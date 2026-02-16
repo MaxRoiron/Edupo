@@ -1,7 +1,7 @@
 from .config import DATABASE_URL
 from sqlmodel import SQLModel, create_engine, Session
 # Importation de tous les modèles pour la création des tables
-from ..modules.users.models import User 
+# from ..modules.users.models import User  # À décommenter quand le module users sera créé 
 
 engine = create_engine(DATABASE_URL, echo=True)
 
