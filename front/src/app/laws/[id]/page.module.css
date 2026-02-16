@@ -1,0 +1,83 @@
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.backLink {
+    display: inline-block;
+    margin-bottom: 30px;
+    color: var(--fr-text-light);
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.backLink:hover {
+    color: var(--fr-blue);
+}
+
+.lawArticle {
+    background: var(--fr-card-bg);
+    padding: 40px;
+    border-radius: 8px;
+    border: 1px solid var(--fr-border);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+}
+
+.lawHeader {
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--fr-background);
+}
+
+.lawMeta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: var(--fr-text-light);
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.lawCategory {
+    color: var(--fr-blue);
+    font-weight: 700;
+}
+
+.lawTitle {
+    font-size: 2.5rem;
+    line-height: 1.2;
+    margin: 0;
+    color: var(--fr-text);
+}
+
+.summaryBox {
+    background-color: rgba(0, 35, 149, 0.05);
+    /* Light fr-blue tint */
+    padding: 24px;
+    border-radius: 6px;
+    margin-bottom: 32px;
+    border-left: 4px solid var(--fr-blue);
+}
+
+.summaryBox h3 {
+    margin-top: 0;
+    font-size: 1.1rem;
+    color: var(--fr-blue);
+}
+
+.detailsBox h3 {
+    font-size: 1.5rem;
+    border-bottom: 1px solid var(--fr-border);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    color: var(--fr-text);
+}
+
+.detailsText {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--fr-text);
+}
