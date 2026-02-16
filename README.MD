@@ -2,6 +2,14 @@
 
 Bienvenue sur le projet Édupo.
 
+## Hiérarchie
+          Main
+            |
+           Dev
+           / \
+          /   \
+      front   back
+
 ## Installation & Lancement
 
 Une fois le projet cloné sur votre machine :
