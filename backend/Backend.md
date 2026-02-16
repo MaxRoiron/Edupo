@@ -62,7 +62,7 @@ docker-compose up -d
 Depuis la racine du projet (`Edupo/`) :
 ```bash
 # Assurez-vous d'avoir activé votre venv
-uvicorn backend.app.main:app --reload
+python -m uvicorn backend.app.main:app --reload
 ```
 
 ---

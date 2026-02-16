@@ -1,16 +1,19 @@
+from app import router_oauth
+from .core import engine
+from .api import api_router
+from .modules import *
+
 import os
+from sqlmodel import SQLModel
+from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request
 from authlib.integrations.starlette_client import OAuth
 from starlette.middleware.sessions import SessionMiddleware
-from .core import init_db
 
-#import router
-from app import router_oauth
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    init_db()
+    SQLModel.metadata.create_all(engine)
     yield
 
 app = FastAPI(lifespan=lifespan)
@@ -24,5 +27,6 @@ def read_root():
 def health_check():
     return {"status": "healthy"}
 
-#Include router
+
 app.include_router(router_oauth, prefix="", tags=["OAuth"])
+app.include_router(api_router)
