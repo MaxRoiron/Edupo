@@ -1,5 +1,5 @@
 from ...core import get_session, verify_password, create_access_token
-from ..users import UserCreate, UserView, get_user_by_email, add_user, get_current_user, User, UserUpdate, update_user
+from ..users import UserCreate, UserView, get_user_by_email, add_user, get_current_user, User, UserUpdate, update_user, Token, LoginRequest
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session
@@ -13,15 +13,18 @@ async def register(user: UserCreate, session: Session = Depends(get_session)) ->
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already used by an account")
     return add_user(session, user)
 
-@router.post("/login")
-async def login( email: str, password: str, session: Session = Depends(get_session)) -> UserView:
-    db_user = get_user_by_email(session=session, email=email)
+@router.post("/login", response_model=Token)
+async def login(login: LoginRequest, session: Session = Depends(get_session)) -> Token:
+    db_user = get_user_by_email(session=session, email=login.email)
     if db_user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
-    if verify_password(password, db_user.hashed_password) is False:
+    if verify_password(login.password, db_user.hashed_password) is False:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     access_token = create_access_token(data={"user_id": db_user.id})
-    return {"access_token": access_token, "token_type": "bearer"}
+    return Token(
+        access_token=access_token,
+        token_type="bearer"
+    )
 
 
 
