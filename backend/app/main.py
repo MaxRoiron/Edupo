@@ -1,4 +1,3 @@
-from app import router_oauth
 from .core import engine
 from .api import api_router
 from .modules import *
@@ -28,5 +27,4 @@ def health_check():
     return {"status": "healthy"}
 
 
-app.include_router(router_oauth, prefix="", tags=["OAuth"])
 app.include_router(api_router)
