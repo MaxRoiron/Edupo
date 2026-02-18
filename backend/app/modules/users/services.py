@@ -7,6 +7,9 @@ from fastapi import HTTPException, status
 def get_user_by_id(session: Session, id: int) -> User | None:
     return session.exec(select(User).where(User.id == id)).first()
 
+def get_user_by_ggid(session: Session, ggid: int) -> User | None:
+    return session.exec(select(User).where(User.ggid == ggid)).first()
+
 def get_user_by_email(session: Session, email: str) -> User | None:
     return session.exec(select(User).where(User.email == email)).first()
 

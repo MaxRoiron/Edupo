@@ -6,3 +6,4 @@ class User(SQLModel, table=True):
     email: str = Field(index=True, unique=True, nullable=False)
     hashed_password: str = Field(nullable=False)
     role: str = Field(index=True, nullable=False)
+    ggid: str | None = Field(default=None)
