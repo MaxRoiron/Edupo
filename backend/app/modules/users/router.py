@@ -6,12 +6,17 @@ from sqlmodel import Session
 
 router = APIRouter()
 
-@router.post("/register", response_model=UserView)
-async def register(user: UserCreate, session: Session = Depends(get_session)) -> UserView:
+@router.post("/register", response_model=Token)
+async def register(user: UserCreate, session: Session = Depends(get_session)) -> Token:
     db_user = get_user_by_email(session, user.email)
     if db_user is not None:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already used by an account")
-    return add_user(session, user)
+    db_user = add_user(session=session, user=user)
+    access_token = create_access_token(data={"user_id": db_user.id})
+    return Token(
+        access_token=access_token,
+        token_type="bearer"
+    )
 
 @router.post("/login", response_model=Token)
 async def login(login: LoginRequest, session: Session = Depends(get_session)) -> Token:
