@@ -2,6 +2,52 @@
 
 Ce projet utilise Docker pour garantir un environnement de développement identique pour tous les contributeurs et simplifier le déploiement.
 
+## 📊 Schéma d'Orchestration
+
+```mermaid
+
+graph RL
+    %% --- STYLE DEFINITIONS ---
+    classDef pcNode fill:#f9f9f9,stroke:#333,stroke-width:2px,color:#000
+    classDef dockerNode fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#01579b
+    classDef networkNode fill:#fff9c4,stroke:#fbc02d,stroke-width:2px,color:#f57f17,stroke-dasharray: 5 5
+
+    subgraph " "
+        PC["💻 MACHINE HÔTE (DÉVELOPPEMENT)"]
+        ENV["⚙️ CONFIG<br/>.env"]
+        CODE["🐍 CODE SOURCE<br/>./backend"]
+        VOL["💾 PERSISTANCE<br/>./docker/data"]
+    end
+
+    subgraph " "
+        DOCKER["🐋 ÉCOSYSTÈME DOCKER COMPOSE"]
+        subgraph " "
+            BACK["🚀 BACKEND"]
+            API["FastAPI /app"]
+        end
+
+        subgraph " "
+            DATA["🗄️ BASE DE DONNÉE"]
+            DB["PostgreSQL 5432"]
+        end
+
+        NET(("🌐 DOCKER NETWORK"))
+    end
+
+    %% --- CONNECTIONS ---
+    ENV ==>|Injection| API
+    CODE ==>|Volume Mount| API
+    VOL <==>|Local Persist| DB
+
+    API --- NET
+    DB --- NET
+
+    %% --- APPLY STYLES ---
+    class ENV,CODE,VOL pcNode
+    class API,DB dockerNode
+    class NET networkNode
+```
+
 ---
 
 ## 🛠️ Services Docker Compose
