@@ -14,6 +14,7 @@ export default function Header() {
         <nav className={styles.nav}>
           <Link href="/" className={styles.navLink}>Accueil</Link>
           <Link href="/dashboard" className={styles.navLink}>Tableau de bord</Link>
+          <Link href="/login" className={styles.authButton}>Connexion</Link>
         </nav>
       </div>
     </header>
