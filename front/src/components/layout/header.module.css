@@ -32,6 +32,7 @@
 .nav {
     display: flex;
     gap: 24px;
+    align-items: center;
 }
 
 .navLink {
@@ -44,4 +45,20 @@
 
 .navLink:hover {
     color: var(--fr-blue);
+}
+
+.authButton {
+    background-color: var(--fr-blue);
+    color: var(--fr-white);
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+    margin-left: 20px;
+}
+
+.authButton:hover {
+    background-color: #001b75;
 }

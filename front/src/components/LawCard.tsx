@@ -8,7 +8,7 @@ interface LawCardProps {
   law: Law;
 }
 
-const LawCard: React.FC<LawCardProps> = ({ law }) => {
+const LawCard = ({ law }: LawCardProps) => {
   return (
     <Link href={`/laws/${law.id}`} className={styles.lawCard}>
       <div className="law-card-content">
