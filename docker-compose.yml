@@ -1,0 +1,25 @@
+services:
+  db:
+    image: postgres:17-alpine
+    restart: always
+    env_file:
+      - backend/.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./docker/postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    env_file:
+      - backend/.env
+    depends_on:
+      - db
+    restart: unless-stopped
+    environment:
+      - PYTHONUNBUFFERED=1
+      - POSTGRES_SERVER=db

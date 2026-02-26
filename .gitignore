@@ -20,6 +20,8 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
+.venv
+.env
 .env*.local
 
 # vercel
@@ -27,3 +29,9 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+
+# docker
+docker/
+
+# python
+__pycache__/
