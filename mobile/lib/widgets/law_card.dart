@@ -96,19 +96,30 @@ class LawCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Text(
-                    'Lire le détail',
-                    style: TextStyle(
-                      color: AppColors.frBlue,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+                  Container(
+                    padding: const EdgeInsets.only(bottom: 1),
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: AppColors.frRed,
+                          width: 1,
+                        ),
+                      ),
+                    ),
+                    child: Text(
+                      'Lire le détail',
+                      style: TextStyle(
+                        color: AppColors.frRed,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 4),
                   Icon(
                     Icons.arrow_forward_rounded,
                     size: 16,
-                    color: AppColors.frBlue,
+                    color: AppColors.frRed,
                   ),
                 ],
               ),
