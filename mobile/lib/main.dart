@@ -101,7 +101,7 @@ class _EdupoAppState extends State<EdupoApp> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.frRed : Colors.transparent,
+          color: isSelected ? AppColors.frWhite : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -109,7 +109,7 @@ class _EdupoAppState extends State<EdupoApp> {
           children: [
             Icon(
               isSelected ? activeIcon : inactiveIcon,
-              color: isSelected ? AppColors.frBlue : AppColors.textMuted,
+              color: isSelected ? AppColors.frBlue : AppColors.frWhite,
               size: 22,
             ),
             if (isSelected) ...[

@@ -210,58 +210,58 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildHeader() {
     return Container(
-      padding: EdgeInsets.fromLTRB(16, MediaQuery.of(context).padding.top + 8, 16, 40),
+      padding: EdgeInsets.fromLTRB(16, MediaQuery.of(context).padding.top + 8, 16, 16),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFF001A6E),
-            AppColors.frBlue,
             Color(0xFF0036B3),
+            AppColors.frBlue,
+            AppColors.frBlue,
+            AppColors.frBlue,
           ],
         ),
         borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(32),
-          bottomRight: Radius.circular(32),
+          bottomLeft: Radius.circular(24),
+          bottomRight: Radius.circular(24),
         ),
       ),
-      child: Column(
+      child: Row(
         children: [
           // Back button
-          Row(
-            children: [
-              GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.arrow_back_rounded,
-                    color: Colors.white,
-                    size: 22,
-                  ),
-                ),
+          GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(10),
               ),
-            ],
+              child: const Icon(
+                Icons.arrow_back_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
           ),
-          const SizedBox(height: 24),
+          const Spacer(),
           // Icon
           Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(
               Icons.person_rounded,
               color: Colors.white,
-              size: 40,
+              size: 24,
             ),
           ),
+          const Spacer(),
+          // Invisible spacer to center the icon
+          const SizedBox(width: 36),
         ],
       ),
     );
@@ -343,9 +343,13 @@ class _LoginScreenState extends State<LoginScreen> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [AppColors.frBlue, Color(0xFF0036B3)],
-          ),
+          // gradient: const LinearGradient(
+          //   colors: [AppColors.frBlue,
+          //   Color(0xFF0036B3),
+          //   AppColors.frBlue,],
+          // ),
+        color: AppColors.frBlue,
+
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(

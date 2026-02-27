@@ -24,7 +24,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late Animation<double> _fadeAnimation;
 
   final List<Map<String, dynamic>> _categories = [
-    {'label': 'Tout', 'icon': Icons.apps_rounded, 'color': AppColors.frBlue, 'value': null},
+    {'label': 'Tout', 'icon': Icons.apps_rounded, 'color': AppColors.frRed},
     {'label': 'Défense', 'icon': Icons.shield_rounded, 'color': AppColors.catDefense, 'value': 'Défense'},
     {'label': 'Économie', 'icon': Icons.trending_up_rounded, 'color': AppColors.catEconomie, 'value': 'Économie'},
     {'label': 'Travail', 'icon': Icons.work_rounded, 'color': AppColors.catTravail, 'value': 'Travail'},
@@ -133,13 +133,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: AppColors.frBlue.withValues(alpha: 0.1),
+                        color: AppColors.frRed.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         '${_filteredLaws.length} résultat${_filteredLaws.length > 1 ? 's' : ''}',
                         style: const TextStyle(
-                          color: AppColors.frBlue,
+                          color: AppColors.frRed,
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                         ),
@@ -201,7 +201,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFF001A6E),
+            Color(0xFF0036B3),
+            AppColors.frBlue,
+            AppColors.frBlue,
             AppColors.frBlue,
             Color(0xFF0036B3),
           ],
@@ -251,7 +253,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           style: TextStyle(
                             color: AppColors.frRed,
                             fontSize: 24,
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w900,
                             letterSpacing: -0.5,
                           ),
                         ),
