@@ -7,16 +7,16 @@ Ce projet utilise **Alembic** pour gérer les évolutions de la base de données
 Dès que vous modifiez un fichier `model.py` dans vos modules :
 
 ### 1. Générer une nouvelle migration
-Depuis le dossier `backend/`, lancez la commande suivante :
+Une fois le docker en route (`docker compose up -d`), lancez la commande suivante :
 ```bash
-python -m alembic revision --autogenerate -m "description de mon changement"
+docker compose exec backend python -m alembic revision --autogenerate -m "description de mon changement"
 ```
 *Ceci va créer un nouveau script dans `migrations/versions/`.*
 
 ### 2. Appliquer les changements
 Pour mettre à jour votre base de données locale (ou en production) :
 ```bash
-python -m alembic upgrade head
+docker compose exec backend python -m alembic upgrade head
 ```
 
 ---
