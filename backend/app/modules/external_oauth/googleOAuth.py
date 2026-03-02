@@ -4,7 +4,7 @@ from ...core import get_session, create_access_token
 from ..users import get_user_by_ggid, User, Token
 from fastapi import Request, APIRouter, Depends
 from authlib.integrations.starlette_client import OAuth
-from passlib.pwd import genword
+# from passlib.pwd import genword
 
 router = APIRouter()
 
@@ -41,7 +41,8 @@ async def auth_google_callback(request: Request, session: Session = Depends(get_
         db_user = User(
             username=user_info.get('name', ''),
             email=user_info.get('email', ''),
-            hashed_password=genword(entropy=80),  # Mot de passe aléatoire
+            # hashed_password=genword(entropy=80),  # Mot de passe aléatoire
+            hashed_password="",
             role='user',
             ggid=ggid
         )
