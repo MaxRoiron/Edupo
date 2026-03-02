@@ -1,4 +1,5 @@
 from sqlmodel import SQLModel, Field
+import datetime
 
 class User(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
@@ -7,3 +8,4 @@ class User(SQLModel, table=True):
     hashed_password: str = Field(nullable=False)
     role: str = Field(index=True, nullable=False)
     ggid: str | None = Field(default=None)
+    created_at: datetime.datetime = Field(default=datetime.datetime.now(datetime.UTC), nullable=False)
