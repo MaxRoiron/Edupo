@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../theme/app_theme.dart';
 import '../services/api_service.dart';
 import '../services/auth_service.dart';
@@ -16,6 +17,59 @@ class _ProfileScreenState extends State<ProfileScreen>
   bool _isLoggingOut = false;
   String _username = '';
   String _email = '';
+
+  // Informations complémentaires
+  final TextEditingController _ageController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  String? _selectedProfessionalStatus;
+  String? _selectedGender;
+
+  static const List<String> _professionalStatuses = [
+    'Étudiant(e)',
+    'Lycéen(ne)',
+    'Apprenti(e)',
+    'Stagiaire',
+    'Demandeur d\'emploi',
+    'Salarié(e)',
+    'Cadre',
+    'Ingénieur(e)',
+    'Technicien(ne)',
+    'Ouvrier / Ouvrière',
+    'Artisan(e)',
+    'Commerçant(e)',
+    'Chef(fe) d\'entreprise',
+    'Auto-entrepreneur(e)',
+    'Profession libérale',
+    'Fonctionnaire',
+    'Enseignant(e)',
+    'Chercheur(se)',
+    'Médecin / Santé',
+    'Avocat(e) / Juridique',
+    'Restauration / Hôtellerie',
+    'Agriculture',
+    'Artiste / Créatif',
+    'Journaliste / Média',
+    'Militaire',
+    'Retraité(e)',
+    'Au foyer',
+    'Autre',
+  ];
+
+  static const List<String> _genders = [
+    'Homme',
+    'Femme',
+    'Non-binaire',
+    'Genderqueer',
+    'Genderfluid',
+    'Agenre',
+    'Bigenre',
+    'Demigarçon',
+    'Demifille',
+    'Transgenre',
+    'Two-Spirit',
+    'Autre',
+    'Non renseigné',
+  ];
   late AnimationController _animController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
@@ -44,6 +98,8 @@ class _ProfileScreenState extends State<ProfileScreen>
   @override
   void dispose() {
     _animController.dispose();
+    _ageController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
@@ -273,6 +329,61 @@ class _ProfileScreenState extends State<ProfileScreen>
             value: _email.isNotEmpty ? _email : '—',
           ),
 
+          const SizedBox(height: 36),
+
+          // ── Informations complémentaires ──
+          _buildSectionTitle('Informations complémentaires'),
+          const SizedBox(height: 16),
+
+          _buildEditableInfoCard(
+            icon: Icons.cake_outlined,
+            label: 'Âge',
+            controller: _ageController,
+            hint: 'Votre âge',
+            keyboardType: TextInputType.number,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(3),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          _buildEditableInfoCard(
+            icon: Icons.phone_outlined,
+            label: 'Numéro de téléphone',
+            controller: _phoneController,
+            hint: '06 12 34 56 78',
+            keyboardType: TextInputType.phone,
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'[0-9+ ]')),
+              LengthLimitingTextInputFormatter(18),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          _buildDropdownCard(
+            icon: Icons.work_outline_rounded,
+            label: 'Statut professionnel',
+            value: _selectedProfessionalStatus,
+            hint: 'Sélectionner...',
+            items: _professionalStatuses,
+            onChanged: (value) {
+              setState(() => _selectedProfessionalStatus = value);
+            },
+          ),
+          const SizedBox(height: 14),
+
+          _buildDropdownCard(
+            icon: Icons.transgender_rounded,
+            label: 'Genre',
+            value: _selectedGender,
+            hint: 'Sélectionner...',
+            items: _genders,
+            onChanged: (value) {
+              setState(() => _selectedGender = value);
+            },
+          ),
+
           const SizedBox(height: 48),
 
           // Logout button
@@ -389,6 +500,209 @@ class _ProfileScreenState extends State<ProfileScreen>
                     fontWeight: FontWeight.w600,
                   ),
                   overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Row(
+        children: [
+          Container(
+            width: 4,
+            height: 22,
+            decoration: BoxDecoration(
+              color: AppColors.frBlue,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            title,
+            style: const TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEditableInfoCard({
+    required IconData icon,
+    required String label,
+    required TextEditingController controller,
+    required String hint,
+    TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.frBlue.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              icon,
+              color: AppColors.frBlue,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: AppColors.textMuted,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                TextField(
+                  controller: controller,
+                  keyboardType: keyboardType,
+                  inputFormatters: inputFormatters,
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: hint,
+                    hintStyle: const TextStyle(
+                      color: AppColors.textMuted,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w400,
+                    ),
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 6),
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDropdownCard({
+    required IconData icon,
+    required String label,
+    required String? value,
+    required String hint,
+    required List<String> items,
+    required ValueChanged<String?> onChanged,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.frBlue.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              icon,
+              color: AppColors.frBlue,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: AppColors.textMuted,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: value,
+                    hint: Text(
+                      hint,
+                      style: const TextStyle(
+                        color: AppColors.textMuted,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    isExpanded: true,
+                    isDense: true,
+                    icon: Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      color: AppColors.frBlue.withValues(alpha: 0.6),
+                      size: 22,
+                    ),
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    dropdownColor: AppColors.cardBackground,
+                    borderRadius: BorderRadius.circular(14),
+                    menuMaxHeight: 300,
+                    items: items.map((item) {
+                      return DropdownMenuItem<String>(
+                        value: item,
+                        child: Text(item),
+                      );
+                    }).toList(),
+                    onChanged: onChanged,
+                  ),
                 ),
               ],
             ),
