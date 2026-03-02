@@ -7,6 +7,8 @@ import '../widgets/category_chip.dart';
 import 'law_detail_screen.dart';
 import 'login_screen.dart';
 import 'register_screen.dart';
+import 'profile_screen.dart';
+import '../services/auth_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,6 +22,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final GlobalKey _profileButtonKey = GlobalKey();
   String _searchQuery = '';
   String? _selectedCategory;
+  bool _isLoggedIn = false;
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
 
@@ -43,6 +46,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       curve: Curves.easeOut,
     );
     _fadeController.forward();
+    _checkLoginStatus();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    final loggedIn = await AuthService.isLoggedIn();
+    if (mounted) {
+      setState(() => _isLoggedIn = loggedIn);
+    }
   }
 
   @override
@@ -265,7 +276,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               // Avatar / profile
               GestureDetector(
                 key: _profileButtonKey,
-                onTap: () => _showAuthPopup(),
+                onTap: () => _handleProfileTap(),
                 child: Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
@@ -322,6 +333,20 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
+  void _handleProfileTap() async {
+    if (_isLoggedIn) {
+      final result = await Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const ProfileScreen()),
+      );
+      // If user logged out from profile, refresh status
+      if (result == 'logged_out') {
+        _checkLoginStatus();
+      }
+    } else {
+      _showAuthPopup();
+    }
+  }
+
   void _showAuthPopup() {
     final RenderBox renderBox =
         _profileButtonKey.currentContext!.findRenderObject() as RenderBox;
@@ -375,15 +400,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
         ),
       ],
-    ).then((value) {
+    ).then((value) async {
       if (value == 'login') {
-        Navigator.of(context).push(
+        final result = await Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => const LoginScreen()),
         );
+        if (result == true) _checkLoginStatus();
       } else if (value == 'register') {
-        Navigator.of(context).push(
+        final result = await Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => const RegisterScreen()),
         );
+        if (result == true) _checkLoginStatus();
       }
     });
   }
