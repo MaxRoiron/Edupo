@@ -23,6 +23,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   final TextEditingController _phoneController = TextEditingController();
   String? _selectedProfessionalStatus;
   String? _selectedGender;
+  bool _isEditingExtra = false;
 
   static const List<String> _professionalStatuses = [
     'Étudiant(e)',
@@ -332,57 +333,124 @@ class _ProfileScreenState extends State<ProfileScreen>
           const SizedBox(height: 36),
 
           // ── Informations complémentaires ──
-          _buildSectionTitle('Informations complémentaires'),
+          _buildSectionTitleWithEdit(),
           const SizedBox(height: 16),
 
-          _buildEditableInfoCard(
-            icon: Icons.cake_outlined,
-            label: 'Âge',
-            controller: _ageController,
-            hint: 'Votre âge',
-            keyboardType: TextInputType.number,
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-              LengthLimitingTextInputFormatter(3),
-            ],
-          ),
-          const SizedBox(height: 14),
+          // Show either read-only or editable view
+          if (_isEditingExtra) ...[
+            _buildEditableInfoCard(
+              icon: Icons.cake_outlined,
+              label: 'Âge',
+              controller: _ageController,
+              hint: 'Votre âge',
+              keyboardType: TextInputType.number,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(3),
+              ],
+            ),
+            const SizedBox(height: 14),
 
-          _buildEditableInfoCard(
-            icon: Icons.phone_outlined,
-            label: 'Numéro de téléphone',
-            controller: _phoneController,
-            hint: '06 12 34 56 78',
-            keyboardType: TextInputType.phone,
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'[0-9+ ]')),
-              LengthLimitingTextInputFormatter(18),
-            ],
-          ),
-          const SizedBox(height: 14),
+            _buildEditableInfoCard(
+              icon: Icons.phone_outlined,
+              label: 'Numéro de téléphone',
+              controller: _phoneController,
+              hint: '06 12 34 56 78',
+              keyboardType: TextInputType.phone,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[0-9+ ]')),
+                LengthLimitingTextInputFormatter(18),
+              ],
+            ),
+            const SizedBox(height: 14),
 
-          _buildDropdownCard(
-            icon: Icons.work_outline_rounded,
-            label: 'Statut professionnel',
-            value: _selectedProfessionalStatus,
-            hint: 'Sélectionner...',
-            items: _professionalStatuses,
-            onChanged: (value) {
-              setState(() => _selectedProfessionalStatus = value);
-            },
-          ),
-          const SizedBox(height: 14),
+            _buildDropdownCard(
+              icon: Icons.work_outline_rounded,
+              label: 'Statut professionnel',
+              value: _selectedProfessionalStatus,
+              hint: 'Sélectionner...',
+              items: _professionalStatuses,
+              onChanged: (value) {
+                setState(() => _selectedProfessionalStatus = value);
+              },
+            ),
+            const SizedBox(height: 14),
 
-          _buildDropdownCard(
-            icon: Icons.transgender_rounded,
-            label: 'Genre',
-            value: _selectedGender,
-            hint: 'Sélectionner...',
-            items: _genders,
-            onChanged: (value) {
-              setState(() => _selectedGender = value);
-            },
-          ),
+            _buildDropdownCard(
+              icon: Icons.transgender_rounded,
+              label: 'Genre',
+              value: _selectedGender,
+              hint: 'Sélectionner...',
+              items: _genders,
+              onChanged: (value) {
+                setState(() => _selectedGender = value);
+              },
+            ),
+            const SizedBox(height: 20),
+
+            // Valider button
+            GestureDetector(
+              onTap: _handleSaveExtra,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                decoration: BoxDecoration(
+                  color: AppColors.frBlue,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.frBlue.withValues(alpha: 0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.check_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                    SizedBox(width: 8),
+                    Text(
+                      'Valider',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ] else ...[
+            _buildInfoCard(
+              icon: Icons.cake_outlined,
+              label: 'Âge',
+              value: _ageController.text.isNotEmpty ? '${_ageController.text} ans' : 'Non renseigné',
+            ),
+            const SizedBox(height: 14),
+            _buildInfoCard(
+              icon: Icons.phone_outlined,
+              label: 'Numéro de téléphone',
+              value: _phoneController.text.isNotEmpty ? _phoneController.text : 'Non renseigné',
+            ),
+            const SizedBox(height: 14),
+            _buildInfoCard(
+              icon: Icons.work_outline_rounded,
+              label: 'Statut professionnel',
+              value: _selectedProfessionalStatus ?? 'Non renseigné',
+            ),
+            const SizedBox(height: 14),
+            _buildInfoCard(
+              icon: Icons.transgender_rounded,
+              label: 'Genre',
+              value: _selectedGender ?? 'Non renseigné',
+            ),
+          ],
 
           const SizedBox(height: 48),
 
@@ -509,29 +577,58 @@ class _ProfileScreenState extends State<ProfileScreen>
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Row(
-        children: [
-          Container(
-            width: 4,
-            height: 22,
-            decoration: BoxDecoration(
-              color: AppColors.frBlue,
-              borderRadius: BorderRadius.circular(2),
-            ),
+  Widget _buildSectionTitleWithEdit() {
+    return Row(
+      children: [
+        Container(
+          width: 4,
+          height: 22,
+          decoration: BoxDecoration(
+            color: AppColors.frBlue,
+            borderRadius: BorderRadius.circular(2),
           ),
-          const SizedBox(width: 10),
-          Text(
-            title,
-            style: const TextStyle(
+        ),
+        const SizedBox(width: 10),
+        const Expanded(
+          child: Text(
+            'Informations complémentaires',
+            style: TextStyle(
               color: AppColors.textPrimary,
               fontSize: 18,
               fontWeight: FontWeight.w700,
             ),
           ),
-        ],
+        ),
+        GestureDetector(
+          onTap: () => setState(() => _isEditingExtra = !_isEditingExtra),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: _isEditingExtra
+                  ? AppColors.frBlue.withValues(alpha: 0.12)
+                  : AppColors.frBlue.withValues(alpha: 0.06),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              _isEditingExtra ? Icons.close_rounded : Icons.edit_rounded,
+              color: AppColors.frBlue,
+              size: 18,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _handleSaveExtra() {
+    setState(() => _isEditingExtra = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Informations enregistrées'),
+        backgroundColor: AppColors.accentGreen,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
