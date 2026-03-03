@@ -1,5 +1,5 @@
 from ...core import get_session, verify_password, create_access_token
-from ..users import UserCreate, UserView, get_user_by_email, add_user, get_current_user, User, UserUpdate, update_user, Token, LoginRequest
+from ..users import UserCreate, UserView, get_user_by_email, add_user, get_current_user, User, UserUpdate, update_user, Token, LoginRequest, delete_user_by_email
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session
@@ -48,3 +48,8 @@ async def read_me(current_user: User = Depends(get_current_user)):
 @router.patch("/me", response_model=UserView)
 async def patch_me(user_update: UserUpdate, current_user: User = Depends(get_current_user), session: Session = Depends(get_session)):
     return update_user(session=session, user=current_user, user_update=user_update)
+
+
+@router.delete("/admin/{user_email}")
+async def delete_user(user_email: str, current_user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    return delete_user_by_email(email=user_email, user=current_user, session=session)
