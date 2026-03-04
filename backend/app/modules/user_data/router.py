@@ -2,6 +2,7 @@ from ...core import get_session
 from ..user_data import UserDataCreate, UserDataUpdate, UserDataView, add_user_data, update_user_data, reset_user_data
 from ..user_data import ProfessionalStatusCreate, ProfessionalStatusUpdate, ProfessionalStatusView, add_professional_status, update_professional_status_by_id, delete_professional_status_by_id, get_professional_status_by_id, read_all_professional_status
 from ..user_data import SocialStatusCreate, SocialStatusUpdate, SocialStatusView, add_social_status, update_social_status_by_id, delete_social_status_by_id, get_social_status_by_id, read_all_social_status
+from ..user_data import GenderIdentitiesCreate, GenderIdentitiesUpdate, GenderIdentitiesView, add_gender, update_gender_by_id, delete_gender_by_id, get_gender_by_id, read_all_gender
 from ..users import User, get_current_user, get_user_by_email
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -49,6 +50,8 @@ async def reset_user_datas(user_email: str, current_user: User = Depends(get_cur
 
 
 
+
+
 @router.post("/admin/user_data/professional", response_model=ProfessionalStatusView, tags=["Admin"])
 async def post_professional_status(status: ProfessionalStatusCreate, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
     if user.role == "user":
@@ -77,6 +80,8 @@ async def delete_professional_status(status_id: int, user: User = Depends(get_cu
 
 
 
+
+
 @router.post("/admin/user_data/social", response_model=SocialStatusView, tags=["Admin"])
 async def post_social_status(status: SocialStatusCreate, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
     if user.role == "user":
@@ -102,3 +107,33 @@ async def delete_social_status(status_id: int, user: User = Depends(get_current_
     if user.role == "user":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have the required authorization")
     return delete_social_status_by_id(status_id=status_id, session=session)
+
+
+
+
+
+@router.post("/admin/user_data/gender", response_model=GenderIdentitiesView, tags=["Admin"])
+async def post_gender(status: GenderIdentitiesCreate, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    if user.role == "user":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have the required authorization")
+    return add_gender(status=status, session=session)
+
+@router.get("/user_data/gender", response_model=list[GenderIdentitiesView], tags=["UserData Content"])
+async def get_all_gender(status_id: int, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    return read_all_gender(status_id=status_id, session=session)
+
+@router.get("/user_data/gender/{status_id}", response_model=GenderIdentitiesView, tags=["UserData Content"])
+async def get_gender(status_id: int, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    return get_gender_by_id(status_id=status_id, session=session)
+
+@router.patch("/admin/user_data/gender/{status_id}", response_model=GenderIdentitiesView, tags=["Admin"])
+async def patch_gender(status_id: int, update_data: GenderIdentitiesUpdate, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    if user.role == "user":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have the required authorization")
+    return update_gender_by_id(status_id=status_id, update_data=update_data, session=session)
+
+@router.delete("/admin/user_data/gender/{status_id}", response_model=GenderIdentitiesView, tags=["Admin"])
+async def delete_gender(status_id: int, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    if user.role == "user":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have the required authorization")
+    return delete_gender_by_id(status_id=status_id, session=session)

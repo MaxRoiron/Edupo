@@ -1,6 +1,7 @@
 from ..user_data import UserData, UserDataView, UserDataCreate, UserDataUpdate
 from ..user_data import ProfessionalStatus, ProfessionalStatusCreate, ProfessionalStatusUpdate, ProfessionalStatusView
 from ..user_data import SocialStatus, SocialStatusCreate, SocialStatusUpdate, SocialStatusView
+from ..user_data import GenderIdentities, GenderIdentitiesCreate, GenderIdentitiesUpdate, GenderIdentitiesView
 from ..users import get_user_by_email
 
 from sqlmodel import Session, select
@@ -169,3 +170,51 @@ def delete_social_status_by_id(status_id: int, session: Session):
     session.delete(db_status)
     session.commit()
     return {"message": f"Social status ({status_id}) has been deleted"}
+
+
+
+
+
+
+def add_gender(status: GenderIdentitiesCreate, session: Session):
+    db_status = GenderIdentities(
+        name=status.name
+    )
+    session.add(db_status)
+    session.commit()
+    session.refresh(db_status)
+    return GenderIdentitiesView(
+        id=db_status.id,
+        name=db_status.name
+    )
+
+def get_gender_by_id(id: int, session: Session):
+    return session.exec(select(GenderIdentities).where(GenderIdentities.id == id)).first()
+
+def read_all_gender(session: Session):
+    return session.exec(select(GenderIdentities)).all()
+
+def update_gender_by_id(status_id: int, update_data: GenderIdentitiesUpdate, session: Session):
+    db_status = get_gender_by_id(id=status_id, session=session)
+    if db_status is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Gender identity ({status_id}) can't be found")
+
+    if update_data.name is not None:
+        db_status.name = update_data.name
+
+    session.add(db_status)
+    session.commit()
+    session.refresh(db_status)
+    return GenderIdentitiesView(
+        id=db_status.id,
+        name=db_status.name
+    )
+
+def delete_gender_by_id(status_id: int, session: Session):
+    db_status = get_gender_by_id(id=status_id, session=session)
+    if db_status is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Gender identity ({status_id}) can't be found")
+
+    session.delete(db_status)
+    session.commit()
+    return {"message": f"Gender identity ({status_id}) has been deleted"}
