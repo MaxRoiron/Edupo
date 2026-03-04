@@ -1,6 +1,6 @@
 from ...core import get_session
-from ..user_data import UserDataCreate, UserDataUpdate, UserDataView, get_user_data_by_user_id, add_user_data, update_user_data, reset_user_data_by_email
-from ..users import User, get_current_user
+from ..user_data import UserDataCreate, UserDataUpdate, UserDataView, get_user_data_by_user_id, add_user_data, update_user_data, reset_user_data
+from ..users import User, get_current_user, get_user_by_email
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session
@@ -34,6 +34,13 @@ async def patch_user_data(data: UserDataUpdate, user: User = Depends(get_current
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User's data can't be found")
     return update_user_data(session=session, user_data=user_data, data_update=data)
 
-@router.put("/admin/{user_email}/reset", tags=["Admin"])
-async def reset_user_data(user_email: str, current_user: User = Depends(get_current_user), session: Session = Depends(get_session)):
-    return reset_user_data_by_email(email=user_email, session=session, user=current_user)
+@router.put("/me/data/reset", response_model=UserDataView, tags=["User"])
+async def reset_user_datas(current_user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    return reset_user_data(email=current_user.email, session=session, user=current_user)
+
+@router.put("/admin/{user_email}/reset", response_model=UserDataView, tags=["Admin"])
+async def reset_user_datas(user_email: str, current_user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    if current_user.role != "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have the required authorization")
+    user_to_reset = get_user_by_email(session=session, email=user_email)
+    return reset_user_data(session=session, user_data=user_to_reset.user_data)
