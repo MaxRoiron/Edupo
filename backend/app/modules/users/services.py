@@ -62,8 +62,6 @@ def update_user(session: Session, user: User, user_update: UserUpdate) -> UserVi
     )
 
 def delete_user_by_email(email: str, user: User, session: Session):
-    if user.role != "admin":
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="You don't have the required authorization")
     user_to_delete = get_user_by_email(session=session, email=email)
     if user_to_delete is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User ({email}) not found")
