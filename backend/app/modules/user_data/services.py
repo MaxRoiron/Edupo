@@ -1,4 +1,4 @@
-from ..user_data import UserData, UserDataView, UserDataCreate, UserDataUpdate
+from ..user_data import UserData, UserDataView, UserDataCreate, UserDataUpdate, ProfessionalStatus, ProfessionalStatusCreate, ProfessionalStatusUpdate, ProfessionalStatusView
 from ..users import User, get_user_by_email
 
 from sqlmodel import Session, select
@@ -74,3 +74,48 @@ def reset_user_data(session: Session, user_data: UserData):
         social_status_id=user_data.social_status_id,
         gender_identity_id=user_data.gender_identity_id
     )
+
+
+
+def add_professional_status(status: ProfessionalStatusCreate, session: Session):
+    db_status = ProfessionalStatus(
+        name=status.name
+    )
+    session.add(db_status)
+    session.commit()
+    session.refresh(db_status)
+    return ProfessionalStatusView(
+        id=db_status.id,
+        name=db_status.name
+    )
+
+def get_professional_status_by_id(id: int, session: Session):
+    return session.exec(select(ProfessionalStatus).where(ProfessionalStatus.id == id)).first()
+
+def read_all_professional_status(session: Session):
+    return session.exec(select(ProfessionalStatus)).all()
+
+def update_professional_status_by_id(status_id: int, update_data: ProfessionalStatusUpdate, session: Session):
+    db_status = get_professional_status_by_id(id=status_id, session=session)
+    if db_status is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Professional status ({status_id}) can't be found")
+
+    if update_data.name is not None:
+        db_status.name = update_data.name
+
+    session.add(db_status)
+    session.commit()
+    session.refresh(db_status)
+    return ProfessionalStatusView(
+        id=db_status.id,
+        name=db_status.name
+    )
+
+def delete_professional_status_by_id(status_id: int, session: Session):
+    db_status = get_professional_status_by_id(id=status_id, session=session)
+    if db_status is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Professional status ({status_id}) can't be found")
+
+    session.delete(db_status)
+    session.commit()
+    return {"message": f"Professional status ({status_id}) has been deleted"}

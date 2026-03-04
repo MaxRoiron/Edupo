@@ -1,5 +1,5 @@
 from ...core import get_session
-from ..user_data import UserDataCreate, UserDataUpdate, UserDataView, get_user_data_by_user_id, add_user_data, update_user_data, reset_user_data
+from ..user_data import UserDataCreate, UserDataUpdate, UserDataView, get_user_data_by_user_id, add_user_data, update_user_data, reset_user_data, ProfessionalStatusCreate, ProfessionalStatusUpdate, ProfessionalStatusView, add_professional_status, update_professional_status_by_id, delete_professional_status_by_id, get_professional_status_by_id, read_all_professional_status
 from ..users import User, get_current_user, get_user_by_email
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -44,3 +44,31 @@ async def reset_user_datas(user_email: str, current_user: User = Depends(get_cur
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have the required authorization")
     user_to_reset = get_user_by_email(session=session, email=user_email)
     return reset_user_data(session=session, user_data=user_to_reset.user_data)
+
+
+
+@router.post("/admin/user_data/professional", response_model=ProfessionalStatusView, tags=["Admin"])
+async def post_professional_status(status: ProfessionalStatusCreate, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    if user.role == "user":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have the required authorization")
+    return add_professional_status(status=status, session=session)
+
+@router.get("/user_data/professional", response_model=list[ProfessionalStatusView], tags=["UserData Content"])
+async def get_all_professional_status(status_id: int, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    return read_all_professional_status(status_id=status_id, session=session)
+
+@router.get("/user_data/professional/{status_id}", response_model=ProfessionalStatusView, tags=["UserData Content"])
+async def get_professional_status(status_id: int, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    return get_professional_status_by_id(status_id=status_id, session=session)
+
+@router.patch("/admin/user_data/professional/{status_id}", response_model=ProfessionalStatusView, tags=["Admin"])
+async def patch_professional_status(status_id: int, update_data: ProfessionalStatusUpdate, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    if user.role == "user":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have the required authorization")
+    return update_professional_status_by_id(status_id=status_id, update_data=update_data, session=session)
+
+@router.delete("/admin/user_data/professional/{status_id}", response_model=ProfessionalStatusView, tags=["Admin"])
+async def delete_professional_status(status_id: int, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    if user.role == "user":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have the required authorization")
+    return delete_professional_status_by_id(status_id=status_id, session=session)
