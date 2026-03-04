@@ -7,14 +7,14 @@ from sqlmodel import Session
 
 router = APIRouter()
 
-@router.post("/me/data", response_model=UserDataView)
+@router.post("/me/data", response_model=UserDataView, tags=["User"])
 async def post_user_data(user_data: UserDataCreate, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
     db_user_data = get_user_data_by_user_id(session=session, user=user)
     if db_user_data is not None:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User's data already created")
     return add_user_data(session=session, user_data=user_data)
 
-@router.get("/me/data", response_model=UserDataView)
+@router.get("/me/data", response_model=UserDataView, tags=["User"])
 async def get_user_data(user: User = Depends(get_current_user), session: Session = Depends(get_session)):
     user_data = get_user_data_by_user_id(session=session, user=user)
     if user_data is None:
@@ -27,13 +27,13 @@ async def get_user_data(user: User = Depends(get_current_user), session: Session
         gender_identity_id=user_data.gender_identity_id
     )
 
-@router.patch("/me/data", response_model=UserDataView)
+@router.patch("/me/data", response_model=UserDataView, tags=["User"])
 async def patch_user_data(data: UserDataUpdate, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
     user_data = get_user_data_by_user_id(session=session, user=user)
     if user_data is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User's data can't be found")
     return update_user_data(session=session, user_data=user_data, data_update=data)
 
-@router.put("/admin/{user_email}/reset")
+@router.put("/admin/{user_email}/reset", tags=["Admin"])
 async def reset_user_data(user_email: str, current_user: User = Depends(get_current_user), session: Session = Depends(get_session)):
     return reset_user_data_by_email(email=user_email, session=session, user=current_user)
