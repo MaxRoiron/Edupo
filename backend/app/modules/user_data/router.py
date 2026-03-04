@@ -1,5 +1,5 @@
 from ...core import get_session
-from ..user_data import UserDataCreate, UserDataUpdate, UserDataView, get_user_data_by_user_id, add_user_data, update_user_data, reset_user_data, ProfessionalStatusCreate, ProfessionalStatusUpdate, ProfessionalStatusView, add_professional_status, update_professional_status_by_id, delete_professional_status_by_id, get_professional_status_by_id, read_all_professional_status
+from ..user_data import UserData, UserDataCreate, UserDataUpdate, UserDataView, add_user_data, update_user_data, reset_user_data, ProfessionalStatusCreate, ProfessionalStatusUpdate, ProfessionalStatusView, add_professional_status, update_professional_status_by_id, delete_professional_status_by_id, get_professional_status_by_id, read_all_professional_status
 from ..users import User, get_current_user, get_user_by_email
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -9,14 +9,14 @@ router = APIRouter()
 
 @router.post("/me/data", response_model=UserDataView, tags=["User"])
 async def post_user_data(user_data: UserDataCreate, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
-    db_user_data = get_user_data_by_user_id(session=session, user=user)
+    db_user_data = user.user_data
     if db_user_data is not None:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User's data already created")
     return add_user_data(session=session, user_data=user_data)
 
 @router.get("/me/data", response_model=UserDataView, tags=["User"])
 async def get_user_data(user: User = Depends(get_current_user), session: Session = Depends(get_session)):
-    user_data = get_user_data_by_user_id(session=session, user=user)
+    user_data = user.user_data
     if user_data is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User's data can't be found")
     return UserDataView(
@@ -29,7 +29,7 @@ async def get_user_data(user: User = Depends(get_current_user), session: Session
 
 @router.patch("/me/data", response_model=UserDataView, tags=["User"])
 async def patch_user_data(data: UserDataUpdate, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
-    user_data = get_user_data_by_user_id(session=session, user=user)
+    user_data = user.user_data
     if user_data is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User's data can't be found")
     return update_user_data(session=session, user_data=user_data, data_update=data)

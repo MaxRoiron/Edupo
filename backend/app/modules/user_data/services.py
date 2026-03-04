@@ -4,9 +4,6 @@ from ..users import User, get_user_by_email
 from sqlmodel import Session, select
 from fastapi import HTTPException, status
 
-def get_user_data_by_user_id(session: Session, user: User) -> UserData | None:
-    return session.exec(select(UserData).where(UserData.user_id == user.id)).first()
-
 def get_user_data_by_user_email(email: str, session: Session) -> UserData | None:
     user = get_user_by_email(session=session, email=email)
     if user is None:
