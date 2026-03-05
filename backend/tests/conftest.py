@@ -1,13 +1,14 @@
 from app import app
-from app.core import get_session
+
+import os
+os.environ["ENV_FILE"] = os.path.join(os.path.dirname(__file__), ".env.test")
+from app.core import get_session, settings
 
 import pytest
 from sqlmodel import SQLModel, create_engine, Session
 from fastapi.testclient import TestClient
 
-DATABASE_URL = "postgresql+psycopg2://test:test@localhost:5432/test_db"
-
-engine = create_engine(url=DATABASE_URL)
+engine = create_engine(url=settings.DATABASE_URL)
 
 @pytest.fixture(name="session")
 def session_fixture():
