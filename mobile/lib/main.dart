@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'theme/app_theme.dart';
 import 'screens/home_screen.dart';
+import 'screens/programs_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -134,12 +135,7 @@ class _EdupoAppState extends State<EdupoApp> {
       case 0:
         return const HomeScreen(key: ValueKey(0));
       case 1:
-        return _buildPlaceholderPage(
-          key: const ValueKey(1),
-          icon: Icons.description_rounded,
-          title: 'Programmes politiques',
-          subtitle: 'Découvrez les programmes',
-        );
+        return const ProgramsScreen(key: ValueKey(1));
       case 2:
         return _buildPlaceholderPage(
           key: const ValueKey(2),
