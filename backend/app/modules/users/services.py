@@ -3,6 +3,7 @@ from ..users import UserCreate, User, UserView, UserUpdate
 
 from sqlmodel import Session, select
 from fastapi import HTTPException, status
+import datetime
 
 def get_user_by_id(session: Session, id: int) -> User | None:
     return session.exec(select(User).where(User.id == id)).first()
@@ -19,7 +20,9 @@ def add_user(session: Session, user: UserCreate) -> UserView:
         username=user.username,
         email=user.email,
         hashed_password=hashed_password,
-        role="user"
+        role="user",
+        ggid=user.ggid,
+        created_at=datetime.datetime.now(datetime.UTC)
     )
     session.add(db_user)
     session.commit()
@@ -28,7 +31,9 @@ def add_user(session: Session, user: UserCreate) -> UserView:
         id=db_user.id,
         username=db_user.username,
         email=db_user.email,
-        role=db_user.role
+        role=db_user.role,
+        ggid=db_user.ggid,
+        created_at=db_user.created_at
     )
 
 def update_user(session: Session, user: User, user_update: UserUpdate) -> UserView:
@@ -51,5 +56,17 @@ def update_user(session: Session, user: User, user_update: UserUpdate) -> UserVi
         id=user.id,
         username=user.username,
         email=user.email,
-        role=user.role
+        role=user.role,
+        ggid=user.ggid,
+        created_at=user.created_at
     )
+
+def delete_user_by_email(email: str, user: User, session: Session):
+    user_to_delete = get_user_by_email(session=session, email=email)
+    if user_to_delete is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User ({email}) not found")
+    if user.email == email:
+        raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED, detail="You can't delete yourself")
+    session.delete(user_to_delete)
+    session.commit()
+    return {"message": f"User ({email}) has been deleted"}
