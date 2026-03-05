@@ -10,7 +10,7 @@ from sqlmodel import Session
 
 router = APIRouter()
 
-@router.post("/me/data", response_model=UserDataView, tags=["User"])
+@router.post("/me/data", response_model=UserDataView, status_code=status.HTTP_201_CREATED, tags=["User"])
 async def post_user_data(user_data: UserDataCreate, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
     db_user_data = user.user_data
     if db_user_data is not None:
@@ -52,7 +52,7 @@ async def reset_user_datas(user_email: str, current_user: User = Depends(get_cur
 
 
 
-@router.post("/admin/user_data/professional", response_model=ProfessionalStatusView, tags=["Admin"])
+@router.post("/admin/user_data/professional", response_model=ProfessionalStatusView, status_code=status.HTTP_201_CREATED, tags=["Admin"])
 async def post_professional_status(status: ProfessionalStatusCreate, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
     if user.role == "user":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have the required authorization")
@@ -82,7 +82,7 @@ async def delete_professional_status(status_id: int, user: User = Depends(get_cu
 
 
 
-@router.post("/admin/user_data/social", response_model=SocialStatusView, tags=["Admin"])
+@router.post("/admin/user_data/social", response_model=SocialStatusView, status_code=status.HTTP_201_CREATED, tags=["Admin"])
 async def post_social_status(status: SocialStatusCreate, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
     if user.role == "user":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have the required authorization")
@@ -112,7 +112,7 @@ async def delete_social_status(status_id: int, user: User = Depends(get_current_
 
 
 
-@router.post("/admin/user_data/gender", response_model=GenderIdentitiesView, tags=["Admin"])
+@router.post("/admin/user_data/gender", response_model=GenderIdentitiesView, status_code=status.HTTP_201_CREATED, tags=["Admin"])
 async def post_gender(status: GenderIdentitiesCreate, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
     if user.role == "user":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have the required authorization")

@@ -6,7 +6,7 @@ from sqlmodel import Session
 
 router = APIRouter()
 
-@router.post("/register", response_model=Token, tags=["OAuth"])
+@router.post("/register", response_model=Token, status_code=status.HTTP_201_CREATED, tags=["OAuth"])
 async def register(user: UserCreate, session: Session = Depends(get_session)) -> Token:
     db_user = get_user_by_email(session, user.email)
     if db_user is not None:
