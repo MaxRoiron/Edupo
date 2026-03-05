@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'api_config.dart';
 import 'auth_service.dart';
+import 'http_client.dart';
 
 /// Réponse générique de l'API
 class ApiResponse {
@@ -14,6 +15,8 @@ class ApiResponse {
 
 /// Service pour les appels HTTP au backend FastAPI
 class ApiService {
+  static final http.Client _client = createHttpClient();
+
   /// POST /register
   /// Retourne le JWT si succès
   static Future<ApiResponse> register({
@@ -24,7 +27,7 @@ class ApiService {
     try {
       final url = '${ApiConfig.baseUrl}/register';
       print('[DEBUG] POST $url');
-      final response = await http.post(
+      final response = await _client.post(
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
@@ -70,7 +73,7 @@ class ApiService {
     try {
       final url = '${ApiConfig.baseUrl}/login';
       print('[DEBUG] POST $url');
-      final response = await http.post(
+      final response = await _client.post(
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
@@ -114,7 +117,7 @@ class ApiService {
         return ApiResponse(success: false, message: 'Non connecté.');
       }
 
-      final response = await http.get(
+      final response = await _client.get(
         Uri.parse('${ApiConfig.baseUrl}/me'),
         headers: {
           'Content-Type': 'application/json',
