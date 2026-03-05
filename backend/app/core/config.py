@@ -3,12 +3,6 @@ from pydantic import computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(
-        env_file=os.getenv("ENV_FILE", os.path.join(os.path.dirname(__file__), "../../.env")),
-        env_file_encoding="utf-8",
-        extra="ignore"
-    )
-
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str
     POSTGRES_SERVER: str
