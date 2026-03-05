@@ -25,6 +25,8 @@ async def get_user_data(user: User = Depends(get_current_user)):
     return UserDataView(
         id=user_data.id,
         age=user_data.age,
+        phone_number=user_data.phone_number,
+        user_id=user.id,
         professional_status_id=user_data.professional_status_id,
         social_status_id=user_data.social_status_id,
         gender_identity_id=user_data.gender_identity_id

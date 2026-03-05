@@ -16,6 +16,7 @@ def get_user_data_by_user_email(email: str, session: Session) -> UserData | None
 def add_user_data(session: Session, user_data: UserDataCreate, user_id: int) -> UserDataView:
     db_user_data = UserData(
         age=user_data.age,
+        phone_number=user_data.phone_number,
         user_id=user_id,
         professional_status_id=user_data.professional_status_id,
         social_status_id=user_data.social_status_id,
@@ -27,23 +28,40 @@ def add_user_data(session: Session, user_data: UserDataCreate, user_id: int) -> 
     return UserDataView(
         id=db_user_data.id,
         age=db_user_data.age,
+        phone_number=db_user_data.phone_number,
         professional_status_id=db_user_data.professional_status_id,
         social_status_id=db_user_data.social_status_id,
-        gender_identity_id=db_user_data.gender_identity_id
+        gender_identity_id=db_user_data.gender_identity_id,
+        user_id=db_user_data.user_id
     )
 
 def update_user_data(session: Session, user_data: UserData, data_update: UserDataUpdate) -> UserDataView:
     if data_update.age is not None:
         user_data.age = data_update.age
 
+    if data_update.phone_number is not None:
+        if data_update.phone_number == "":
+            user_data.phone_number = None
+        else:
+            user_data.phone_number = data_update.phone_number
+
     if data_update.professional_status_id is not None:
-        user_data.professional_status_id = data_update.professional_status_id
+        if data_update.professional_status_id == -1:
+            user_data.professional_status_id = None
+        else:
+            user_data.professional_status_id = data_update.professional_status_id
 
     if data_update.social_status_id is not None:
-        user_data.social_status_id = data_update.social_status_id
+        if data_update.social_status_id == -1:
+            user_data.social_status_id = None
+        else:
+            user_data.social_status_id = data_update.social_status_id
 
     if data_update.gender_identity_id is not None:
-        user_data.gender_identity_id = data_update.gender_identity_id
+        if data_update.gender_identity_id == -1:
+            user_data.gender_identity_id = None
+        else:
+            user_data.gender_identity_id = data_update.gender_identity_id
 
     session.add(user_data)
     session.commit()
@@ -51,6 +69,8 @@ def update_user_data(session: Session, user_data: UserData, data_update: UserDat
     return UserDataView(
         id=user_data.id,
         age=user_data.age,
+        phone_number=user_data.phone_number,
+        user_id=user_data.user_id,
         professional_status_id=user_data.professional_status_id,
         social_status_id=user_data.social_status_id,
         gender_identity_id=user_data.gender_identity_id
@@ -60,6 +80,7 @@ def reset_user_data(session: Session, user_data: UserData):
     if user_data is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User's data can't be found")
     user_data.age = None
+    user_data.phone_number = None
     user_data.professional_status_id = None
     user_data.social_status_id = None
     user_data.gender_identity_id = None
@@ -70,6 +91,8 @@ def reset_user_data(session: Session, user_data: UserData):
     return UserDataView(
         id=user_data.id,
         age=user_data.age,
+        phone_number=user_data.phone_number,
+        user_id=user_data.user_id,
         professional_status_id=user_data.professional_status_id,
         social_status_id=user_data.social_status_id,
         gender_identity_id=user_data.gender_identity_id

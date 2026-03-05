@@ -22,55 +22,17 @@ class _ProfileScreenState extends State<ProfileScreen>
   final TextEditingController _ageController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   String? _selectedProfessionalStatus;
+  int? _selectedProfessionalStatusId;
   String? _selectedGender;
+  int? _selectedGenderId;
   bool _isEditingExtra = false;
+  bool _hasUserData = false;
 
-  static const List<String> _professionalStatuses = [
-    'Étudiant(e)',
-    'Lycéen(ne)',
-    'Apprenti(e)',
-    'Stagiaire',
-    'Demandeur d\'emploi',
-    'Salarié(e)',
-    'Cadre',
-    'Ingénieur(e)',
-    'Technicien(ne)',
-    'Ouvrier / Ouvrière',
-    'Artisan(e)',
-    'Commerçant(e)',
-    'Chef(fe) d\'entreprise',
-    'Auto-entrepreneur(e)',
-    'Profession libérale',
-    'Fonctionnaire',
-    'Enseignant(e)',
-    'Chercheur(se)',
-    'Médecin / Santé',
-    'Avocat(e) / Juridique',
-    'Restauration / Hôtellerie',
-    'Agriculture',
-    'Artiste / Créatif',
-    'Journaliste / Média',
-    'Militaire',
-    'Retraité(e)',
-    'Au foyer',
-    'Autre',
-  ];
+  List<Map<String, dynamic>> _professionalStatusesList = [];
+  List<Map<String, dynamic>> _gendersList = [];
 
-  static const List<String> _genders = [
-    'Homme',
-    'Femme',
-    'Non-binaire',
-    'Genderqueer',
-    'Genderfluid',
-    'Agenre',
-    'Bigenre',
-    'Demigarçon',
-    'Demifille',
-    'Transgenre',
-    'Two-Spirit',
-    'Autre',
-    'Non renseigné',
-  ];
+  List<String> get _professionalStatuses => _professionalStatusesList.map((e) => e['name'] as String).toList();
+  List<String> get _genders => _gendersList.map((e) => e['name'] as String).toList();
   late AnimationController _animController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
@@ -105,15 +67,55 @@ class _ProfileScreenState extends State<ProfileScreen>
   }
 
   Future<void> _loadUserInfo() async {
-    final response = await ApiService.getMe();
-    if (!mounted) return;
+    // Parallel fetching
+    final results = await Future.wait([
+      ApiService.getMe(),
+      ApiService.getUserData(),
+      ApiService.getProfessionalStatuses(),
+      ApiService.getGenders(),
+    ]);
 
-    if (response.success && response.data != null) {
-      setState(() {
-        _username = response.data!['username'] ?? '';
-        _email = response.data!['email'] ?? '';
-        _isLoading = false;
-      });
+    if (!mounted) return;
+    
+    final meResp = results[0];
+    final dataResp = results[1];
+    final profResp = results[2];
+    final genderResp = results[3];
+
+    if (meResp.success && meResp.data != null) {
+      if (profResp.success && profResp.data != null) {
+        _professionalStatusesList = List<Map<String, dynamic>>.from(profResp.data!['list']);
+      }
+      if (genderResp.success && genderResp.data != null) {
+        _gendersList = List<Map<String, dynamic>>.from(genderResp.data!['list']);
+      }
+
+      _username = meResp.data!['username'] ?? '';
+      _email = meResp.data!['email'] ?? '';
+
+      if (dataResp.success && dataResp.data != null) {
+        _hasUserData = true;
+        
+        final age = dataResp.data!['age'];
+        if (age != null) _ageController.text = age.toString();
+        
+        final phone = dataResp.data!['phone_number'];
+        if (phone != null) _phoneController.text = phone.toString();
+
+        _selectedProfessionalStatusId = dataResp.data!['professional_status_id'];
+        if (_selectedProfessionalStatusId != null) {
+          final found = _professionalStatusesList.where((p) => p['id'] == _selectedProfessionalStatusId).toList();
+          if (found.isNotEmpty) _selectedProfessionalStatus = found.first['name'];
+        }
+
+        _selectedGenderId = dataResp.data!['gender_identity_id'];
+        if (_selectedGenderId != null) {
+          final found = _gendersList.where((g) => g['id'] == _selectedGenderId).toList();
+          if (found.isNotEmpty) _selectedGender = found.first['name'];
+        }
+      }
+
+      setState(() => _isLoading = false);
       _animController.forward();
     } else {
       setState(() => _isLoading = false);
@@ -371,7 +373,13 @@ class _ProfileScreenState extends State<ProfileScreen>
               hint: 'Sélectionner...',
               items: _professionalStatuses,
               onChanged: (value) {
-                setState(() => _selectedProfessionalStatus = value);
+                if (value != null) {
+                  final mapped = _professionalStatusesList.where((p) => p['name'] == value).toList();
+                  setState(() {
+                    _selectedProfessionalStatus = value;
+                    _selectedProfessionalStatusId = mapped.isNotEmpty ? mapped.first['id'] : null;
+                  });
+                }
               },
             ),
             const SizedBox(height: 14),
@@ -383,7 +391,13 @@ class _ProfileScreenState extends State<ProfileScreen>
               hint: 'Sélectionner...',
               items: _genders,
               onChanged: (value) {
-                setState(() => _selectedGender = value);
+                if (value != null) {
+                  final mapped = _gendersList.where((g) => g['name'] == value).toList();
+                  setState(() {
+                    _selectedGender = value;
+                    _selectedGenderId = mapped.isNotEmpty ? mapped.first['id'] : null;
+                  });
+                }
               },
             ),
             const SizedBox(height: 20),
@@ -621,16 +635,39 @@ class _ProfileScreenState extends State<ProfileScreen>
     );
   }
 
-  void _handleSaveExtra() {
+  void _handleSaveExtra() async {
     setState(() => _isEditingExtra = false);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Informations enregistrées'),
-        backgroundColor: AppColors.accentGreen,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
+
+    Map<String, dynamic> updateData = {
+      'age': int.tryParse(_ageController.text),
+      'phone_number': _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
+      'professional_status_id': _selectedProfessionalStatusId,
+      'social_status_id': null,
+      'gender_identity_id': _selectedGenderId,
+      'user_id': -1, // Needed for creation but ignored mostly wait it's not needed for patch
+    };
+
+    if (!_hasUserData) {
+      final meResp = await ApiService.getMe();
+      if (meResp.success) {
+        updateData['user_id'] = meResp.data!['id'];
+        await ApiService.createUserData(updateData);
+        _hasUserData = true;
+      }
+    } else {
+      await ApiService.updateUserData(updateData);
+    }
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Informations enregistrées'),
+          backgroundColor: AppColors.accentGreen,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+    }
   }
 
   Widget _buildEditableInfoCard({

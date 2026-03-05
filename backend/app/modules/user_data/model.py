@@ -19,6 +19,7 @@ class GenderIdentities(SQLModel, table=True):
 class UserData(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
     age: int | None = Field(default=None, nullable=True)
+    phone_number: str | None = Field(default=None, nullable=True)
     user_id: int = Field(foreign_key="user.id", unique=True)
     professional_status_id: int | None = Field(default=None, foreign_key="professionalstatus.id")
     social_status_id: int | None = Field(default=None, foreign_key="socialstatus.id")

@@ -145,4 +145,111 @@ class ApiService {
       );
     }
   }
+
+  /// GET /me/data — Récupère les données additionnelles de l'utilisateur
+  static Future<ApiResponse> getUserData() async {
+    try {
+      final token = await AuthService.getToken();
+      if (token == null) return ApiResponse(success: false, message: 'Non connecté.');
+
+      final response = await _client.get(
+        Uri.parse('${ApiConfig.baseUrl}/me/data'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      final body = jsonDecode(response.body) as Map<String, dynamic>;
+      if (response.statusCode == 200) {
+        return ApiResponse(success: true, data: body);
+      }
+      return ApiResponse(success: false, message: body['detail']?.toString() ?? 'Erreur.');
+    } catch (e) {
+      return ApiResponse(success: false, message: 'Erreur: $e');
+    }
+  }
+
+  /// POST /me/data — Crée les données additionnelles
+  static Future<ApiResponse> createUserData(Map<String, dynamic> data) async {
+    try {
+      final token = await AuthService.getToken();
+      if (token == null) return ApiResponse(success: false, message: 'Non connecté.');
+
+      final response = await _client.post(
+        Uri.parse('${ApiConfig.baseUrl}/me/data'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(data),
+      );
+
+      final body = jsonDecode(response.body) as Map<String, dynamic>;
+      if (response.statusCode == 200) {
+        return ApiResponse(success: true, data: body);
+      }
+      return ApiResponse(success: false, message: body['detail']?.toString() ?? 'Erreur.');
+    } catch (e) {
+      return ApiResponse(success: false, message: 'Erreur: $e');
+    }
+  }
+
+  /// PATCH /me/data — Met à jour les données additionnelles
+  static Future<ApiResponse> updateUserData(Map<String, dynamic> data) async {
+    try {
+      final token = await AuthService.getToken();
+      if (token == null) return ApiResponse(success: false, message: 'Non connecté.');
+
+      final response = await _client.patch(
+        Uri.parse('${ApiConfig.baseUrl}/me/data'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(data),
+      );
+
+      final body = jsonDecode(response.body) as Map<String, dynamic>;
+      if (response.statusCode == 200) {
+        return ApiResponse(success: true, data: body);
+      }
+      return ApiResponse(success: false, message: body['detail']?.toString() ?? 'Erreur.');
+    } catch (e) {
+      return ApiResponse(success: false, message: 'Erreur: $e');
+    }
+  }
+
+  /// GET les listes
+  static Future<ApiResponse> getProfessionalStatuses() async {
+    try {
+      final token = await AuthService.getToken();
+      final response = await _client.get(
+        Uri.parse('${ApiConfig.baseUrl}/user_data/professional'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      if (response.statusCode == 200) {
+        return ApiResponse(success: true, data: {'list': jsonDecode(response.body)});
+      }
+      return ApiResponse(success: false);
+    } catch (e) {
+      return ApiResponse(success: false);
+    }
+  }
+
+  static Future<ApiResponse> getGenders() async {
+    try {
+      final token = await AuthService.getToken();
+      final response = await _client.get(
+        Uri.parse('${ApiConfig.baseUrl}/user_data/gender'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      if (response.statusCode == 200) {
+        return ApiResponse(success: true, data: {'list': jsonDecode(response.body)});
+      }
+      return ApiResponse(success: false);
+    } catch (e) {
+      return ApiResponse(success: false);
+    }
+  }
 }

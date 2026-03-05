@@ -35,19 +35,24 @@ class GenderIdentitiesView(BaseModel):
 
 class UserDataCreate(BaseModel):
     age: int | None = None
+    phone_number: str | None = None
+    user_id: int
     professional_status_id: int | None = None
     social_status_id: int | None = None
     gender_identity_id: int | None = None
 
 class UserDataUpdate(BaseModel):
     age: int | None = None
+    phone_number: str | None = None
     professional_status_id: int | None = None
     social_status_id: int | None = None
     gender_identity_id: int | None = None
 
 class UserDataView(BaseModel):
     id: int
-    age: int | None = None
-    professional_status_id: int | None = None
-    social_status_id: int | None = None
-    gender_identity_id: int | None = None
+    age: int | None
+    phone_number: str | None
+    user_id: int
+    professional_status_id: int | None
+    social_status_id: int | None
+    gender_identity_id: int | None
