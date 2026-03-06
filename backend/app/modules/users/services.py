@@ -65,8 +65,8 @@ def delete_user_by_email(email: str, user: User, session: Session):
     user_to_delete = get_user_by_email(session=session, email=email)
     if user_to_delete is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User ({email}) not found")
-    if user.email == email:
-        raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED, detail="You can't delete yourself")
+    if user_to_delete.role == "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You can't delete yourself")
     session.delete(user_to_delete)
     session.commit()
     return {"message": f"User ({email}) has been deleted"}
