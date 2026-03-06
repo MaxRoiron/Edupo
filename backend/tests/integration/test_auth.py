@@ -52,7 +52,8 @@ def test_login_user_not_registered(client):
     )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-def test_login_user_wrong_password(client):
+def test_login_user_wrong_password(client, test_user):
+    assert test_user is not None
     response = client.post(
         "/login",
         json={
