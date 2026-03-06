@@ -1,0 +1,22 @@
+services:
+  db:
+    image: postgres:17-alpine
+    restart: always
+    env_file:
+      - .env.test
+    ports:
+      - "5433:5432"
+    volumes:
+      - ../docker/postgres_data_tests:/var/lib/postgresql/data
+
+  backend:
+    build: .
+    command: ["python", "-m", "pytest", "-v", "--cov=app"]
+    volumes:
+      - .:/app
+    env_file:
+      - .env.test
+    depends_on:
+      - db
+    environment:
+      - POSTGRES_SERVER=db
