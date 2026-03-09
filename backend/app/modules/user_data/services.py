@@ -13,10 +13,10 @@ def get_user_data_by_user_email(email: str, session: Session) -> UserData | None
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User ({email}) not found")
     return user.user_data
 
-def add_user_data(session: Session, user_data: UserDataCreate) -> UserDataView:
+def add_user_data(session: Session, user_data: UserDataCreate, user_id: int) -> UserDataView:
     db_user_data = UserData(
         age=user_data.age,
-        user_id=user_data.user_id,
+        user_id=user_id,
         professional_status_id=user_data.professional_status_id,
         social_status_id=user_data.social_status_id,
         gender_identity_id=user_data.gender_identity_id
