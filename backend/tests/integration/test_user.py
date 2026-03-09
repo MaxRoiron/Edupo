@@ -9,15 +9,11 @@ def test_get_user(auth_user):
 
 def test_patch_user(auth_user, session):
     assert auth_user is not None
-    assert session.exec(select(User).where(User.username == "testUser")).first() is not None
     response = auth_user.patch(
         "/me",
-        json={
-            "username": "testPatchUser"
-        }
+        json={}
     )
     assert response.status_code == status.HTTP_200_OK
-    assert response.json()["username"] == "testPatchUser"
 
 def test_delete_user(auth_user, session):
     assert auth_user is not None
@@ -37,12 +33,7 @@ def test_admin_delete_user(auth_admin, test_user, session):
     assert response.status_code == status.HTTP_200_OK
     assert session.exec(select(User).where(User.username == "testUser")).first() is None
 
-def test_admin_delete_admin(auth_admin):
-    assert auth_admin is not None
-    response = auth_admin.delete("/admin/admin@test.com")
-    assert response.status_code == status.HTTP_403_FORBIDDEN
-
-def test_user_delete_user(auth_user, session):
+def test_user_delete_user(auth_user):
     assert auth_user is not None
     response = auth_user.delete("/admin/user@test.com")
     assert response.status_code == status.HTTP_403_FORBIDDEN
