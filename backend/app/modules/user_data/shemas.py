@@ -4,7 +4,7 @@ class ProfessionalStatusCreate(BaseModel):
     name: str
 
 class ProfessionalStatusUpdate(BaseModel):
-    name: str | None
+    name: str | None = None
 
 class ProfessionalStatusView(BaseModel):
     id: int
@@ -15,7 +15,7 @@ class SocialStatusCreate(BaseModel):
     name: str
 
 class SocialStatusUpdate(BaseModel):
-    name: str | None
+    name: str | None = None
 
 class SocialStatusView(BaseModel):
     id: int
@@ -26,7 +26,7 @@ class GenderIdentitiesCreate(BaseModel):
     name: str
 
 class GenderIdentitiesUpdate(BaseModel):
-    name: str | None
+    name: str | None = None
 
 class GenderIdentitiesView(BaseModel):
     id: int
@@ -34,22 +34,20 @@ class GenderIdentitiesView(BaseModel):
 
 
 class UserDataCreate(BaseModel):
-    age: int | None
-    user_id: int
-    professional_status_id: int | None
-    social_status_id: int | None
-    gender_identity_id: int | None
+    age: int | None = None
+    professional_status_id: int | None = None
+    social_status_id: int | None = None
+    gender_identity_id: int | None = None
 
 class UserDataUpdate(BaseModel):
-    age: int | None
-    professional_status_id: int | None
-    social_status_id: int | None
-    gender_identity_id: int | None
+    age: int | None = None
+    professional_status_id: int | None = None
+    social_status_id: int | None = None
+    gender_identity_id: int | None = None
 
 class UserDataView(BaseModel):
     id: int
-    age: int | None
-    user_id: int
-    professional_status_id: int | None
-    social_status_id: int | None
-    gender_identity_id: int | None
+    age: int | None = None
+    professional_status_id: int | None = None
+    social_status_id: int | None = None
+    gender_identity_id: int | None = None
