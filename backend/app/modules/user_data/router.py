@@ -53,18 +53,18 @@ async def reset_user_datas(user_email: str, current_user: User = Depends(get_cur
 
 
 @router.post("/admin/user_data/professional", response_model=ProfessionalStatusView, status_code=status.HTTP_201_CREATED, tags=["Admin"])
-async def post_professional_status(status: ProfessionalStatusCreate, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+async def post_professional_status(professional_status: ProfessionalStatusCreate, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
     if user.role == "user":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have the required authorization")
-    return add_professional_status(status=status, session=session)
+    return add_professional_status(status=professional_status, session=session)
 
 @router.get("/user_data/professional", response_model=list[ProfessionalStatusView], tags=["UserData Content"])
-async def get_all_professional_status(status_id: int, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
-    return read_all_professional_status(status_id=status_id, session=session)
+async def get_all_professional_status(user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    return read_all_professional_status(session=session)
 
 @router.get("/user_data/professional/{status_id}", response_model=ProfessionalStatusView, tags=["UserData Content"])
 async def get_professional_status(status_id: int, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
-    return get_professional_status_by_id(status_id=status_id, session=session)
+    return get_professional_status_by_id(id=status_id, session=session)
 
 @router.patch("/admin/user_data/professional/{status_id}", response_model=ProfessionalStatusView, tags=["Admin"])
 async def patch_professional_status(status_id: int, update_data: ProfessionalStatusUpdate, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
@@ -72,7 +72,7 @@ async def patch_professional_status(status_id: int, update_data: ProfessionalSta
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have the required authorization")
     return update_professional_status_by_id(status_id=status_id, update_data=update_data, session=session)
 
-@router.delete("/admin/user_data/professional/{status_id}", response_model=ProfessionalStatusView, tags=["Admin"])
+@router.delete("/admin/user_data/professional/{status_id}", tags=["Admin"])
 async def delete_professional_status(status_id: int, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
     if user.role == "user":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have the required authorization")
@@ -83,18 +83,18 @@ async def delete_professional_status(status_id: int, user: User = Depends(get_cu
 
 
 @router.post("/admin/user_data/social", response_model=SocialStatusView, status_code=status.HTTP_201_CREATED, tags=["Admin"])
-async def post_social_status(status: SocialStatusCreate, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+async def post_social_status(social_status: SocialStatusCreate, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
     if user.role == "user":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have the required authorization")
-    return add_social_status(status=status, session=session)
+    return add_social_status(status=social_status, session=session)
 
 @router.get("/user_data/social", response_model=list[SocialStatusView], tags=["UserData Content"])
-async def get_all_social_status(status_id: int, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
-    return read_all_social_status(status_id=status_id, session=session)
+async def get_all_social_status(user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    return read_all_social_status(session=session)
 
 @router.get("/user_data/social/{status_id}", response_model=SocialStatusView, tags=["UserData Content"])
 async def get_social_status(status_id: int, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
-    return get_social_status_by_id(status_id=status_id, session=session)
+    return get_social_status_by_id(id=status_id, session=session)
 
 @router.patch("/admin/user_data/social/{status_id}", response_model=SocialStatusView, tags=["Admin"])
 async def patch_social_status(status_id: int, update_data: SocialStatusUpdate, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
@@ -102,7 +102,7 @@ async def patch_social_status(status_id: int, update_data: SocialStatusUpdate, u
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have the required authorization")
     return update_social_status_by_id(status_id=status_id, update_data=update_data, session=session)
 
-@router.delete("/admin/user_data/social/{status_id}", response_model=SocialStatusView, tags=["Admin"])
+@router.delete("/admin/user_data/social/{status_id}", tags=["Admin"])
 async def delete_social_status(status_id: int, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
     if user.role == "user":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have the required authorization")
@@ -113,18 +113,18 @@ async def delete_social_status(status_id: int, user: User = Depends(get_current_
 
 
 @router.post("/admin/user_data/gender", response_model=GenderIdentitiesView, status_code=status.HTTP_201_CREATED, tags=["Admin"])
-async def post_gender(status: GenderIdentitiesCreate, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+async def post_gender(gender: GenderIdentitiesCreate, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
     if user.role == "user":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have the required authorization")
-    return add_gender(status=status, session=session)
+    return add_gender(status=gender, session=session)
 
 @router.get("/user_data/gender", response_model=list[GenderIdentitiesView], tags=["UserData Content"])
-async def get_all_gender(status_id: int, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
-    return read_all_gender(status_id=status_id, session=session)
+async def get_all_gender(user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    return read_all_gender(session=session)
 
 @router.get("/user_data/gender/{status_id}", response_model=GenderIdentitiesView, tags=["UserData Content"])
 async def get_gender(status_id: int, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
-    return get_gender_by_id(status_id=status_id, session=session)
+    return get_gender_by_id(id=status_id, session=session)
 
 @router.patch("/admin/user_data/gender/{status_id}", response_model=GenderIdentitiesView, tags=["Admin"])
 async def patch_gender(status_id: int, update_data: GenderIdentitiesUpdate, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
@@ -132,7 +132,7 @@ async def patch_gender(status_id: int, update_data: GenderIdentitiesUpdate, user
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have the required authorization")
     return update_gender_by_id(status_id=status_id, update_data=update_data, session=session)
 
-@router.delete("/admin/user_data/gender/{status_id}", response_model=GenderIdentitiesView, tags=["Admin"])
+@router.delete("/admin/user_data/gender/{status_id}", tags=["Admin"])
 async def delete_gender(status_id: int, user: User = Depends(get_current_user), session: Session = Depends(get_session)):
     if user.role == "user":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have the required authorization")
