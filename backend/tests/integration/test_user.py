@@ -1,4 +1,4 @@
-from app.modules.users import User, UserUpdate
+from app.modules.users import User
 
 from sqlmodel import select
 from fastapi import status
