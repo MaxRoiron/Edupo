@@ -1,6 +1,5 @@
 from app.modules.users import User
 
-from sqlmodel import select
 from fastapi import status
 
 def test_post_data(auth_user):
