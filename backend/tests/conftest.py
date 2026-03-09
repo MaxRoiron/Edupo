@@ -1,5 +1,6 @@
 from app import app
 from app.modules.users import User
+from app.modules.user_data import UserData
 
 import os
 os.environ["ENV_FILE"] = os.path.join(os.path.dirname(__file__), ".env.test")
@@ -45,6 +46,32 @@ def test_user_fixture(session: Session):
 @pytest.fixture(name="auth_user")
 def auth_user_fixture(client: TestClient, test_user: User):
     token = create_access_token(data={"user_id": test_user.id})
+    client.headers.update({"Authorization": f"Bearer {token}"})
+    return client
+
+@pytest.fixture(name="test_user_with_user_data")
+def test_user_with_data_fixture(session: Session):
+    user = User(
+        username="testUser",
+        email="user@test.com",
+        hashed_password=get_password_hash("userPassword"),
+        role="user"
+    )
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+
+    user_data = UserData(
+        user_id=user.id
+    )
+    session.add(user_data)
+    session.commit()
+    session.refresh(user_data)
+    return user
+
+@pytest.fixture(name="auth_user_with_user_data")
+def auth_user_with_data_fixture(client: TestClient, test_user_with_user_data: User):
+    token = create_access_token(data={"user_id": test_user_with_user_data.id})
     client.headers.update({"Authorization": f"Bearer {token}"})
     return client
 
