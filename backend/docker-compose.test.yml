@@ -11,7 +11,7 @@ services:
 
   backend:
     build: .
-    command: ["python", "-m", "pytest", "-v", "--cov=app", "--cov-report=xml"]
+    command: ["python", "-m", "pytest"]
     volumes:
       - .:/app
     env_file:
