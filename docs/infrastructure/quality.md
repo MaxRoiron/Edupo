@@ -39,11 +39,22 @@ cd backend
 
 ---
 
-## 🧪 Stratégie de Tests (À venir)
+## 🧪 Stratégie de Tests
 
-Le projet prévoit d'intégrer :
-- **Backend** : `pytest` pour les tests unitaires et d'intégration.
-- **Frontend** : `Jest` ou `Vitest` pour les composants.
+### Backend (en place ✅)
+Le backend utilise **pytest** avec **pytest-cov** pour les tests d'intégration :
+- **Environnement isolé** : `docker-compose.test.yml` lance une DB PostgreSQL dédiée (port `5433`).
+- **Fixtures `conftest.py`** : Sessions de test, utilisateurs, admins et clients authentifiés pré-configurés.
+- **Couverture de code** : Configurée dans `pytest.ini` (`-v --cov=app --cov-report=term-missing --cov-report=xml`).
+- **Lancement rapide** :
+  ```bash
+  cd backend
+  ./tests.sh
+  ```
+- **Tests existants** : `test_auth`, `test_user`, `test_user_data`, `test_professional_status`, `test_social_status`, `test_gender_identity`.
+
+### Frontend (À venir)
+- `Jest` ou `Vitest` pour les composants.
 
 ---
 

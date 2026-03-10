@@ -8,8 +8,8 @@ Bienvenue dans le centre de documentation technique du projet. Ce dossier regrou
 
 ### 🔙 [Backend (API)](./backend/index.md)
 *Tout ce qui concerne le serveur Python, la logique métier et la sécurité.*
-- **[Guide Général](./backend/index.md)** : Architecture, services, routers et standards.
-- **[Base de données](./backend/database.md)** : Gestion des migrations avec Alembic, schémas et scripts.
+- **[Guide Général](./backend/index.md)** : Architecture, modules, API endpoints, sécurité et tests.
+- **[Base de données](./backend/database.md)** : Schéma relationnel, détail des tables, migrations Alembic.
 
 ### 🎨 [Frontend (Web)](./frontend/index.md)
 *Tout ce qui concerne l'interface utilisateur en Next.js.*

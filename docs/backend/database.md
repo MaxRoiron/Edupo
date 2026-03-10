@@ -1,6 +1,108 @@
-# 🗄️ Gestion des Migrations avec Alembic
+# 🗄️ Base de Données & Migrations Alembic
 
 Ce projet utilise **Alembic** pour gérer les évolutions de la base de données PostgreSQL. Contrairement à une création automatique brute, Alembic permet de modifier la structure de la base sans perdre les données existantes.
+
+---
+
+## 📊 Schéma Relationnel
+
+```mermaid
+erDiagram
+    USER {
+        int id PK
+        string username
+        string email UK
+        string hashed_password
+        string role
+        string ggid
+        datetime created_at
+    }
+
+    USERDATA {
+        int id PK
+        int age
+        int user_id FK, UK
+        int professional_status_id FK
+        int social_status_id FK
+        int gender_identity_id FK
+    }
+
+    PROFESSIONALSTATUS {
+        int id PK
+        string name
+    }
+
+    SOCIALSTATUS {
+        int id PK
+        string name
+    }
+
+    GENDERIDENTITIES {
+        int id PK
+        string name
+    }
+
+    USER ||--o| USERDATA : "has (cascade delete)"
+    USERDATA }o--o| PROFESSIONALSTATUS : "references"
+    USERDATA }o--o| SOCIALSTATUS : "references"
+    USERDATA }o--o| GENDERIDENTITIES : "references"
+```
+
+---
+
+## 📋 Détail des Tables
+
+### Table `user`
+| Colonne | Type | Contraintes | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `INTEGER` | PK, Auto-increment | Identifiant unique |
+| `username` | `VARCHAR` | NOT NULL, INDEX | Nom d'utilisateur |
+| `email` | `VARCHAR` | NOT NULL, UNIQUE, INDEX | Adresse email |
+| `hashed_password` | `VARCHAR` | NOT NULL | Bcrypt hash du mot de passe |
+| `role` | `VARCHAR` | NOT NULL, INDEX | `user` ou `admin` |
+| `ggid` | `VARCHAR` | NULLABLE | Google ID (OAuth) |
+| `created_at` | `TIMESTAMP` | NOT NULL, DEFAULT now() | Date de création |
+
+### Table `userdata`
+| Colonne | Type | Contraintes | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `INTEGER` | PK, Auto-increment | Identifiant unique |
+| `age` | `INTEGER` | NULLABLE | Âge de l'utilisateur |
+| `user_id` | `INTEGER` | FK → `user.id`, UNIQUE | Lien 1:1 vers l'utilisateur |
+| `professional_status_id` | `INTEGER` | FK → `professionalstatus.id`, NULLABLE | Statut professionnel |
+| `social_status_id` | `INTEGER` | FK → `socialstatus.id`, NULLABLE | Statut social |
+| `gender_identity_id` | `INTEGER` | FK → `genderidentities.id`, NULLABLE | Identité de genre |
+
+### Table `professionalstatus`
+| Colonne | Type | Contraintes | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `INTEGER` | PK, Auto-increment | Identifiant unique |
+| `name` | `VARCHAR` | INDEX | Libellé du statut |
+
+### Table `socialstatus`
+| Colonne | Type | Contraintes | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `INTEGER` | PK, Auto-increment | Identifiant unique |
+| `name` | `VARCHAR` | INDEX | Libellé du statut |
+
+### Table `genderidentities`
+| Colonne | Type | Contraintes | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `INTEGER` | PK, Auto-increment | Identifiant unique |
+| `name` | `VARCHAR` | INDEX | Libellé de l'identité |
+
+---
+
+## 🔗 Relations
+
+| Relation | Type | Comportement |
+| :--- | :--- | :--- |
+| `User` → `UserData` | 1:1 (optionnel) | **Cascade delete** : supprimer un user supprime ses données |
+| `UserData` → `ProfessionalStatus` | N:1 (optionnel) | Référence simple (pas de cascade) |
+| `UserData` → `SocialStatus` | N:1 (optionnel) | Référence simple (pas de cascade) |
+| `UserData` → `GenderIdentities` | N:1 (optionnel) | Référence simple (pas de cascade) |
+
+---
 
 ## 🚀 Workflow Rapide (Usage Quotidien)
 
