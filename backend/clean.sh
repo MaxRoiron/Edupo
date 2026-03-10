@@ -5,4 +5,4 @@ sudo find . -type d -name "__pycache__" -exec rm -rf {} +
 
 rm -f .coverage coverage.xml
 
-echo "Terminé : Tous les dossiers __pycache__ ont été supprimés."
+rm -rf .pytest_cache
