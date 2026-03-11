@@ -59,8 +59,18 @@ backend/
 │   │   │   ├── services.py      # Logique métier (à implémenter)
 │   │   │   └── router.py        # Endpoints institutions (à implémenter)
 │   │   │
-│   │   ├── political_figures/   # Module Personnalités Politiques 🆕 (placeholder)
-│   │   ├── political_parties/   # Module Partis Politiques 🆕 (placeholder)
+│   │   ├── political_figure/    # Module Personnalités Politiques 🆕
+│   │   │   ├── model.py         # PoliticalFigure, PoliticalRole
+│   │   │   ├── shemas.py        # Schémas (FigureCreate, RoleView, etc.)
+│   │   │   ├── services.py      # Logique métier (à implémenter)
+│   │   │   └── router.py        # Endpoints (à implémenter)
+│   │   │
+│   │   ├── political_party/     # Module Partis Politiques 🆕
+│   │   │   ├── model.py         # Party, Domain, Program, Topic, ElectionType
+│   │   │   ├── shemas.py        # Schémas (PartyCreate, ProgramView, etc.)
+│   │   │   ├── services.py      # Logique métier (à implémenter)
+│   │   │   └── router.py        # Endpoints (à implémenter)
+│   │   │
 │   │   ├── votes/               # Module Votes 🆕 (placeholder)
 │   │   │
 │   │   └── external_oauth/      # Module OAuth Externe
@@ -221,15 +231,51 @@ Gère les institutions politiques. Ce module introduit **3 modèles** liés entr
 
 > ⚠️ **État** : Modèles et schémas définis. Le `router.py` et `services.py` sont encore vides (à implémenter).
 
-### 5. Modules en cours de création (placeholders) 🆕
+### 5. Module `political_figure` — Personnalités Politiques 🆕
 
-Les dossiers suivants ont été créés en préparation de futurs développements, mais sont actuellement **vides** :
+Gère les politiciens et l'historique de leurs fonctions.
+
+**Modèle `PoliticalFigure`** :
+| Champ | Type | Description |
+| :--- | :--- | :--- |
+| `id` | `int` (PK) | Identifiant auto-incrémenté |
+| `name` | `str` | Prénom (indexé) |
+| `last_name` | `str` | Nom de famille (indexé) |
+| `party_id` | `int` (FK) | Parti actuel |
+| `country_id` | `int` (FK) | Pays d'origine |
+
+**Modèle `PoliticalRole`** :
+| Champ | Type | Description |
+| :--- | :--- | :--- |
+| `id` | `int` (PK) | Identifiant auto-incrémenté |
+| `name` | `str` | Nom du rôle (ex: Ministre) |
+| `start_date` | `datetime` | Date de début |
+| `end_date` | `datetime \| None` | Date de fin optionnelle |
+| `figure_id` | `int` (FK) | Lien vers la personnalité |
+
+### 6. Module `political_party` — Partis et Programmes 🆕
+
+Module complexe gérant les partis, leurs idéologies et leurs programmes par élection.
+
+**Modèle `PoliticalParty`** :
+| Champ | Type | Description |
+| :--- | :--- | :--- |
+| `id` | `int` (PK) | Identifiant auto-incrémenté |
+| `name` | `str` | Nom complet |
+| `abbreviation` | `str \| None` | Acronyme (ex: LFI, RN) |
+| `country_id` | `int` (FK) | Pays d'ancrage |
+
+**Programmes et Thématiques** :
+- `PoliticalProgram` : Regroupe les propositions pour une année et un type d'élection.
+- `PoliticalTopic` : Un point de programme spécifique lié à un domaine.
+- `Domain` : Thématique (Économie, Écologie, International...).
+- `ElectionType` : Type de scrutin (Présidentielle, Européennes...).
+
+### 7. Module en cours de création (placeholder) 🆕
 
 | Module | Objectif prévu |
 | :--- | :--- |
-| `political_figures/` | Gestion des personnalités politiques |
-| `political_parties/` | Gestion des partis politiques |
-| `votes/` | Gestion des votes et résultats |
+| `votes/` | Gestion des scrutins et résultats électoraux |
 
 ### 6. Module `external_oauth` — OAuth Google
 
@@ -295,8 +341,8 @@ Permet l'authentification via Google. Le flux est le suivant :
 | `PATCH` | `/admin/user_data/gender/{id}` | Admin | Met à jour une identité |
 | `DELETE` | `/admin/user_data/gender/{id}` | Admin | Supprime une identité |
 
-### Endpoints pour `country` & `institution` 🆕
-> 🚧 Les routers et services pour les modules `country` et `institution` ne sont pas encore implémentés. Les endpoints seront documentés une fois le développement terminé.
+### Endpoints pour `country`, `institution`, `political_figure` & `political_party` 🆕
+> 🚧 Les routers et services pour ces modules sont en cours d'implémentation. Les endpoints seront documentés une fois le développement métier avancé.
 
 ### Endpoints Utilitaires
 | Méthode | Route | Description |

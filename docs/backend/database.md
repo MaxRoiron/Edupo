@@ -63,10 +63,58 @@ erDiagram
     INSTITUTION {
         int id PK
         string name
-        string description
         int country_id FK
         int power_id FK
         int institution_type_id FK
+    }
+
+    POLITICALFIGURE {
+        int id PK
+        string name
+        string last_name
+        int party_id FK
+        int country_id FK
+    }
+
+    POLITICALROLE {
+        int id PK
+        string name
+        datetime start_date
+        datetime end_date
+        int figure_id FK
+    }
+
+    POLITICALPARTY {
+        int id PK
+        string name
+        string abbreviation
+        string ideology_summary
+        int country_id FK
+    }
+
+    POLITICALPROGRAM {
+        int id PK
+        string name
+        int year
+        int party_id FK
+        int election_type_id FK
+    }
+
+    ELECTIONTYPE {
+        int id PK
+        string name
+    }
+
+    POLITICALTOPIC {
+        int id PK
+        string description
+        int program_id FK
+        int domain_id FK
+    }
+
+    DOMAIN {
+        int id PK
+        string name
     }
 
     USER ||--o| USERDATA : "has (cascade delete)"
@@ -77,6 +125,16 @@ erDiagram
     INSTITUTION }o--|| COUNTRY : "belongs to"
     INSTITUTION }o--|| POWER : "has power"
     INSTITUTION }o--|| INSTITUTIONTYPE : "has type"
+
+    POLITICALFIGURE }o--|| POLITICALPARTY : "member of"
+    POLITICALFIGURE }o--|| COUNTRY : "from"
+    POLITICALROLE }o--|| POLITICALFIGURE : "held by"
+
+    POLITICALPARTY }o--|| COUNTRY : "base in"
+    POLITICALPROGRAM }o--|| POLITICALPARTY : "published by"
+    POLITICALPROGRAM }o--|| ELECTIONTYPE : "for"
+    POLITICALTOPIC }o--|| POLITICALPROGRAM : "part of"
+    POLITICALTOPIC }o--|| DOMAIN : "belongs to domain"
 ```
 
 ---
@@ -153,6 +211,62 @@ erDiagram
 | `power_id` | `INTEGER` | FK → `power.id`, INDEX | Pouvoir associé |
 | `institution_type_id` | `INTEGER` | FK → `institutiontype.id`, INDEX | Type d'institution |
 
+### Table `politicalfigure` 🆕
+| Colonne | Type | Contraintes | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `INTEGER` | PK, Auto-increment | Identifiant unique |
+| `name` | `VARCHAR` | INDEX | Prénom |
+| `last_name` | `VARCHAR` | INDEX | Nom de famille |
+| `party_id` | `INTEGER` | FK → `politicalparty.id` | Parti d'appartenance |
+| `country_id` | `INTEGER` | FK → `country.id` | Pays d'attache |
+
+### Table `politicalrole` 🆕
+| Colonne | Type | Contraintes | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `INTEGER` | PK, Auto-increment | Identifiant unique |
+| `name` | `VARCHAR` | INDEX | Intitulé du rôle |
+| `start_date` | `TIMESTAMP` | NOT NULL | Date de début |
+| `end_date` | `TIMESTAMP` | NULLABLE | Date de fin |
+| `figure_id` | `INTEGER` | FK → `politicalfigure.id` | Personnalité concernée |
+
+### Table `politicalparty` 🆕
+| Colonne | Type | Contraintes | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `INTEGER` | PK, Auto-increment | Identifiant unique |
+| `name` | `VARCHAR` | INDEX | Nom du parti |
+| `abbreviation` | `VARCHAR` | NULLABLE, INDEX | Acronyme |
+| `country_id` | `INTEGER` | FK → `country.id` | Pays |
+
+### Table `politicalprogram` 🆕
+| Colonne | Type | Contraintes | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `INTEGER` | PK, Auto-increment | Identifiant unique |
+| `name` | `VARCHAR` | INDEX | Titre du programme |
+| `year` | `INTEGER` | INDEX | Année de l'élection |
+| `party_id` | `INTEGER` | FK → `politicalparty.id` | Parti porteur |
+| `election_type_id` | `INTEGER` | FK → `electiontype.id` | Type d'élection |
+
+### Table `politicaltopic` 🆕
+| Colonne | Type | Contraintes | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `INTEGER` | PK, Auto-increment | Identifiant unique |
+| `description` | `TEXT` | NOT NULL | Détail de la proposition |
+| `program_id` | `INTEGER` | FK → `politicalprogram.id` | Programme parent |
+| `domain_id` | `INTEGER` | FK → `domain.id` | Thématique (Économie, etc.) |
+
+### Table `domain` 🆕
+| Colonne | Type | Contraintes | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `INTEGER` | PK, Auto-increment | Identifiant unique |
+| `name` | `VARCHAR` | INDEX | Nom du domaine (ex: Santé) |
+| `description` | `VARCHAR` | NULLABLE | Description du domaine |
+
+### Table `electiontype` 🆕
+| Colonne | Type | Contraintes | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `INTEGER` | PK, Auto-increment | Identifiant unique |
+| `name` | `VARCHAR` | NOT NULL | Nom du type (ex: Présidentielle) |
+
 ---
 
 ## 🔗 Relations
@@ -166,6 +280,10 @@ erDiagram
 | `Institution` → `Country` | N:1 (obligatoire) | Chaque institution appartient à un pays |
 | `Institution` → `Power` | N:1 (obligatoire) | Chaque institution est liée à un pouvoir |
 | `Institution` → `InstitutionType` | N:1 (obligatoire) | Chaque institution a un type |
+| `PoliticalFigure` → `PoliticalParty`| N:1 (obligatoire) | Appartenance partisane |
+| `PoliticalRole` → `PoliticalFigure` | N:1 (obligatoire) | Historique des rôles |
+| `PoliticalProgram` → `PoliticalParty`| N:1 (obligatoire) | Programme d'un parti |
+| `PoliticalTopic` → `Domain` | N:1 (obligatoire) | Thématique d'une proposition |
 
 ---
 
