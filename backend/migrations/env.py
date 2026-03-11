@@ -15,7 +15,7 @@ sys.path.insert(0, os.getcwd())
 from sqlmodel import SQLModel
 from app.core.config import settings
 # Import de tous les modèles pour qu'ils soient connus d'Alembic
-from app.modules import User
+from app.modules import User, ProfessionalStatus, SocialStatus, GenderIdentities, UserData, Country, Institution, InstitutionType, Power
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
