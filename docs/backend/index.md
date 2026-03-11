@@ -47,6 +47,22 @@ backend/
 │   │   │   ├── services.py      # Logique métier (CRUD données profil)
 │   │   │   └── router.py        # Endpoints données utilisateur & admin
 │   │   │
+│   │   ├── country/             # Module Pays 🆕
+│   │   │   ├── model.py         # Modèle Country (name, iso_code)
+│   │   │   ├── shemas.py        # Schémas Pydantic (CountryCreate, CountryUpdate, CountryView)
+│   │   │   ├── services.py      # Logique métier (à implémenter)
+│   │   │   └── router.py        # Endpoints pays (à implémenter)
+│   │   │
+│   │   ├── institution/         # Module Institutions 🆕
+│   │   │   ├── model.py         # Modèles Power, InstitutionType, Institution
+│   │   │   ├── shemas.py        # Schémas Pydantic (Create, Update, View)
+│   │   │   ├── services.py      # Logique métier (à implémenter)
+│   │   │   └── router.py        # Endpoints institutions (à implémenter)
+│   │   │
+│   │   ├── political_figures/   # Module Personnalités Politiques 🆕 (placeholder)
+│   │   ├── political_parties/   # Module Partis Politiques 🆕 (placeholder)
+│   │   ├── votes/               # Module Votes 🆕 (placeholder)
+│   │   │
 │   │   └── external_oauth/      # Module OAuth Externe
 │   │       └── googleOAuth.py   # Intégration Google OAuth 2.0
 │   │
@@ -147,7 +163,75 @@ Gère les informations démographiques et sociales des utilisateurs. Contient au
 - `SocialStatus` : (`id`, `name`)
 - `GenderIdentities` : (`id`, `name`)
 
-### 3. Module `external_oauth` — OAuth Google
+### 3. Module `country` — Pays 🆕
+
+Gère la liste des pays référencés dans l'application. Utilisé comme clé étrangère par le module `institution`.
+
+**Modèle `Country`** :
+| Champ | Type | Description |
+| :--- | :--- | :--- |
+| `id` | `int` (PK) | Identifiant auto-incrémenté |
+| `name` | `str` | Nom du pays (indexé, unique) |
+| `iso_code` | `str` | Code ISO du pays (indexé, unique) |
+
+**Schémas Pydantic** :
+- `CountryCreate` : `name`, `iso_code`
+- `CountryUpdate` : `name?`, `iso_code?`
+- `CountryView` : `id`, `name`, `iso_code`
+
+> ⚠️ **État** : Modèle et schémas définis. Le `router.py` et `services.py` sont encore vides (à implémenter).
+
+### 4. Module `institution` — Institutions 🆕
+
+Gère les institutions politiques. Ce module introduit **3 modèles** liés entre eux et au module `country`.
+
+**Modèle `Power`** (Pouvoirs : Exécutif, Législatif, Judiciaire...) :
+| Champ | Type | Description |
+| :--- | :--- | :--- |
+| `id` | `int` (PK) | Identifiant auto-incrémenté |
+| `name` | `str` | Nom du pouvoir (indexé, unique) |
+| `description` | `str \| None` | Description optionnelle |
+
+**Modèle `InstitutionType`** (Types d'institutions) :
+| Champ | Type | Description |
+| :--- | :--- | :--- |
+| `id` | `int` (PK) | Identifiant auto-incrémenté |
+| `name` | `str` | Nom du type (indexé, unique) |
+| `description` | `str \| None` | Description optionnelle |
+
+**Modèle `Institution`** :
+| Champ | Type | Description |
+| :--- | :--- | :--- |
+| `id` | `int` (PK) | Identifiant auto-incrémenté |
+| `name` | `str` | Nom de l'institution (indexé) |
+| `description` | `str \| None` | Description optionnelle |
+| `country_id` | `int` (FK → `country.id`) | Pays de rattachement |
+| `power_id` | `int` (FK → `power.id`) | Pouvoir associé |
+| `institution_type_id` | `int` (FK → `institutiontype.id`) | Type d'institution |
+
+**Relations** :
+- `Institution` → `Country` (N:1)
+- `Institution` → `Power` (N:1)
+- `Institution` → `InstitutionType` (N:1)
+
+**Schémas Pydantic** :
+- `PowerCreate/Update/View`
+- `InstitutionTypeCreate/Update/View`
+- `InstitutionCreate/Update/View`
+
+> ⚠️ **État** : Modèles et schémas définis. Le `router.py` et `services.py` sont encore vides (à implémenter).
+
+### 5. Modules en cours de création (placeholders) 🆕
+
+Les dossiers suivants ont été créés en préparation de futurs développements, mais sont actuellement **vides** :
+
+| Module | Objectif prévu |
+| :--- | :--- |
+| `political_figures/` | Gestion des personnalités politiques |
+| `political_parties/` | Gestion des partis politiques |
+| `votes/` | Gestion des votes et résultats |
+
+### 6. Module `external_oauth` — OAuth Google
 
 Permet l'authentification via Google. Le flux est le suivant :
 1. L'utilisateur est redirigé vers Google (`/auth/google/login`)
@@ -210,6 +294,9 @@ Permet l'authentification via Google. Le flux est le suivant :
 | `GET` | `/user_data/gender/{id}` | UserData Content | Récupère une identité par ID |
 | `PATCH` | `/admin/user_data/gender/{id}` | Admin | Met à jour une identité |
 | `DELETE` | `/admin/user_data/gender/{id}` | Admin | Supprime une identité |
+
+### Endpoints pour `country` & `institution` 🆕
+> 🚧 Les routers et services pour les modules `country` et `institution` ne sont pas encore implémentés. Les endpoints seront documentés une fois le développement terminé.
 
 ### Endpoints Utilitaires
 | Méthode | Route | Description |

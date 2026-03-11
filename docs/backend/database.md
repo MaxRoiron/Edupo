@@ -42,10 +42,41 @@ erDiagram
         string name
     }
 
+    COUNTRY {
+        int id PK
+        string name UK
+        string iso_code UK
+    }
+
+    POWER {
+        int id PK
+        string name UK
+        string description
+    }
+
+    INSTITUTIONTYPE {
+        int id PK
+        string name UK
+        string description
+    }
+
+    INSTITUTION {
+        int id PK
+        string name
+        string description
+        int country_id FK
+        int power_id FK
+        int institution_type_id FK
+    }
+
     USER ||--o| USERDATA : "has (cascade delete)"
     USERDATA }o--o| PROFESSIONALSTATUS : "references"
     USERDATA }o--o| SOCIALSTATUS : "references"
     USERDATA }o--o| GENDERIDENTITIES : "references"
+
+    INSTITUTION }o--|| COUNTRY : "belongs to"
+    INSTITUTION }o--|| POWER : "has power"
+    INSTITUTION }o--|| INSTITUTIONTYPE : "has type"
 ```
 
 ---
@@ -91,6 +122,37 @@ erDiagram
 | `id` | `INTEGER` | PK, Auto-increment | Identifiant unique |
 | `name` | `VARCHAR` | INDEX | Libellé de l'identité |
 
+### Table `country` 🆕
+| Colonne | Type | Contraintes | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `INTEGER` | PK, Auto-increment | Identifiant unique |
+| `name` | `VARCHAR` | UNIQUE, INDEX | Nom du pays |
+| `iso_code` | `VARCHAR` | UNIQUE, INDEX | Code ISO du pays (ex: `FR`, `US`) |
+
+### Table `power` 🆕
+| Colonne | Type | Contraintes | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `INTEGER` | PK, Auto-increment | Identifiant unique |
+| `name` | `VARCHAR` | UNIQUE, INDEX | Nom du pouvoir (ex: Exécutif, Législatif) |
+| `description` | `VARCHAR` | NULLABLE | Description du pouvoir |
+
+### Table `institutiontype` 🆕
+| Colonne | Type | Contraintes | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `INTEGER` | PK, Auto-increment | Identifiant unique |
+| `name` | `VARCHAR` | UNIQUE, INDEX | Nom du type d'institution |
+| `description` | `VARCHAR` | NULLABLE | Description du type |
+
+### Table `institution` 🆕
+| Colonne | Type | Contraintes | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `INTEGER` | PK, Auto-increment | Identifiant unique |
+| `name` | `VARCHAR` | INDEX | Nom de l'institution |
+| `description` | `VARCHAR` | NULLABLE | Description de l'institution |
+| `country_id` | `INTEGER` | FK → `country.id`, INDEX | Pays de rattachement |
+| `power_id` | `INTEGER` | FK → `power.id`, INDEX | Pouvoir associé |
+| `institution_type_id` | `INTEGER` | FK → `institutiontype.id`, INDEX | Type d'institution |
+
 ---
 
 ## 🔗 Relations
@@ -101,6 +163,9 @@ erDiagram
 | `UserData` → `ProfessionalStatus` | N:1 (optionnel) | Référence simple (pas de cascade) |
 | `UserData` → `SocialStatus` | N:1 (optionnel) | Référence simple (pas de cascade) |
 | `UserData` → `GenderIdentities` | N:1 (optionnel) | Référence simple (pas de cascade) |
+| `Institution` → `Country` | N:1 (obligatoire) | Chaque institution appartient à un pays |
+| `Institution` → `Power` | N:1 (obligatoire) | Chaque institution est liée à un pouvoir |
+| `Institution` → `InstitutionType` | N:1 (obligatoire) | Chaque institution a un type |
 
 ---
 
