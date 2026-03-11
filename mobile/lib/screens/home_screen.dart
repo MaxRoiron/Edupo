@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../models/law.dart';
 import '../widgets/law_card.dart';
-import '../widgets/search_bar_widget.dart';
-import '../widgets/category_chip.dart';
 import 'law_detail_screen.dart';
 import 'login_screen.dart';
 import 'register_screen.dart';
@@ -18,21 +16,10 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
-  final TextEditingController _searchController = TextEditingController();
   final GlobalKey _profileButtonKey = GlobalKey();
-  String _searchQuery = '';
-  String? _selectedCategory;
   bool _isLoggedIn = false;
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
-
-  final List<Map<String, dynamic>> _categories = [
-    {'label': 'Tout', 'icon': Icons.apps_rounded, 'color': AppColors.frRed},
-    {'label': 'Défense', 'icon': Icons.shield_rounded, 'color': AppColors.catDefense, 'value': 'Défense'},
-    {'label': 'Économie', 'icon': Icons.trending_up_rounded, 'color': AppColors.catEconomie, 'value': 'Économie'},
-    {'label': 'Travail', 'icon': Icons.work_rounded, 'color': AppColors.catTravail, 'value': 'Travail'},
-    {'label': 'Intérieur', 'icon': Icons.account_balance_rounded, 'color': AppColors.catInterieur, 'value': 'Intérieur'},
-  ];
 
   @override
   void initState() {
@@ -58,20 +45,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    _searchController.dispose();
     _fadeController.dispose();
     super.dispose();
-  }
-
-  List<Law> get _filteredLaws {
-    return sampleLaws.where((law) {
-      final matchesSearch = _searchQuery.isEmpty ||
-          law.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          law.summary.toLowerCase().contains(_searchQuery.toLowerCase());
-      final matchesCategory = _selectedCategory == null ||
-          law.category.contains(_selectedCategory!);
-      return matchesSearch && matchesCategory;
-    }).toList();
   }
 
   @override
@@ -86,73 +61,61 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             // Hero Header
             SliverToBoxAdapter(child: _buildHeroHeader()),
 
-            // Search bar
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 45, 20, 30),
-                child: Transform.translate(
-                  offset: const Offset(0, -28),
-                  child: SearchBarWidget(
-                    controller: _searchController,
-                    onChanged: (value) => setState(() => _searchQuery = value),
-                  ),
-                ),
-              ),
-            ),
-
-            // Category filters
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 0, 20),
-                child: SizedBox(
-                  height: 42,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: _categories.length,
-                    separatorBuilder: (_, _) => const SizedBox(width: 10),
-                    padding: const EdgeInsets.only(right: 20),
-                    itemBuilder: (context, index) {
-                      final cat = _categories[index];
-                      return CategoryChip(
-                        label: cat['label'] as String,
-                        icon: cat['icon'] as IconData,
-                        color: cat['color'] as Color,
-                        isSelected: _selectedCategory == cat['value'],
-                        onTap: () => setState(() => _selectedCategory = cat['value'] as String?),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ),
-
             // Section title
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+                padding: const EdgeInsets.fromLTRB(20, 28, 20, 6),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'Lois récentes',
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.frBlue.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        Icons.how_to_vote_rounded,
+                        color: AppColors.frBlue,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Prochains votes',
+                            style: TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            'Exprimez-vous sur les lois à venir',
+                            style: TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 5),
                       decoration: BoxDecoration(
-                        color: AppColors.frRed.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
+                        color: AppColors.accentGreen.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
-                        '${_filteredLaws.length} résultat${_filteredLaws.length > 1 ? 's' : ''}',
+                        '${upcomingLaws.length} textes',
                         style: const TextStyle(
-                          color: AppColors.frRed,
+                          color: AppColors.accentGreen,
                           fontSize: 12,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
@@ -161,43 +124,54 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
             ),
 
+            // Divider
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+                child: Divider(
+                  color: AppColors.border.withValues(alpha: 0.6),
+                  thickness: 1,
+                  height: 1,
+                ),
+              ),
+            ),
+
             // Law cards list
-            _filteredLaws.isEmpty
-                ? SliverToBoxAdapter(child: _buildEmptyState())
-                : SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
-                    sliver: SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          return TweenAnimationBuilder<double>(
-                            tween: Tween(begin: 0.0, end: 1.0),
-                            duration: Duration(milliseconds: 300 + index * 100),
-                            curve: Curves.easeOut,
-                            builder: (context, value, child) {
-                              return Opacity(
-                                opacity: value,
-                                child: Transform.translate(
-                                  offset: Offset(0, 20 * (1 - value)),
-                                  child: child,
-                                ),
-                              );
-                            },
-                            child: LawCard(
-                              law: _filteredLaws[index],
-                              onTap: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (_) => LawDetailScreen(law: _filteredLaws[index]),
-                                  ),
-                                );
-                              },
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    return TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 0.0, end: 1.0),
+                      duration: Duration(milliseconds: 400 + index * 100),
+                      curve: Curves.easeOut,
+                      builder: (context, value, child) {
+                        return Opacity(
+                          opacity: value,
+                          child: Transform.translate(
+                            offset: Offset(0, 20 * (1 - value)),
+                            child: child,
+                          ),
+                        );
+                      },
+                      child: LawCard(
+                        law: upcomingLaws[index],
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  LawDetailScreen(law: upcomingLaws[index]),
                             ),
                           );
                         },
-                        childCount: _filteredLaws.length,
                       ),
-                    ),
-                  ),
+                    );
+                  },
+                  childCount: upcomingLaws.length,
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -206,23 +180,27 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Widget _buildHeroHeader() {
     return Container(
-      padding: EdgeInsets.fromLTRB(24, MediaQuery.of(context).padding.top + 10, 24, 15),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
+      padding: EdgeInsets.fromLTRB(
+          24, MediaQuery.of(context).padding.top + 10, 24, 20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
             Color(0xFF0036B3),
             AppColors.frBlue,
             AppColors.frBlue,
-            AppColors.frBlue,
             Color(0xFF0036B3),
           ],
         ),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(32),
-          bottomRight: Radius.circular(32),
-        ),
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.frBlue.withValues(alpha: 0.25),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -292,43 +270,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
             ],
           ),
+          const SizedBox(height: 16),
+          // Subtitle
+          Text(
+            'Votez sur les lois de demain.',
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.85),
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+              height: 1.4,
+            ),
+          ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(40),
-        child: Column(
-          children: [
-            Icon(
-              Icons.search_off_rounded,
-              size: 64,
-              color: AppColors.textMuted.withValues(alpha: 0.5),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Aucun résultat',
-              style: TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Essayez de modifier votre recherche\nou de changer de catégorie.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: AppColors.textMuted,
-                fontSize: 14,
-                height: 1.5,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -386,7 +339,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           value: 'register',
           child: Row(
             children: [
-              Icon(Icons.person_add_rounded, color: AppColors.frBlue, size: 20),
+              Icon(Icons.person_add_rounded,
+                  color: AppColors.frBlue, size: 20),
               const SizedBox(width: 12),
               const Text(
                 'Créer un compte',

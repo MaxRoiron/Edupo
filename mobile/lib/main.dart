@@ -62,17 +62,18 @@ class _EdupoAppState extends State<EdupoApp> {
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
             color: AppColors.frBlue,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
             boxShadow: [
               BoxShadow(
-                color: Colors.white.withValues(alpha: 0.3),
-                blurRadius: 20,
-                offset: const Offset(0, -4),
+                color: AppColors.frBlue.withValues(alpha: 0.25),
+                blurRadius: 24,
+                offset: const Offset(0, -8),
               ),
             ],
           ),
           child: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -99,19 +100,25 @@ class _EdupoAppState extends State<EdupoApp> {
       },
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOutCubic,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.frWhite : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
+          color: isSelected ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(15),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              isSelected ? activeIcon : inactiveIcon,
-              color: isSelected ? AppColors.frBlue : AppColors.frWhite,
-              size: 22,
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: child),
+              child: Icon(
+                isSelected ? activeIcon : inactiveIcon,
+                key: ValueKey<bool>(isSelected),
+                color: isSelected ? AppColors.frBlue : Colors.white.withValues(alpha: 0.7),
+                size: 24,
+              ),
             ),
             if (isSelected) ...[
               const SizedBox(width: 8),
@@ -119,7 +126,7 @@ class _EdupoAppState extends State<EdupoApp> {
                 label,
                 style: const TextStyle(
                   color: AppColors.frBlue,
-                  fontSize: 13,
+                  fontSize: 14,
                   fontWeight: FontWeight.w700,
                 ),
               ),

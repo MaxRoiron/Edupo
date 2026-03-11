@@ -178,10 +178,14 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen>
             party.primaryColor,
           ],
         ),
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(32),
-          bottomRight: Radius.circular(32),
-        ),
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
+        boxShadow: [
+          BoxShadow(
+            color: party.primaryColor.withValues(alpha: 0.25), // Customized shadow color for program detail
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
