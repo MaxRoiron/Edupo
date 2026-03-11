@@ -220,12 +220,49 @@ docker compose exec backend python -m alembic upgrade head
 Alembic est puissant mais automatique. Avant de faire un `upgrade head`, ouvrez toujours le fichier généré dans `migrations/versions/` pour vérifier qu'il ne va pas supprimer une colonne par erreur (ex: si vous avez renommé un champ).
 
 ### ❌ Erreur : "Can't locate revision identified by 'xxxx'"
-Cette erreur arrive si votre base de données croit être sur une version dont le fichier n'existe plus sur votre PC (souvent après un merge Git ou une suppression manuelle).
-**Solution brute :** Supprimez la table `alembic_version` dans votre DB et relancez une migration initiale.
+
+Cette erreur arrive quand la table `alembic_version` dans votre base de données pointe vers un ID de révision qui **n'existe plus** dans le dossier `migrations/versions/`.
+
+**Causes fréquentes :**
+- Un merge Git qui a supprimé ou remplacé des fichiers de migration
+- Une suppression manuelle de fichiers dans `migrations/versions/`
+- Un collègue qui a regénéré ses migrations sur une autre branche
+
+**Procédure de résolution complète (4 étapes) :**
+
+#### Étape 1 — Supprimer la table `alembic_version`
 ```bash
-# Commande pour réinitialiser l'historique dans Docker :
-docker compose exec db psql -U superadmin -d edupo_db -c "DROP TABLE IF EXISTS alembic_version CASCADE;"
+docker exec edupo-db-1 psql -U superadmin -d edupo_db -c "DROP TABLE IF EXISTS alembic_version CASCADE;"
 ```
+
+#### Étape 2 — Resynchroniser Alembic avec l'état actuel de la DB
+Cette commande dit à Alembic : *"La base est déjà à jour jusqu'à la dernière migration existante, ne rejoue rien."*
+```bash
+docker exec edupo-backend-1 alembic stamp head
+```
+> ⚠️ **Cette étape est cruciale !** Sans elle, Alembic essaierait de rejouer **toutes** les migrations depuis le début, ce qui échouerait car les tables existent déjà.
+
+#### Étape 3 — Générer la nouvelle migration
+```bash
+docker exec edupo-backend-1 alembic revision --autogenerate -m "description du changement"
+```
+
+#### Étape 4 — Appliquer la migration
+```bash
+docker exec edupo-backend-1 alembic upgrade head
+```
+
+#### Vérification
+Pour confirmer que tout est en ordre :
+```bash
+# Voir la version actuelle de la DB
+docker exec edupo-backend-1 alembic current
+
+# Voir l'historique complet des migrations
+docker exec edupo-backend-1 alembic history
+```
+
+---
 
 ### 🔄 Que se passe-t-il si je renomme une colonne ?
 **Attention !** Alembic `--autogenerate` ne détecte pas bien les renommages. Par défaut, il va :
@@ -240,5 +277,29 @@ docker compose exec db psql -U superadmin -d edupo_db -c "DROP TABLE IF EXISTS a
    op.alter_column('nom_table', 'ancien_nom', new_column_name='nouveau_nom')
    ```
 
+---
+
 ### 📦 Ajout d'un nouveau module
-Si vous créez un nouveau module (ex: `app/modules/courses`), n'oubliez pas d'importer son modèle dans `backend/migrations/env.py` pour qu'Alembic puisse le voir !
+
+Si vous créez un nouveau module (ex: `app/modules/mon_module`), **deux fichiers** doivent être mis à jour pour qu'Alembic détecte vos nouveaux modèles :
+
+#### 1. `app/modules/mon_module/__init__.py`
+Exporter le(s) modèle(s) depuis le module :
+```python
+from .model import MonModel
+```
+
+#### 2. `app/modules/__init__.py`
+Importer le modèle dans le `__init__.py` racine des modules :
+```python
+from .mon_module import MonModel
+```
+
+#### 3. `migrations/env.py`
+Vérifier que la ligne d'import inclut le nouveau modèle :
+```python
+from app.modules import User, ..., MonModel
+```
+
+> 💡 **Astuce** : Si Alembic génère une migration vide (`pass`) alors que vous avez ajouté un nouveau modèle, c'est probablement parce que l'import est manquant dans `env.py` ou dans le `__init__.py` du module.
+
