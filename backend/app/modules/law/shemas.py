@@ -30,6 +30,17 @@ class LawView(BaseModel):
     is_active: bool
 
 
+class VoteCreate(BaseModel):
+    position: str
+
+class VoteUpdate(BaseModel):
+    position: str | None = None
+
+class Voteview(BaseModel):
+    id: int
+    position: str
+
+
 class VoteResultCreate(BaseModel):
     law_id: int
     institution_id: int
