@@ -19,6 +19,10 @@ class Law(SQLModel, table=True):
     domain: Domain = Relationship()
     country: Country = Relationship()
 
+class Vote(SQLModel, table=True):
+    id: int = Field(default=None, primary_key=True)
+    position: str = Field(index=True, unique=True)
+
 class VoteResult(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
     law_id: int = Field(index=True, foreign_key="law.id")
