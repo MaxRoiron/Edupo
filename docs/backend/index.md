@@ -53,25 +53,23 @@ backend/
 │   │   │   ├── services.py      # Logique métier (à implémenter)
 │   │   │   └── router.py        # Endpoints pays (à implémenter)
 │   │   │
-│   │   ├── institution/         # Module Institutions 🆕
-│   │   │   ├── model.py         # Modèles Power, InstitutionType, Institution
-│   │   │   ├── shemas.py        # Schémas Pydantic (Create, Update, View)
-│   │   │   ├── services.py      # Logique métier (à implémenter)
-│   │   │   └── router.py        # Endpoints institutions (à implémenter)
-│   │   │
-│   │   ├── political_figure/    # Module Personnalités Politiques 🆕
-│   │   │   ├── model.py         # PoliticalFigure, PoliticalRole
-│   │   │   ├── shemas.py        # Schémas (FigureCreate, RoleView, etc.)
+│   │   ├── political_party/     # Module Partis Politiques
+│   │   │   ├── model.py         # Party, Domain, Program, Topic, ElectionType, PartyVote 🆕
+│   │   │   ├── shemas.py        # Schémas associés
 │   │   │   ├── services.py      # Logique métier (à implémenter)
 │   │   │   └── router.py        # Endpoints (à implémenter)
 │   │   │
-│   │   ├── political_party/     # Module Partis Politiques 🆕
-│   │   │   ├── model.py         # Party, Domain, Program, Topic, ElectionType
-│   │   │   ├── shemas.py        # Schémas (PartyCreate, ProgramView, etc.)
+│   │   ├── law/                 # Module Lois 🆕
+│   │   │   ├── model.py         # Law, Vote, VoteResult
+│   │   │   ├── shemas.py        # Schémas associés
 │   │   │   ├── services.py      # Logique métier (à implémenter)
 │   │   │   └── router.py        # Endpoints (à implémenter)
 │   │   │
-│   │   ├── votes/               # Module Votes 🆕 (placeholder)
+│   │   ├── user_vote/           # Module Votes Utilisateurs 🆕
+│   │   │   ├── model.py         # UserVote
+│   │   │   ├── shemas.py        # Schémas associés
+│   │   │   ├── services.py      # Logique métier (à implémenter)
+│   │   │   └── router.py        # Endpoints (à implémenter)
 │   │   │
 │   │   └── external_oauth/      # Module OAuth Externe
 │   │       └── googleOAuth.py   # Intégration Google OAuth 2.0
@@ -271,11 +269,30 @@ Module complexe gérant les partis, leurs idéologies et leurs programmes par é
 - `Domain` : Thématique (Économie, Écologie, International...).
 - `ElectionType` : Type de scrutin (Présidentielle, Européennes...).
 
-### 7. Module en cours de création (placeholder) 🆕
+**Votes des Partis** :
+- `PartyVote` : Consigne de vote officielle d'un parti sur une loi. 🆕
+
+### 7. Module `law` — Lois et Scrutins 🆕
+
+Gère les textes de loi et les résultats des votes officiels dans les institutions.
+
+**Modèles** :
+- `Law` : Titre, description, domaine, URL source, pays (FK).
+- `Vote` : Référentiel des positions (Pour, Contre, Abstention).
+- `VoteResult` : Résultats agrégés d'un vote dans une institution spécifique.
+
+### 8. Module `user_vote` — Participation Citoyenne 🆕
+
+Gère les votes exprimés par les utilisateurs de l'application sur les différentes lois.
+
+**Modèle `UserVote`** :
+- Lie un utilisateur, une loi et une position de vote.
+
+### 9. Modules en cours de création (placeholders) 🆕
 
 | Module | Objectif prévu |
 | :--- | :--- |
-| `votes/` | Gestion des scrutins et résultats électoraux |
+| `votes/` | (Ancienne structure, voir `user_vote` et `law`) |
 
 ### 6. Module `external_oauth` — OAuth Google
 
@@ -341,8 +358,8 @@ Permet l'authentification via Google. Le flux est le suivant :
 | `PATCH` | `/admin/user_data/gender/{id}` | Admin | Met à jour une identité |
 | `DELETE` | `/admin/user_data/gender/{id}` | Admin | Supprime une identité |
 
-### Endpoints pour `country`, `institution`, `political_figure` & `political_party` 🆕
-> 🚧 Les routers et services pour ces modules sont en cours d'implémentation. Les endpoints seront documentés une fois le développement métier avancé.
+### Endpoints pour `country`, `institution`, `political_figure`, `political_party`, `law` & `user_vote` 🆕
+> 🚧 Les routers et services pour ces nouveaux modules sont en cours d'implémentation. Les endpoints seront documentés une fois le développement métier avancé.
 
 ### Endpoints Utilitaires
 | Méthode | Route | Description |
