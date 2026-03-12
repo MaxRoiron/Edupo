@@ -83,3 +83,20 @@ class PoliticalProgramView(BaseModel):
     party_id: int
     year: int
     election_type_id: int
+
+
+class PartyVoteCreate(BaseModel):
+    party_id: int
+    law_id: int
+    position_id: int
+
+class PartyVoteUpdate(BaseModel):
+    party_id: int | None = None
+    law_id: int | None = None
+    position_id: int | None = None
+
+class PartyVoteView(BaseModel):
+    id: int
+    party_id: int
+    law_id: int
+    position_id: int
