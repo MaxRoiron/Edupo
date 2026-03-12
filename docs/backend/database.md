@@ -117,6 +117,48 @@ erDiagram
         string name
     }
 
+    LAW {
+        int id PK
+        string title
+        string subtitle
+        string description
+        int domain_id FK
+        int country_id FK
+        string source_url
+        datetime created_at
+        bool is_active
+    }
+
+    VOTE {
+        int id PK
+        string position
+    }
+
+    VOTERESULT {
+        int id PK
+        int law_id FK
+        int institution_id FK
+        int total_for
+        int total_abstention
+        int total_against
+        bool adopted
+        datetime vote_date
+    }
+
+    USERVOTE {
+        int id PK
+        int user_id FK
+        int law_id FK
+        int position_id FK
+    }
+
+    PARTYVOTE {
+        int id PK
+        int party_id FK
+        int law_id FK
+        int position_id FK
+    }
+
     USER ||--o| USERDATA : "has (cascade delete)"
     USERDATA }o--o| PROFESSIONALSTATUS : "references"
     USERDATA }o--o| SOCIALSTATUS : "references"
@@ -135,6 +177,17 @@ erDiagram
     POLITICALPROGRAM }o--|| ELECTIONTYPE : "for"
     POLITICALTOPIC }o--|| POLITICALPROGRAM : "part of"
     POLITICALTOPIC }o--|| DOMAIN : "belongs to domain"
+
+    LAW }o--|| COUNTRY : "originates from"
+    LAW }o--|| DOMAIN : "categorized by"
+    VOTERESULT }o--|| LAW : "result for"
+    VOTERESULT }o--|| INSTITUTION : "voted in"
+    USERVOTE }o--|| USER : "cast by"
+    USERVOTE }o--|| LAW : "on law"
+    USERVOTE }o--|| VOTE : "position"
+    PARTYVOTE }o--|| POLITICALPARTY : "stance of"
+    PARTYVOTE }o--|| LAW : "on law"
+    PARTYVOTE }o--|| VOTE : "position"
 ```
 
 ---
@@ -267,6 +320,53 @@ erDiagram
 | `id` | `INTEGER` | PK, Auto-increment | Identifiant unique |
 | `name` | `VARCHAR` | NOT NULL | Nom du type (ex: Présidentielle) |
 
+### Table `law` 🆕
+| Colonne | Type | Contraintes | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `INTEGER` | PK, Auto-increment | Identifiant unique |
+| `title` | `VARCHAR` | NOT NULL, INDEX | Titre de la loi |
+| `subtitle` | `VARCHAR` | NULLABLE | Sous-titre |
+| `description` | `TEXT` | NOT NULL | Texte ou résumé de la loi |
+| `domain_id` | `INTEGER` | FK → `domain.id`, INDEX | Thématique |
+| `country_id` | `INTEGER` | FK → `country.id`, INDEX | Pays |
+| `source_url` | `VARCHAR` | NULLABLE, INDEX | Lien vers le texte officiel |
+| `created_at` | `TIMESTAMP` | NOT NULL | Date d'ajout |
+| `is_active` | `BOOLEAN` | DEFAULT TRUE | Si la loi est toujours en vigueur |
+
+### Table `vote` 🆕
+| Colonne | Type | Contraintes | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `INTEGER` | PK, Auto-increment | Identifiant unique |
+| `position` | `VARCHAR` | UNIQUE, INDEX | Position (ex: Pour, Contre, Abstention) |
+
+### Table `voteresult` 🆕
+| Colonne | Type | Contraintes | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `INTEGER` | PK, Auto-increment | Identifiant unique |
+| `law_id` | `INTEGER` | FK → `law.id`, INDEX | Loi concernée |
+| `institution_id` | `INTEGER` | FK → `institution.id`, INDEX | Institution ayant voté |
+| `total_for` | `INTEGER` | NOT NULL | Voix pour |
+| `total_abstention` | `INTEGER` | NOT NULL | Abstentions |
+| `total_against` | `INTEGER` | NOT NULL | Voix contre |
+| `adopted` | `BOOLEAN` | NOT NULL | Résultat (Adoptée ou non) |
+| `vote_date` | `TIMESTAMP` | NOT NULL | Date du scrutin |
+
+### Table `uservote` 🆕
+| Colonne | Type | Contraintes | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `INTEGER` | PK, Auto-increment | Identifiant unique |
+| `user_id` | `INTEGER` | FK → `user.id`, INDEX | Utilisateur |
+| `law_id` | `INTEGER` | FK → `law.id`, INDEX | Loi |
+| `position_id` | `INTEGER` | FK → `vote.id`, INDEX | Position choisie |
+
+### Table `partyvote` 🆕
+| Colonne | Type | Contraintes | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `INTEGER` | PK, Auto-increment | Identifiant unique |
+| `party_id` | `INTEGER` | FK → `politicalparty.id`, INDEX | Parti |
+| `law_id` | `INTEGER` | FK → `law.id`, INDEX | Loi |
+| `position_id` | `INTEGER` | FK → `vote.id`, INDEX | Consigne de vote |
+
 ---
 
 ## 🔗 Relations
@@ -284,6 +384,15 @@ erDiagram
 | `PoliticalRole` → `PoliticalFigure` | N:1 (obligatoire) | Historique des rôles |
 | `PoliticalProgram` → `PoliticalParty`| N:1 (obligatoire) | Programme d'un parti |
 | `PoliticalTopic` → `Domain` | N:1 (obligatoire) | Thématique d'une proposition |
+| `Law` → `Country` | N:1 (obligatoire) | Origine d'une loi |
+| `Law` → `Domain` | N:1 (obligatoire) | Catégorie législative |
+| `VoteResult` → `Law` | N:1 (obligatoire) | Scrutin sur une loi |
+| `VoteResult` → `Institution` | N:1 (obligatoire) | Vote par institution |
+| `UserVote` → `User` | N:1 (obligatoire) | Participation utilisateur |
+| `UserVote` → `Law` | N:1 (obligatoire) | Vote sur un texte |
+| `UserVote` → `Vote` | N:1 (obligatoire) | Position du vote |
+| `PartyVote` → `PoliticalParty` | N:1 (obligatoire) | Position du parti |
+| `PartyVote` → `Law` | N:1 (obligatoire) | Consigne sur une loi |
 
 ---
 
