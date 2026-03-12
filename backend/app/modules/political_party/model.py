@@ -1,5 +1,4 @@
 from ..country import Country
-from ..law import Law, Vote
 
 from sqlmodel import SQLModel, Field, Relationship
 
@@ -52,5 +51,5 @@ class PartyVote(SQLModel, table=True):
     law_id: int = Field(index=True, foreign_key="law.id")
     position_id: int = Field(index=True, foreign_key="vote.id")
 
-    position: Vote = Relationship()
-    law: Law = Relationship()
+    position: "Vote" = Relationship()
+    law: "Law" = Relationship()
