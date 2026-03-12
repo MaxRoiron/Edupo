@@ -2,9 +2,7 @@ from .country import Country, country_router
 from .external_oauth import oauth_router
 from .institution import Institution, InstitutionType, Power, institution_router
 from .law import Law, Vote, VoteResult
-from .institution import Institution, InstitutionType, Power, institution_router
 from .country import Country, country_router
-from .external_oauth import oauth_router
 from .law import Law, Vote, VoteResult
 from .political_figure import PoliticalFigure, PoliticalRole
 from .political_party import PoliticalParty, Domain, PoliticalProgram, PoliticalTopic, ElectionType, PartyVote
