@@ -121,19 +121,16 @@ class LawCard extends StatelessWidget {
             // Voter button
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 18),
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
+              child: Row(
+                children: [
+                  const Spacer(),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
                       horizontal: 22,
                       vertical: 10,
                     ),
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [
-                          AppColors.frBlue,
-                          Color(0xFF0036B3),
-                        ],
-                      ),
+                        color: AppColors.frBlue,
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
@@ -164,8 +161,9 @@ class LawCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                ),
+                ],
               ),
+            ),
           ],
         ),
       ),
