@@ -11,7 +11,7 @@ class PoliticalParty(SQLModel, table=True):
     country_id: int = Field(index=True, foreign_key="country.id")
 
     country: Country = Relationship()
-    programs: list["PoliticalProgram"] = Relationship(back_populates="program")
+    programs: list["PoliticalProgram"] = Relationship(back_populates="party")
 
 
 class Domain(SQLModel, table=True):
