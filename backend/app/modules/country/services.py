@@ -4,10 +4,10 @@ from .model import Country
 from .shemas import CountryCreate, CountryUpdate
 
 def read_all_country(session: Session):
-    return session.query(Country).all()
+    return session.exec(select(Country)).all()
 
 def get_country_by_id(id_country: int, session: Session):
-    country = session.get(Country, id_country)
+    country = session.exec(select(Country).where(Country.id == id_country)).first()
     if not country:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Country not found")
     return country
@@ -20,7 +20,7 @@ def add_country(session: Session, country: CountryCreate):
     return country
 
 def update_country_by_id(id_country: int, country_update: CountryUpdate, session: Session):
-    country = session.get(Country, id_country)
+    country = session.exec(select(Country).where(Country.id == id_country)).first()
     if not country:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Country not found")
     country_update_data = country_update.model_dump(exclude_unset=True)
@@ -32,7 +32,7 @@ def update_country_by_id(id_country: int, country_update: CountryUpdate, session
     return country
 
 def delete_country_by_id(id_country: int, session: Session):
-    country = session.get(Country, id_country)
+    country = session.exec(select(Country).where(Country.id == id_country)).first()
     if not country:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Country not found")
     session.delete(country)
