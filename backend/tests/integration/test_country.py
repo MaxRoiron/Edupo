@@ -1,6 +1,6 @@
 from app.modules import Country
 
-from sqlmodel import Session, select
+from sqlmodel import Session
 from fastapi import status
 
 def add_country(session: Session):
