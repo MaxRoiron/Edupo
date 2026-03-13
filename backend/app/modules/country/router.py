@@ -18,7 +18,7 @@ def read_all_country_endpoint(session: Session = Depends(get_session), user: Use
 def read_country_endpoint(id_country: int, session: Session = Depends(get_session), user: User = Depends(get_current_user)):
     return get_country_by_id(id_country, session)
 
-@router.post("/admin/country", response_model=CountryView, tags=["Admin"])
+@router.post("/admin/country", response_model=CountryView, status_code=status.HTTP_201_CREATED, tags=["Admin"])
 def add_country_endpoint(country: CountryCreate, session: Session = Depends(get_session), user: User = Depends(get_current_user)):
     if user.role == "user":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have the required authorization")
