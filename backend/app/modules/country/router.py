@@ -24,7 +24,7 @@ def add_country_endpoint(country: CountryCreate, session: Session = Depends(get_
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have the required authorization")
     return add_country(session, country)
 
-@router.put("/admin/country/{id_country}", response_model=CountryView, tags=["Admin"])
+@router.patch("/admin/country/{id_country}", response_model=CountryView, tags=["Admin"])
 def update_country_endpoint(id_country: int, country_update: CountryUpdate, session: Session = Depends(get_session), user: User = Depends(get_current_user)):
     if user.role == "user":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have the required authorization")
