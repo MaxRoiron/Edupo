@@ -36,6 +36,9 @@ def delete_law_endpoint(id_law: int, session: Session = Depends(get_session), us
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have permission to delete a law")
     return delete_law(session, id_law)
 
+
+
+
 @router.get("/vote", response_model=list[Voteview], tags=["Vote"])
 def read_all_vote_endpoint(session: Session = Depends(get_session), user: User = Depends(get_current_user)):
     return read_all_vote(session)
@@ -44,20 +47,20 @@ def read_all_vote_endpoint(session: Session = Depends(get_session), user: User =
 def read_vote_endpoint(id_vote: int, session: Session = Depends(get_session), user: User = Depends(get_current_user)):
     return read_vote(session, id_vote)
 
-@router.post("/vote", response_model=Voteview, tags=["Admin"])
+@router.post("/admin/vote", response_model=Voteview, status_code=status.HTTP_201_CREATED, tags=["Admin"])
 def add_vote_endpoint(vote: VoteCreate, session: Session = Depends(get_session), user: User = Depends(get_current_user)):
     if user.role == "admin":
         return add_vote(session, vote)
     else:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have permission to add a vote")
 
-@router.patch("/vote/{id_vote}", tags=["Admin"])
+@router.patch("/admin/vote/{id_vote}", tags=["Admin"])
 def update_vote_endpoint(id_vote: int, vote: VoteUpdate, session: Session = Depends(get_session), user: User = Depends(get_current_user)):
     if not user.role == "admin":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have permission to update a vote")
     return update_vote(session, id_vote, vote)
 
-@router.delete("/vote/{id_vote}", tags=["Admin"])
+@router.delete("/admin/vote/{id_vote}", tags=["Admin"])
 def delete_vote_endpoint(id_vote: int, session: Session = Depends(get_session), user: User = Depends(get_current_user)):
     if not user.role == "admin":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have permission to delete a vote")
