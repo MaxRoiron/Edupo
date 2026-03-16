@@ -5,4 +5,4 @@ sudo find . -type d -name "__pycache__" -exec rm -rf {} +
 
 rm -f .coverage coverage.xml
 
-rm -rf .pytest_cache
+sudo rm -rf .pytest_cache
