@@ -272,15 +272,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
           const SizedBox(height: 16),
           // Subtitle
-          Text(
-            'Votez sur les lois de demain.',
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.85),
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
-              height: 1.4,
-            ),
-          ),
+          // Text(
+          //   'Votez sur les lois de demain.',
+          //   style: TextStyle(
+          //     color: Colors.white.withValues(alpha: 0.85),
+          //     fontSize: 15,
+          //     fontWeight: FontWeight.w500,
+          //     height: 1.4,
+          //   ),
+          // ),
         ],
       ),
     );

@@ -164,23 +164,23 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 24),
 
                     // Divider
-                    Row(
-                      children: [
-                        const Expanded(child: Divider(color: AppColors.border)),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(
-                            'ou',
-                            style: TextStyle(
-                              color: AppColors.textMuted,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                        const Expanded(child: Divider(color: AppColors.border)),
-                      ],
-                    ),
+                    // Row(
+                    //   children: [
+                    //     const Expanded(child: Divider(color: AppColors.border)),
+                    //     Padding(
+                    //       padding: const EdgeInsets.symmetric(horizontal: 16),
+                    //       child: Text(
+                    //         'ou',
+                    //         style: TextStyle(
+                    //           color: AppColors.textMuted,
+                    //           fontSize: 13,
+                    //           fontWeight: FontWeight.w500,
+                    //         ),
+                    //       ),
+                    //     ),
+                    //     const Expanded(child: Divider(color: AppColors.border)),
+                    //   ],
+                    // ),
                     const SizedBox(height: 24),
 
                     // Go to register

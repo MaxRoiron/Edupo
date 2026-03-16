@@ -34,9 +34,9 @@ class Law {
     if (days <= 0) return 'Aujourd\'hui';
     if (days == 1) return 'Demain';
     if (days <= 7) return 'Dans $days jours';
-    if (days <= 14) return 'Dans ~${(days / 7).round()} semaines';
-    if (days <= 30) return 'Dans ~${(days / 7).round()} semaines';
-    return 'Dans ~${(days / 30).round()} mois';
+    if (days <= 14) return 'Dans ${(days / 7).round()} semaines';
+    if (days <= 30) return 'Dans ${(days / 7).round()} semaines';
+    return 'Dans ${(days / 30).round()} mois';
   }
 
   /// Couleur dynamique selon l'urgence du vote
