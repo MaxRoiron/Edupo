@@ -1,4 +1,4 @@
-from sqlmodel import Session
+from sqlmodel import Session, select
 from fastapi import HTTPException, status
 from .model import Country
 from .shemas import CountryCreate, CountryUpdate
