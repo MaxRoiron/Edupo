@@ -17,20 +17,20 @@ def read_all_law_endpoint(session: Session = Depends(get_session), user: User = 
 def read_law_endpoint(id_law: int, session: Session = Depends(get_session), user: User = Depends(get_current_user)):
     return read_law(session, id_law)
 
-@router.post("/law", response_model=LawView, tags=["Admin"])
+@router.post("/admin/law", response_model=LawView, status_code=status.HTTP_201_CREATED, tags=["Admin"])
 def add_law_endpoint(law: LawCreate, session: Session = Depends(get_session), user: User = Depends(get_current_user)):
     if user.role == "admin":
         return add_law(session, law)
     else:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have permission to add a law")
 
-@router.patch("/law/{id_law}", tags=["Admin"])
+@router.patch("/admin/law/{id_law}", tags=["Admin"])
 def update_law_endpoint(id_law: int, law: LawUpdate, session: Session = Depends(get_session), user: User = Depends(get_current_user)):
     if not user.role == "admin":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have permission to update a law")
     return update_law(session, id_law, law)
 
-@router.delete("/law/{id_law}", tags=["Admin"])
+@router.delete("/admin/law/{id_law}", tags=["Admin"])
 def delete_law_endpoint(id_law: int, session: Session = Depends(get_session), user: User = Depends(get_current_user)):
     if not user.role == "admin":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have permission to delete a law")

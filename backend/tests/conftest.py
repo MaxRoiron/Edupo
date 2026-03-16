@@ -1,6 +1,5 @@
 from app import app
-from app.modules.users import User
-from app.modules.user_data import UserData
+from app.modules import User, UserData
 
 import os
 os.environ["ENV_FILE"] = os.path.join(os.path.dirname(__file__), ".env.test")
