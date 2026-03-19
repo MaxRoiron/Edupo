@@ -18,6 +18,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final GlobalKey _profileButtonKey = GlobalKey();
   bool _isLoggedIn = false;
+  bool _showUpcoming = true;
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
 
@@ -61,77 +62,84 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             // Hero Header
             SliverToBoxAdapter(child: _buildHeroHeader()),
 
-            // Section title
+            // Toggle Tabs
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 28, 20, 6),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: AppColors.frBlue.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(
-                        Icons.how_to_vote_rounded,
-                        color: AppColors.frBlue,
-                        size: 20,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    const Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Prochains votes',
-                            style: TextStyle(
-                              color: AppColors.textPrimary,
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
+                padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: AppColors.frBlue.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => setState(() => _showUpcoming = true),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            decoration: BoxDecoration(
+                              color: _showUpcoming ? AppColors.frBlue : Colors.transparent,
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: _showUpcoming
+                                  ? [
+                                      BoxShadow(
+                                        color: AppColors.frBlue.withValues(alpha: 0.3),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ]
+                                  : [],
+                            ),
+                            child: Center(
+                              child: Text(
+                                'À venir',
+                                style: TextStyle(
+                                  color: _showUpcoming ? Colors.white : AppColors.frBlue.withValues(alpha: 0.7),
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
                             ),
                           ),
-                          SizedBox(height: 2),
-                          Text(
-                            'Exprimez-vous sur les lois à venir',
-                            style: TextStyle(
-                              color: AppColors.textSecondary,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: AppColors.accentGreen.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        '${upcomingLaws.length} textes',
-                        style: const TextStyle(
-                          color: AppColors.accentGreen,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // Divider
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
-                child: Divider(
-                  color: AppColors.border.withValues(alpha: 0.6),
-                  thickness: 1,
-                  height: 1,
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => setState(() => _showUpcoming = false),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            decoration: BoxDecoration(
+                              color: !_showUpcoming ? AppColors.frBlue : Colors.transparent,
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: !_showUpcoming
+                                  ? [
+                                      BoxShadow(
+                                        color: AppColors.frBlue.withValues(alpha: 0.3),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ]
+                                  : [],
+                            ),
+                            child: Center(
+                              child: Text(
+                                'Déjà votées',
+                                style: TextStyle(
+                                  color: !_showUpcoming ? Colors.white : AppColors.frBlue.withValues(alpha: 0.7),
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -142,9 +150,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
+                    final currentList = _showUpcoming ? upcomingLaws : pastLaws;
+                    if (index >= currentList.length) return const SizedBox.shrink();
+                    final law = currentList[index];
                     return TweenAnimationBuilder<double>(
                       tween: Tween(begin: 0.0, end: 1.0),
-                      duration: Duration(milliseconds: 400 + index * 100),
+                      // reset animation key when switching list
+                      key: ValueKey('${law.id}_$index'),
+                      duration: Duration(milliseconds: 300 + index * 50),
                       curve: Curves.easeOut,
                       builder: (context, value, child) {
                         return Opacity(
@@ -156,19 +169,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         );
                       },
                       child: LawCard(
-                        law: upcomingLaws[index],
+                        law: law,
                         onTap: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (_) =>
-                                  LawDetailScreen(law: upcomingLaws[index]),
+                              builder: (_) => LawDetailScreen(law: law),
                             ),
                           );
                         },
                       ),
                     );
                   },
-                  childCount: upcomingLaws.length,
+                  childCount: _showUpcoming ? upcomingLaws.length : pastLaws.length,
                 ),
               ),
             ),

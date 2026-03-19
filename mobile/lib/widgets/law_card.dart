@@ -140,18 +140,18 @@ class LawCard extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          Icons.how_to_vote_rounded,
+                          law.daysUntilVote < 0 ? Icons.bar_chart_rounded : Icons.how_to_vote_rounded,
                           color: Colors.white,
                           size: 18,
                         ),
-                        SizedBox(width: 8),
+                        const SizedBox(width: 8),
                         Text(
-                          'Voter',
-                          style: TextStyle(
+                          law.daysUntilVote < 0 ? 'Voir le résultat des votes' : 'Voter',
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 14,
                             fontWeight: FontWeight.w700,

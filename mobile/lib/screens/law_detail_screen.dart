@@ -249,7 +249,7 @@ class _LawDetailScreenState extends State<LawDetailScreen>
                     ),
                     const SizedBox(height: 36),
 
-                    // Section: Vote
+                    // Section: Vote ou Résultats
                     Row(
                       children: [
                         Container(
@@ -258,16 +258,16 @@ class _LawDetailScreenState extends State<LawDetailScreen>
                             color: AppColors.frBlue.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: const Icon(
-                            Icons.how_to_vote_rounded,
+                          child: Icon(
+                            widget.law.daysUntilVote < 0 ? Icons.bar_chart_rounded : Icons.how_to_vote_rounded,
                             color: AppColors.frBlue,
                             size: 18,
                           ),
                         ),
                         const SizedBox(width: 10),
-                        const Text(
-                          'Votre vote',
-                          style: TextStyle(
+                        Text(
+                          widget.law.daysUntilVote < 0 ? 'Résultat des votes' : 'Votre vote',
+                          style: const TextStyle(
                             color: AppColors.textPrimary,
                             fontSize: 17,
                             fontWeight: FontWeight.w700,
@@ -277,8 +277,8 @@ class _LawDetailScreenState extends State<LawDetailScreen>
                     ),
                     const SizedBox(height: 20),
 
-                    // Vote buttons
-                    _buildVoteButtons(),
+                    // Vote buttons or Results
+                    widget.law.daysUntilVote < 0 ? _buildVoteResults() : _buildVoteButtons(),
 
                     const SizedBox(height: 40),
                   ],
@@ -381,6 +381,56 @@ class _LawDetailScreenState extends State<LawDetailScreen>
 
         // S'abstenir
         _buildAbstainButton(),
+      ],
+    );
+  }
+
+  Widget _buildVoteResults() {
+    // Hardcoded demo values
+    final pour = 58;
+    final contre = 31;
+    final abst = 11;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        children: [
+          _buildResultBar('Pour', pour, AppColors.accentGreen),
+          const SizedBox(height: 18),
+          _buildResultBar('Contre', contre, AppColors.frRed),
+          const SizedBox(height: 18),
+          _buildResultBar('Abstention', abst, AppColors.textMuted),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildResultBar(String label, int percentage, Color color) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+            Text('$percentage%', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: color)),
+          ],
+        ),
+        const SizedBox(height: 10),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: LinearProgressIndicator(
+            value: percentage / 100.0,
+            backgroundColor: color.withValues(alpha: 0.1),
+            valueColor: AlwaysStoppedAnimation<Color>(color),
+            minHeight: 14,
+          ),
+        ),
       ],
     );
   }

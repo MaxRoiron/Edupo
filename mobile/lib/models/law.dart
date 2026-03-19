@@ -28,11 +28,11 @@ class Law {
     return vote.difference(today).inDays;
   }
 
-  /// Label lisible pour le nombre de jours restants
+  /// Label lisible pour le nombre de jours restants ou passés
   String get urgencyLabel {
     final days = daysUntilVote;
-    if (days <= 0) return 'Aujourd\'hui';
-    if (days == 1) return 'Demain';
+    if (days < 0) return 'Votée le ${voteDate.day}/${voteDate.month}/${voteDate.year}';
+    if (days == 0) return 'Aujourd\'hui';
     if (days <= 7) return 'Dans $days jours';
     if (days <= 14) return 'Dans ${(days / 7).round()} semaines';
     if (days <= 30) return 'Dans ${(days / 7).round()} semaines';
@@ -46,14 +46,15 @@ class Law {
   ///  - > 45 jours → bleu foncé (lointain)
   Color get urgencyColor {
     final days = daysUntilVote;
+    if (days < 0) return AppColors.accentGreen;        // Vert pour les lois clôturées
     if (days <= 21) return AppColors.accentOrange;     // Orange
     if (days <= 45) return AppColors.accentBlue;       // Bleu clair
     return AppColors.frBlue;                           // Bleu République
   }
 }
 
-// Projets de loi à venir à l'Assemblée nationale
-final List<Law> upcomingLaws = [
+// Tous les projets de loi
+final List<Law> allLaws = [
   Law(
     id: 'pjl-fin-de-vie',
     title: 'Projet de loi sur la fin de vie',
@@ -159,4 +160,35 @@ final List<Law> upcomingLaws = [
     voteDate: DateTime(2026, 5, 6),
     category: 'Agriculture',
   ),
+  Law(
+    id: 'loi-immigration-2024',
+    title: 'Loi pour contrôler l\'immigration, améliorer l\'intégration',
+    subtitle: 'Texte adopté après un parcours parlementaire agité et la censure partielle du Conseil Constitutionnel.',
+    description: 'Ce texte vise à durcir les conditions d\'accueil et renforcer les expulsions, tout en régularisant les travailleurs dans les métiers en tension. Une grande partie des mesures les plus restrictives a été censurée par le Conseil Constitutionnel.',
+    date: '26 Janvier 2024',
+    voteDate: DateTime(2024, 1, 26),
+    category: 'Intérieur',
+  ),
+  Law(
+    id: 'loi-pouvoir-achat-2023',
+    title: 'Mesures d\'urgence pour la protection du pouvoir d\'achat',
+    subtitle: 'Bouclier tarifaire, revalorisation des retraites et des minimas sociaux.',
+    description: 'Loi visant à protéger le pouvoir d\'achat face à l\'inflation historique. Elle inclut le triplement de la prime Macron, la fin de la redevance TV et le maintien du bouclier tarifaire sur l\'énergie.',
+    date: '16 Août 2022',
+    voteDate: DateTime(2022, 8, 16),
+    category: 'Économie',
+  )
 ];
+
+// Listes dynamiques filtrées selon la date
+List<Law> get upcomingLaws {
+  final list = allLaws.where((law) => law.daysUntilVote >= 0).toList();
+  list.sort((a, b) => a.voteDate.compareTo(b.voteDate));
+  return list;
+}
+
+List<Law> get pastLaws {
+  final list = allLaws.where((law) => law.daysUntilVote < 0).toList();
+  list.sort((a, b) => b.voteDate.compareTo(a.voteDate)); // Plus récentes en premier
+  return list;
+}
