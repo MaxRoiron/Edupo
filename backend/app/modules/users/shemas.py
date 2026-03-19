@@ -15,6 +15,17 @@ class UserView(BaseModel):
     ggid: str | None
     created_at: datetime.datetime
 
+class AdminUserView(BaseModel):
+    id: int
+    username: str
+    email: str
+    role: str
+    created_at: datetime.datetime
+    age: int | None = None
+    phone_number: str | None = None
+    gender: str | None = None
+    profession: str | None = None
+
 class UserUpdate(BaseModel):
     username: str | None = None
     email: str | None = None

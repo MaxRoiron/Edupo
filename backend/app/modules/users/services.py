@@ -1,5 +1,6 @@
 from ...core import get_password_hash
-from ..users import UserCreate, User, UserView, UserUpdate
+from .model import User
+from .shemas import UserCreate, UserView, UserUpdate, AdminUserView
 
 from sqlmodel import Session, select
 from fastapi import HTTPException, status
@@ -13,6 +14,34 @@ def get_user_by_ggid(session: Session, ggid: int) -> User | None:
 
 def get_user_by_email(session: Session, email: str) -> User | None:
     return session.exec(select(User).where(User.email == email)).first()
+
+def get_all_users(session: Session) -> list[AdminUserView]:
+    from ..user_data.model import UserData, GenderIdentities, ProfessionalStatus
+    users = session.exec(select(User)).all()
+    results = []
+    for u in users:
+        user_data = session.exec(select(UserData).where(UserData.user_id == u.id)).first()
+        gender = None
+        profession = None
+        if user_data:
+            if user_data.gender_identity_id:
+                gi = session.exec(select(GenderIdentities).where(GenderIdentities.id == user_data.gender_identity_id)).first()
+                gender = gi.name if gi else None
+            if user_data.professional_status_id:
+                ps = session.exec(select(ProfessionalStatus).where(ProfessionalStatus.id == user_data.professional_status_id)).first()
+                profession = ps.name if ps else None
+
+        results.append(
+            AdminUserView(
+                id=u.id, username=u.username, email=u.email,
+                role=u.role, created_at=u.created_at,
+                age=user_data.age if user_data else None,
+                phone_number=user_data.phone_number if user_data else None,
+                gender=gender,
+                profession=profession
+            )
+        )
+    return results
 
 def add_user(session: Session, user: UserCreate) -> UserView:
     hashed_password = get_password_hash(password=user.password)

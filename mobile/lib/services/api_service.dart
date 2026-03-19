@@ -252,4 +252,29 @@ class ApiService {
       return ApiResponse(success: false);
     }
   }
+
+  static Future<ApiResponse> getAllUsers() async {
+    try {
+      final token = await AuthService.getToken();
+      if (token == null) return ApiResponse(success: false, message: 'Non connecté.');
+
+      final response = await _client.get(
+        Uri.parse('${ApiConfig.baseUrl}/admin/users'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> body = jsonDecode(response.body);
+        return ApiResponse(success: true, data: {'list': body});
+      }
+      
+      final errorBody = jsonDecode(response.body) as Map<String, dynamic>;
+      return ApiResponse(success: false, message: errorBody['detail']?.toString() ?? 'Erreur lors de la récupération des utilisateurs.');
+    } catch (e) {
+      return ApiResponse(success: false, message: 'Erreur: $e');
+    }
+  }
 }

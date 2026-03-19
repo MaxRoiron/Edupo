@@ -57,3 +57,11 @@ async def delete_user(user_email: str, current_user: User = Depends(get_current_
     if current_user.role != "admin":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have the required authorization")
     return delete_user_by_email(email=user_email, user=current_user, session=session)
+
+from .shemas import AdminUserView
+@router.get("/admin/users", response_model=list[AdminUserView], tags=["Admin"])
+async def read_all_users(current_user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    if current_user.role != "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have the required authorization")
+    from .services import get_all_users
+    return get_all_users(session=session)

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'admin_users_screen.dart';
 import '../theme/app_theme.dart';
 import '../services/api_service.dart';
 import '../services/auth_service.dart';
@@ -17,6 +18,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   bool _isLoggingOut = false;
   String _username = '';
   String _email = '';
+  String _role = '';
 
   // Informations complémentaires
   final TextEditingController _ageController = TextEditingController();
@@ -92,6 +94,7 @@ class _ProfileScreenState extends State<ProfileScreen>
 
       _username = meResp.data!['username'] ?? '';
       _email = meResp.data!['email'] ?? '';
+      _role = meResp.data!['role'] ?? 'user';
 
       if (dataResp.success && dataResp.data != null) {
         _hasUserData = true;
@@ -471,6 +474,51 @@ class _ProfileScreenState extends State<ProfileScreen>
           ],
 
           const SizedBox(height: 48),
+          
+          if (_role == 'admin') ...[
+            GestureDetector(
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const AdminUsersScreen()),
+                );
+              },
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade700,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.amber.shade700.withValues(alpha: 0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.admin_panel_settings_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                    SizedBox(width: 10),
+                    Text(
+                      'Dashboard Admin',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
 
           // Logout button
           GestureDetector(
