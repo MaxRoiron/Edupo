@@ -12,6 +12,9 @@ class Law(SQLModel, table=True):
     description: str
     domain_id: int = Field(index=True, foreign_key="domain.id")
     source_url: str | None = Field(default=None, index=True)
+    vote_date: datetime.datetime | None = Field(default=None)
+    scrutin_id: str | None = Field(default=None, index=True)
+    category: str | None = Field(default=None)
     created_at: datetime.datetime = Field(default_factory=lambda: datetime.datetime.now(datetime.UTC), nullable=False)
     country_id: int = Field(index=True, foreign_key="country.id")
     is_active: bool = Field(default=True)

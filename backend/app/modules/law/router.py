@@ -6,15 +6,39 @@ from .services import read_all_law, read_law, add_law, update_law, delete_law
 from .services import read_all_vote, read_vote, add_vote, update_vote, delete_vote
 
 from sqlmodel import Session
+import httpx
 
 router = APIRouter()
 
+@router.get("/law/assembly_votes/{scrutin_id}", tags=["Law"])
+async def fetch_assembly_votes(scrutin_id: str):
+    """Retrieve official government votes results from nosdeputes.fr OpenData for a specific scrutin"""
+    url = f"https://www.nosdeputes.fr/16/scrutin/{scrutin_id}/json"
+    async with httpx.AsyncClient() as client:
+        try:
+            resp = await client.get(
+                url, 
+                timeout=10.0, 
+                headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                return {"votes": data.get("votes", [])}
+            elif resp.status_code == 404:
+                raise HTTPException(status_code=404, detail="Résultats non disponibles")
+            else:
+                raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="Failed to fetch open data")
+        except HTTPException as he:
+            raise he
+        except Exception as e:
+            raise HTTPException(status_code=500, detail="Internal Error")
+
 @router.get("/law", response_model=list[LawView], tags=["Law"])
-def read_all_law_endpoint(session: Session = Depends(get_session), user: User = Depends(get_current_user)):
+def read_all_law_endpoint(session: Session = Depends(get_session)):
     return read_all_law(session)
 
 @router.get("/law/{id_law}", response_model=LawView, tags=["Law"])
-def read_law_endpoint(id_law: int, session: Session = Depends(get_session), user: User = Depends(get_current_user)):
+def read_law_endpoint(id_law: int, session: Session = Depends(get_session)):
     return read_law(session, id_law)
 
 @router.post("/admin/law", response_model=LawView, status_code=status.HTTP_201_CREATED, tags=["Admin"])

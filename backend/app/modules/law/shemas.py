@@ -7,6 +7,9 @@ class LawCreate(BaseModel):
     description: str
     domain_id: int
     source_url: str | None = None
+    vote_date: datetime.datetime | None = None
+    scrutin_id: str | None = None
+    category: str | None = None
     country_id: int
     is_active: bool
 
@@ -16,6 +19,9 @@ class LawUpdate(BaseModel):
     description: str | None = None
     domain_id: int | None = None
     source_url: str | None = None
+    vote_date: datetime.datetime | None = None
+    scrutin_id: str | None = None
+    category: str | None = None
     country_id: int | None = None
     is_active: bool | None = None
 
@@ -26,6 +32,9 @@ class LawView(BaseModel):
     description: str
     domain_id: int
     source_url: str | None
+    vote_date: datetime.datetime | None
+    scrutin_id: str | None
+    category: str | None
     country_id: int
     is_active: bool
 

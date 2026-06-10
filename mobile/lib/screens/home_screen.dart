@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../models/law.dart';
+import '../services/api_service.dart';
 import '../widgets/law_card.dart';
 import 'law_detail_screen.dart';
 import 'login_screen.dart';
@@ -19,22 +20,92 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final GlobalKey _profileButtonKey = GlobalKey();
   bool _isLoggedIn = false;
   bool _showUpcoming = true;
-  late AnimationController _fadeController;
+  late AnimationController _animController;
   late Animation<double> _fadeAnimation;
+  
+  bool _isLoading = true;
+  List<Law> _allLaws = [];
 
   @override
   void initState() {
     super.initState();
-    _fadeController = AnimationController(
-      duration: const Duration(milliseconds: 600),
+    _animController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
     _fadeAnimation = CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeOut,
+      parent: _animController,
+      curve: Curves.easeOutCubic,
     );
-    _fadeController.forward();
+    _animController.forward();
+    _fetchLaws();
     _checkLoginStatus();
+  }
+
+  Future<void> _fetchLaws() async {
+    final response = await ApiService.getAllLaws();
+    if (response.success && response.data != null) {
+      final List<dynamic> lawsJson = response.data!['list'] ?? [];
+      final laws = lawsJson.map((json) => Law.fromJson(json)).toList();
+      if (mounted) {
+        setState(() {
+          _allLaws = laws;
+          _isLoading = false;
+        });
+      }
+    } else {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  int _scoreLawForYouth(Law law) {
+    int score = 0;
+    // Mots-clés qui impactent soit directement les 12-30 ans, soit qui génèrent plus d'intérêt
+    final keywords = [
+      'jeune', 'étudiant', 'école', 'ecole', 'université', 'lycée', 'éducation', 'enseignement',
+      'numérique', 'internet', 'réseaux', 'cyber', 'harcèlement', 'mineur',
+      'climat', 'écologie', 'environnement', 'logement', 'pouvoir d\'achat', 'inflation',
+      'emploi', 'loyer', 'smic', 'transport', 'permis', 'précarité', 'santé mentale',
+      'ivg', 'avortement', 'fin de vie', 'cannabis', 'légalisation', 'police', 'sécurité'
+    ];
+    
+    final textToSearch = '${law.title} ${law.subtitle} ${law.description}'.toLowerCase();
+    
+    for (final kw in keywords) {
+      if (textToSearch.contains(kw)) {
+        score += 3;
+      }
+    }
+    
+    // Malus pour les lois trop administratives ou locales qui intéressent moins la cible globale
+    if (textToSearch.contains('ratification') || textToSearch.contains('ordonnance') || textToSearch.contains('approbation')) {
+      score -= 5;
+    }
+    if (textToSearch.contains('codification') || textToSearch.contains('simplification administrative')) {
+      score -= 3;
+    }
+
+    return score;
+  }
+
+  List<Law> get _upcomingLaws {
+    // 2 months old law max
+    var list = _allLaws.where((law) => law.daysUntilVote >= 0 && law.daysUntilVote <= 60).toList();
+    list.sort((a, b) => _scoreLawForYouth(b).compareTo(_scoreLawForYouth(a)));
+    // keep 10 most relevant upcoming laws max
+    if (list.length > 10) list = list.sublist(0, 10);
+    list.sort((a, b) => a.voteDate.compareTo(b.voteDate));
+    return list;
+  }
+
+  List<Law> get _pastLaws {
+    var list = _allLaws.where((law) => law.daysUntilVote < 0).toList();
+    list.sort((a, b) => _scoreLawForYouth(b).compareTo(_scoreLawForYouth(a)));
+    if (list.length > 15) list = list.sublist(0, 15);
+    list.sort((a, b) => b.voteDate.compareTo(a.voteDate));
+    return list;
   }
 
   Future<void> _checkLoginStatus() async {
@@ -46,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    _fadeController.dispose();
+    _animController.dispose();
     super.dispose();
   }
 
@@ -145,16 +216,28 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
 
             // Law cards list
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final currentList = _showUpcoming ? upcomingLaws : pastLaws;
-                    if (index >= currentList.length) return const SizedBox.shrink();
-                    final law = currentList[index];
-                    return TweenAnimationBuilder<double>(
-                      tween: Tween(begin: 0.0, end: 1.0),
+            _isLoading
+                ? const SliverFillRemaining(
+                    child: Center(child: CircularProgressIndicator(color: AppColors.frBlue)),
+                  )
+                : SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final currentList = _showUpcoming ? _upcomingLaws : _pastLaws;
+                          if (currentList.isEmpty && index == 0) {
+                            return const Padding(
+                              padding: EdgeInsets.only(top: 40),
+                              child: Center(
+                                child: Text('Aucune loi trouvée.'),
+                              ),
+                            );
+                          }
+                          if (index >= currentList.length) return const SizedBox.shrink();
+                          final law = currentList[index];
+                          return TweenAnimationBuilder<double>(
+                            tween: Tween(begin: 0.0, end: 1.0),
                       // reset animation key when switching list
                       key: ValueKey('${law.id}_$index'),
                       duration: Duration(milliseconds: 300 + index * 50),
@@ -180,7 +263,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ),
                     );
                   },
-                  childCount: _showUpcoming ? upcomingLaws.length : pastLaws.length,
+                  childCount: _showUpcoming ? _upcomingLaws.length : _pastLaws.length,
                 ),
               ),
             ),

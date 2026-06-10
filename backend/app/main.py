@@ -4,13 +4,19 @@ from .modules import *
 
 import os
 from sqlmodel import SQLModel
+import asyncio
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from authlib.integrations.starlette_client import OAuth
 from starlette.middleware.sessions import SessionMiddleware
-
+from app.modules.law.scraper import periodic_law_scraper
 
 app = FastAPI()
+
+@app.on_event("startup")
+async def startup_event():
+    # Démarre notre système automatique de mise à jour des lois
+    asyncio.create_task(periodic_law_scraper())
 
 # CORS — autorise les requêtes depuis le mobile/web Flutter
 app.add_middleware(

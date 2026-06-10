@@ -20,6 +20,26 @@ class Law {
     required this.category,
   });
 
+  factory Law.fromJson(Map<String, dynamic> json) {
+    // Parse the datetime string from backend isoformat
+    DateTime vDate = DateTime.now();
+    if (json['vote_date'] != null) {
+      vDate = DateTime.parse(json['vote_date']);
+    }
+
+    final months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+    
+    return Law(
+      id: json['scrutin_id']?.toString() ?? json['id']?.toString() ?? '',
+      title: json['title'] ?? 'Loi sans titre',
+      subtitle: json['subtitle'] ?? '',
+      description: json['description'] ?? '',
+      date: '${vDate.day} ${months[vDate.month - 1]} ${vDate.year}',
+      voteDate: vDate,
+      category: json['category'] ?? 'Général',
+    );
+  }
+
   /// Nombre de jours restants avant le vote
   int get daysUntilVote {
     final now = DateTime.now();
@@ -53,142 +73,5 @@ class Law {
   }
 }
 
-// Tous les projets de loi
-final List<Law> allLaws = [
-  Law(
-    id: 'pjl-fin-de-vie',
-    title: 'Projet de loi sur la fin de vie',
-    subtitle: 'Légalisation de l\'aide à mourir sous conditions strictes pour les patients en phase terminale.',
-    description:
-        'Ce projet de loi vise à créer un nouveau droit : l\'aide à mourir pour les personnes majeures '
-        'atteintes d\'une maladie grave et incurable, engageant leur pronostic vital à court ou moyen terme, '
-        'et dont les souffrances sont réfractaires aux traitements.\n\n'
-        'Le texte prévoit plusieurs conditions cumulatives :\n\n'
-        '• Le patient doit être majeur, de nationalité française ou résidant de manière stable en France\n'
-        '• Il doit être atteint d\'une affection grave et incurable\n'
-        '• Il doit exprimer une demande libre, éclairée et réitérée\n'
-        '• Deux médecins indépendants doivent valider la demande\n'
-        '• Un délai de réflexion de 15 jours est imposé après l\'accord médical\n\n'
-        'Le projet inclut également un renforcement significatif des soins palliatifs sur l\'ensemble du territoire, '
-        'avec la création de maisons d\'accompagnement et l\'augmentation des financements dédiés.\n\n'
-        'Les opposants au texte craignent une dérive vers l\'euthanasie, tandis que les partisans défendent '
-        'le droit à mourir dans la dignité.',
-    date: '14 Mars 2026',
-    voteDate: DateTime(2026, 3, 14),
-    category: 'Santé & Éthique',
-  ),
-  Law(
-    id: 'pjl-reforme-audiovisuel',
-    title: 'Réforme de l\'audiovisuel public',
-    subtitle: 'Fusion de France Télévisions, Radio France et l\'INA en une holding unique « France Médias ».',
-    description:
-        'Le projet de loi prévoit la création d\'une société holding unique baptisée « France Médias » '
-        'regroupant France Télévisions, Radio France et l\'Institut National de l\'Audiovisuel (INA).\n\n'
-        'Les objectifs principaux :\n\n'
-        '• Mutualiser les moyens techniques et les rédactions pour gagner en efficacité\n'
-        '• Créer une plateforme numérique commune pour concurrencer les géants du streaming\n'
-        '• Maintenir l\'indépendance éditoriale de chaque entité via des chartes déontologiques\n'
-        '• Réduire les coûts de fonctionnement de 15 % sur 5 ans\n\n'
-        'Le financement resterait public, avec une dotation budgétaire annuelle votée par le Parlement '
-        'en remplacement de la contribution à l\'audiovisuel public supprimée en 2022.\n\n'
-        'Les syndicats de journalistes expriment des inquiétudes sur les suppressions de postes '
-        'et la concentration des rédactions.',
-    date: '21 Mars 2026',
-    voteDate: DateTime(2026, 3, 21),
-    category: 'Culture & Médias',
-  ),
-  Law(
-    id: 'pjl-logement-social',
-    title: 'Accélération du logement social',
-    subtitle: 'Obligation de 30% de logements sociaux dans les communes de plus de 3 500 habitants.',
-    description:
-        'Ce projet de loi renforce la loi SRU (Solidarité et Renouvellement Urbain) en augmentant '
-        'les obligations de construction de logements sociaux pour les communes.\n\n'
-        'Mesures principales :\n\n'
-        '• Passage du seuil obligatoire de 25 % à 30 % de logements sociaux\n'
-        '• Abaissement du seuil d\'application de 5 000 à 3 500 habitants\n'
-        '• Quintuplement des amendes pour les communes récalcitrantes\n'
-        '• Création d\'un « fonds national d\'accélération » doté de 2 milliards d\'euros\n'
-        '• Simplification des permis de construire pour les bailleurs sociaux\n'
-        '• Encadrement renforcé des loyers dans les zones tendues\n\n'
-        'Les maires des petites communes s\'inquiètent de la faisabilité technique et financière '
-        'de ces nouvelles obligations, tandis que les associations de mal-logés saluent une mesure '
-        '«nécessaire mais insuffisante».',
-    date: '2 Avril 2026',
-    voteDate: DateTime(2026, 4, 2),
-    category: 'Logement',
-  ),
-  Law(
-    id: 'pjl-numerique-mineurs',
-    title: 'Protection des mineurs en ligne',
-    subtitle: 'Vérification d\'âge obligatoire et responsabilisation des plateformes pour les contenus exposés aux mineurs.',
-    description:
-        'Ce texte vise à renforcer drastiquement la protection des mineurs sur Internet, '
-        'en imposant de nouvelles obligations aux plateformes numériques.\n\n'
-        'Dispositions clés :\n\n'
-        '• Vérification d\'âge obligatoire sur les réseaux sociaux et sites de contenus pour adultes\n'
-        '• Interdiction des « dark patterns » ciblant les mineurs (notifications addictives, scroll infini)\n'
-        '• Obligation pour les plateformes de détecter et supprimer les contenus de harcèlement en 24h\n'
-        '• Création d\'un « droit à l\'oubli numérique » renforcé pour les mineurs\n'
-        '• Amendes jusqu\'à 6 % du chiffre d\'affaires mondial en cas de manquement\n'
-        '• Possibilité pour les parents de demander la suppression de tout compte de leur enfant\n\n'
-        'Le débat porte sur l\'équilibre entre protection de l\'enfance et respect de la vie privée, '
-        'notamment concernant les méthodes de vérification d\'âge qui pourraient impliquer '
-        'la collecte de données sensibles.',
-    date: '22 Avril 2026',
-    voteDate: DateTime(2026, 4, 22),
-    category: 'Numérique',
-  ),
-  Law(
-    id: 'pjl-souverainete-alimentaire',
-    title: 'Souveraineté alimentaire',
-    subtitle: 'Garantir l\'autonomie agricole française face aux crises géopolitiques et climatiques.',
-    description:
-        'Le projet de loi sur la souveraineté alimentaire vise à renforcer la capacité de la France '
-        'à nourrir sa population de manière autonome.\n\n'
-        'Axes principaux :\n\n'
-        '• Interdiction de la vente à perte de produits agricoles français\n'
-        '• Création d\'un « bouclier foncier agricole » pour limiter l\'artificialisation des terres\n'
-        '• Obligation de 60 % de produits locaux dans la restauration collective publique\n'
-        '• Plan de transition pour réduire la dépendance aux engrais importés\n'
-        '• Soutien financier à l\'installation de 20 000 nouveaux agriculteurs par an\n'
-        '• Création de stocks stratégiques alimentaires nationaux\n\n'
-        'Les syndicats agricoles majoritaires soutiennent ce texte, mais les associations '
-        'environnementales regrettent l\'absence de mesures contraignantes sur les pesticides '
-        'et le bien-être animal.',
-    date: '6 Mai 2026',
-    voteDate: DateTime(2026, 5, 6),
-    category: 'Agriculture',
-  ),
-  Law(
-    id: 'loi-immigration-2024',
-    title: 'Loi pour contrôler l\'immigration, améliorer l\'intégration',
-    subtitle: 'Texte adopté après un parcours parlementaire agité et la censure partielle du Conseil Constitutionnel.',
-    description: 'Ce texte vise à durcir les conditions d\'accueil et renforcer les expulsions, tout en régularisant les travailleurs dans les métiers en tension. Une grande partie des mesures les plus restrictives a été censurée par le Conseil Constitutionnel.',
-    date: '26 Janvier 2024',
-    voteDate: DateTime(2024, 1, 26),
-    category: 'Intérieur',
-  ),
-  Law(
-    id: 'loi-pouvoir-achat-2023',
-    title: 'Mesures d\'urgence pour la protection du pouvoir d\'achat',
-    subtitle: 'Bouclier tarifaire, revalorisation des retraites et des minimas sociaux.',
-    description: 'Loi visant à protéger le pouvoir d\'achat face à l\'inflation historique. Elle inclut le triplement de la prime Macron, la fin de la redevance TV et le maintien du bouclier tarifaire sur l\'énergie.',
-    date: '16 Août 2022',
-    voteDate: DateTime(2022, 8, 16),
-    category: 'Économie',
-  )
-];
-
-// Listes dynamiques filtrées selon la date
-List<Law> get upcomingLaws {
-  final list = allLaws.where((law) => law.daysUntilVote >= 0).toList();
-  list.sort((a, b) => a.voteDate.compareTo(b.voteDate));
-  return list;
-}
-
-List<Law> get pastLaws {
-  final list = allLaws.where((law) => law.daysUntilVote < 0).toList();
-  list.sort((a, b) => b.voteDate.compareTo(a.voteDate)); // Plus récentes en premier
-  return list;
-}
+// Les listes ne sont plus statiques, 
+// elles seront récupérées depuis l'API.

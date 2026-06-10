@@ -277,4 +277,50 @@ class ApiService {
       return ApiResponse(success: false, message: 'Erreur: $e');
     }
   }
+
+  static Future<ApiResponse> getAssemblyVotes(String scrutinId) async {
+    try {
+      // Fetching directly from Open Data to avoid backend IP rate-limiting bans.
+      final response = await _client.get(
+        Uri.parse('https://www.nosdeputes.fr/16/scrutin/$scrutinId/json'),
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'Edupo Mobile App / 1.0',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> body = jsonDecode(response.body);
+        return ApiResponse(success: true, data: body);
+      } else {
+        return ApiResponse(success: false, message: 'Résultats non publiés');
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: 'Erreur: $e');
+    }
+  }
+
+  static Future<ApiResponse> getAllLaws() async {
+    try {
+      final token = await AuthService.getToken();
+      // Even if not logged in, we might want to see laws, but let's send token if we have it
+      
+      final url = '${ApiConfig.baseUrl}/law';
+      final response = await _client.get(
+        Uri.parse(url),
+        headers: token != null ? {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        } : { 'Content-Type': 'application/json' },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> body = jsonDecode(response.body);
+        return ApiResponse(success: true, data: {'list': body});
+      }
+      return ApiResponse(success: false, message: 'Erreur lors de la récupération des lois.');
+    } catch (e) {
+      return ApiResponse(success: false, message: 'Erreur réseau: $e');
+    }
+  }
 }

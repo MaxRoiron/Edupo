@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import '../services/api_service.dart';
 import '../models/law.dart';
 import '../theme/app_theme.dart';
+import '../widgets/hemicycle_chart.dart';
 
 class LawDetailScreen extends StatefulWidget {
   final Law law;
@@ -17,6 +19,10 @@ class _LawDetailScreenState extends State<LawDetailScreen>
   late AnimationController _animController;
   late Animation<double> _fadeAnimation;
 
+  List<dynamic> _assemblyVotes = [];
+  bool _isLoadingVotes = false;
+  String? _hemicycleFilter; // null, 'pour', 'contre', 'abstention'
+
   @override
   void initState() {
     super.initState();
@@ -29,6 +35,25 @@ class _LawDetailScreenState extends State<LawDetailScreen>
       curve: Curves.easeOut,
     );
     _animController.forward();
+    if (widget.law.daysUntilVote < 0) {
+      _fetchAssemblyVotes();
+    }
+  }
+
+  Future<void> _fetchAssemblyVotes() async {
+    setState(() => _isLoadingVotes = true);
+    try {
+      final resp = await ApiService.getAssemblyVotes(widget.law.id);
+      if (resp.success && resp.data != null) {
+        if (mounted) setState(() => _assemblyVotes = resp.data!['votes'] ?? []);
+      } else {
+        if (mounted) setState(() => _assemblyVotes = []);
+      }
+    } catch (e) {
+      debugPrint('Error fetching votes: $e');
+      if (mounted) setState(() => _assemblyVotes = []);
+    }
+    if (mounted) setState(() => _isLoadingVotes = false);
   }
 
   @override
@@ -52,16 +77,13 @@ class _LawDetailScreenState extends State<LawDetailScreen>
       SnackBar(
         content: Text(
           messages[vote]!,
-          style: const TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 15,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
         ),
         backgroundColor: vote == 'oui'
             ? AppColors.accentGreen
             : vote == 'non'
-                ? AppColors.frRed
-                : AppColors.textSecondary,
+            ? AppColors.frRed
+            : AppColors.textSecondary,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
@@ -93,13 +115,16 @@ class _LawDetailScreenState extends State<LawDetailScreen>
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                       decoration: BoxDecoration(
                         color: widget.law.urgencyColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
-                          color:
-                              widget.law.urgencyColor.withValues(alpha: 0.25),
+                          color: widget.law.urgencyColor.withValues(
+                            alpha: 0.25,
+                          ),
                         ),
                       ),
                       child: Row(
@@ -107,8 +132,9 @@ class _LawDetailScreenState extends State<LawDetailScreen>
                           Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: widget.law.urgencyColor
-                                  .withValues(alpha: 0.15),
+                              color: widget.law.urgencyColor.withValues(
+                                alpha: 0.15,
+                              ),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Icon(
@@ -143,7 +169,9 @@ class _LawDetailScreenState extends State<LawDetailScreen>
                           const Spacer(),
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 5),
+                              horizontal: 10,
+                              vertical: 5,
+                            ),
                             decoration: BoxDecoration(
                               color: AppColors.frBlue.withValues(alpha: 0.08),
                               borderRadius: BorderRadius.circular(8),
@@ -199,7 +227,9 @@ class _LawDetailScreenState extends State<LawDetailScreen>
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: AppColors.accentPurple.withValues(alpha: 0.1),
+                            color: AppColors.accentPurple.withValues(
+                              alpha: 0.1,
+                            ),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: const Icon(
@@ -259,14 +289,18 @@ class _LawDetailScreenState extends State<LawDetailScreen>
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Icon(
-                            widget.law.daysUntilVote < 0 ? Icons.bar_chart_rounded : Icons.how_to_vote_rounded,
+                            widget.law.daysUntilVote < 0
+                                ? Icons.bar_chart_rounded
+                                : Icons.how_to_vote_rounded,
                             color: AppColors.frBlue,
                             size: 18,
                           ),
                         ),
                         const SizedBox(width: 10),
                         Text(
-                          widget.law.daysUntilVote < 0 ? 'Résultat des votes' : 'Votre vote',
+                          widget.law.daysUntilVote < 0
+                              ? 'Résultat des votes'
+                              : 'Votre vote',
                           style: const TextStyle(
                             color: AppColors.textPrimary,
                             fontSize: 17,
@@ -278,7 +312,9 @@ class _LawDetailScreenState extends State<LawDetailScreen>
                     const SizedBox(height: 20),
 
                     // Vote buttons or Results
-                    widget.law.daysUntilVote < 0 ? _buildVoteResults() : _buildVoteButtons(),
+                    widget.law.daysUntilVote < 0
+                        ? _buildVoteResults()
+                        : _buildVoteButtons(),
 
                     const SizedBox(height: 40),
                   ],
@@ -294,7 +330,11 @@ class _LawDetailScreenState extends State<LawDetailScreen>
   Widget _buildHeader() {
     return Container(
       padding: EdgeInsets.fromLTRB(
-          16, MediaQuery.of(context).padding.top + 8, 16, 16),
+        16,
+        MediaQuery.of(context).padding.top + 8,
+        16,
+        16,
+      ),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
@@ -386,52 +426,129 @@ class _LawDetailScreenState extends State<LawDetailScreen>
   }
 
   Widget _buildVoteResults() {
-    // Hardcoded demo values
-    final pour = 58;
-    final contre = 31;
-    final abst = 11;
+    if (_isLoadingVotes) {
+      return Container(
+        height: 200,
+        alignment: Alignment.center,
+        child: const CircularProgressIndicator(color: AppColors.frBlue),
+      );
+    }
+    if (_assemblyVotes.isEmpty) {
+      return Container(
+        height: 200,
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.query_stats_rounded, size: 48, color: AppColors.frBlue.withValues(alpha: 0.3)),
+            const SizedBox(height: 16),
+            const Text(
+              'Les résultats ne sont pas encore disponibles pour ce texte.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 15, color: Colors.black54),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Extract totals from API
+    final firstVote = _assemblyVotes.first['vote']['scrutin'];
+    int dpour = int.tryParse(firstVote['nombre_pours'] ?? '0') ?? 0;
+    int dcontre = int.tryParse(firstVote['nombre_contres'] ?? '0') ?? 0;
+    int dabst = int.tryParse(firstVote['nombre_abstentions'] ?? '0') ?? 0;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       decoration: BoxDecoration(
         color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         children: [
-          _buildResultBar('Pour', pour, AppColors.accentGreen),
-          const SizedBox(height: 18),
-          _buildResultBar('Contre', contre, AppColors.frRed),
-          const SizedBox(height: 18),
-          _buildResultBar('Abstention', abst, AppColors.textMuted),
+          // Filter Buttons
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildFilterBtn('Pour', 'pour', dpour, AppColors.accentGreen),
+              _buildFilterBtn('Contre', 'contre', dcontre, AppColors.frRed),
+              _buildFilterBtn(
+                'Abstention',
+                'abstention',
+                dabst,
+                AppColors.textMuted,
+              ),
+            ],
+          ),
+          const SizedBox(height: 32),
+
+          // Dynamic Parliament Hemicycle
+          HemicycleChart(
+            votesList: _assemblyVotes,
+            activeFilter: _hemicycleFilter,
+          ),
+
+          const SizedBox(height: 12),
+          Text(
+            _hemicycleFilter == null
+                ? 'Tous les suffrages'
+                : 'Sièges colorés par groupe politique',
+            style: TextStyle(
+              color: AppColors.textMuted.withValues(alpha: 0.8),
+              fontSize: 12,
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildResultBar(String label, int percentage, Color color) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-            Text('$percentage%', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: color)),
-          ],
-        ),
-        const SizedBox(height: 10),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: LinearProgressIndicator(
-            value: percentage / 100.0,
-            backgroundColor: color.withValues(alpha: 0.1),
-            valueColor: AlwaysStoppedAnimation<Color>(color),
-            minHeight: 14,
+  Widget _buildFilterBtn(String title, String filterId, int count, Color c) {
+    final bool isActive = _hemicycleFilter == filterId;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () =>
+            setState(() => _hemicycleFilter = isActive ? null : filterId),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: isActive ? c : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: isActive ? c : c.withValues(alpha: 0.2)),
+          ),
+          child: Column(
+            children: [
+              Text(
+                count.toString(),
+                style: TextStyle(
+                  color: isActive ? Colors.white : c,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 18,
+                ),
+              ),
+              Text(
+                title,
+                style: TextStyle(
+                  color: isActive ? Colors.white : c.withValues(alpha: 0.9),
+                  fontSize: 12,
+                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                ),
+              ),
+            ],
           ),
         ),
-      ],
+      ),
     );
   }
 
@@ -454,15 +571,15 @@ class _LawDetailScreenState extends State<LawDetailScreen>
           color: isSelected
               ? color
               : isOtherSelected
-                  ? color.withValues(alpha: 0.06)
-                  : color.withValues(alpha: 0.1),
+              ? color.withValues(alpha: 0.06)
+              : color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected
                 ? color
                 : isOtherSelected
-                    ? color.withValues(alpha: 0.1)
-                    : color.withValues(alpha: 0.25),
+                ? color.withValues(alpha: 0.1)
+                : color.withValues(alpha: 0.25),
             width: isSelected ? 2 : 1.5,
           ),
           boxShadow: isSelected
@@ -499,8 +616,8 @@ class _LawDetailScreenState extends State<LawDetailScreen>
                 color: isSelected
                     ? Colors.white
                     : isOtherSelected
-                        ? color.withValues(alpha: 0.4)
-                        : color,
+                    ? color.withValues(alpha: 0.4)
+                    : color,
                 fontSize: 16,
                 fontWeight: FontWeight.w800,
               ),
@@ -537,15 +654,15 @@ class _LawDetailScreenState extends State<LawDetailScreen>
           color: isSelected
               ? const Color(0xFF9CA3AF)
               : isOtherSelected
-                  ? const Color(0xFFF0F0F0)
-                  : const Color(0xFFF5F5F5),
+              ? const Color(0xFFF0F0F0)
+              : const Color(0xFFF5F5F5),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: isSelected
                 ? const Color(0xFF9CA3AF)
                 : isOtherSelected
-                    ? const Color(0xFFE5E5E5)
-                    : const Color(0xFFDDDDDD),
+                ? const Color(0xFFE5E5E5)
+                : const Color(0xFFDDDDDD),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -557,8 +674,8 @@ class _LawDetailScreenState extends State<LawDetailScreen>
               color: isSelected
                   ? Colors.white
                   : isOtherSelected
-                      ? AppColors.textMuted.withValues(alpha: 0.4)
-                      : AppColors.textMuted,
+                  ? AppColors.textMuted.withValues(alpha: 0.4)
+                  : AppColors.textMuted,
               size: 18,
             ),
             const SizedBox(width: 8),
@@ -568,8 +685,8 @@ class _LawDetailScreenState extends State<LawDetailScreen>
                 color: isSelected
                     ? Colors.white
                     : isOtherSelected
-                        ? AppColors.textMuted.withValues(alpha: 0.4)
-                        : AppColors.textSecondary,
+                    ? AppColors.textMuted.withValues(alpha: 0.4)
+                    : AppColors.textSecondary,
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
               ),
