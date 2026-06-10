@@ -280,12 +280,10 @@ class ApiService {
 
   static Future<ApiResponse> getAssemblyVotes(String scrutinId) async {
     try {
-      // Fetching directly from Open Data to avoid backend IP rate-limiting bans.
       final response = await _client.get(
-        Uri.parse('https://www.nosdeputes.fr/16/scrutin/$scrutinId/json'),
+        Uri.parse('${ApiConfig.baseUrl}/law/assembly_votes/$scrutinId'),
         headers: {
           'Accept': 'application/json',
-          'User-Agent': 'Edupo Mobile App / 1.0',
         },
       );
 

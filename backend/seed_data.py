@@ -7,6 +7,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "app"))
 from app.core.database import engine
 from sqlmodel import Session, select
 from app.modules.user_data.model import ProfessionalStatus, GenderIdentities
+from app.modules.country.model import Country
+from app.modules.political_party.model import Domain
 
 professional_statuses = [
     'Étudiant(e)', 'Lycéen(ne)', 'Apprenti(e)', 'Stagiaire', 'Demandeur d\'emploi',
@@ -36,6 +38,14 @@ def seed_data():
             if not existing:
                 session.add(GenderIdentities(name=gender_name))
                 
+        existing_country = session.exec(select(Country).where(Country.name == "France")).first()
+        if not existing_country:
+            session.add(Country(name="France", iso_code="FR"))
+
+        existing_domain = session.exec(select(Domain).where(Domain.name == "Général")).first()
+        if not existing_domain:
+            session.add(Domain(name="Général"))
+
         session.commit()
         print("Done seeding user data.")
 

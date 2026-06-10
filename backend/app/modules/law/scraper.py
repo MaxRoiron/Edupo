@@ -1,6 +1,9 @@
 import httpx
 import re
 import asyncio
+import zipfile
+import io
+import json
 from datetime import datetime, timedelta
 from sqlmodel import Session, select
 from app.core.database import engine
@@ -28,44 +31,63 @@ async def scrape_and_sync_laws():
                 
                 laws_added = 0
                 
-                # Check les scrutins de NosDeputes
+                # Check les scrutins de l'Assemblée nationale (17ème législature Open Data)
                 try:
-                    nd_resp = await client.get(url, timeout=15.0)
-                    if nd_resp.status_code == 200:
-                        scrutins = nd_resp.json().get("scrutins", [])
-                        for item in scrutins:
-                            s = item.get("scrutin", {})
-                            titre = s.get("titre", "")
-                            
-                            if "l'ensemble du projet de loi" in titre.lower() or "l'ensemble de la proposition de loi" in titre.lower():
-                                scrutin_num = str(s.get("numero", ""))
-                                
-                                existing = session.exec(select(Law).where(Law.scrutin_id == scrutin_num)).first()
-                                if not existing:
-                                    clean_title = re.sub(r'^.*l\'ensemble d[ue] (projet|proposition) de loi (.*)$', r'\2', titre, flags=re.IGNORECASE)
-                                    clean_title = clean_title.split("(texte")[0].strip().capitalize()
-                                    
-                                    category = "Justice / Intérieur" if "intérieur" in clean_title.lower() or "sécurité" in clean_title.lower() else "Législation"
-                                    category = "Écologie" if "climat" in clean_title.lower() or "environnement" in clean_title.lower() else category
-                                    category = "Économie" if "pouvoir d'achat" in clean_title.lower() or "finances" in clean_title.lower() else category
-                                    
-                                    new_law = Law(
-                                        title=clean_title,
-                                        subtitle=f"Scrutin National n°{scrutin_num}",
-                                        description=f"Le texte original est intitulé : '{titre}'.\nVote effectué le {s.get('date')} avec un résultat '{s.get('sort')}'.\n\nParticipants: {s.get('nombre_votants')} votants dont {s.get('nombre_pours')} 'Pour' et {s.get('nombre_contres')} 'Contre'.",
-                                        domain_id=domain.id,
-                                        country_id=country.id,
-                                        vote_date=datetime.strptime(s.get("date"), "%Y-%m-%d"),
-                                        scrutin_id=scrutin_num,
-                                        category=category,
-                                        is_active=True
-                                    )
-                                    session.add(new_law)
-                                    laws_added += 1
+                    zip_url = "https://data.assemblee-nationale.fr/static/openData/repository/17/loi/scrutins/Scrutins.json.zip"
+                    an_resp = await client.get(zip_url, timeout=30.0, follow_redirects=True)
+                    if an_resp.status_code == 200:
+                        with zipfile.ZipFile(io.BytesIO(an_resp.content)) as z:
+                            for filename in z.namelist():
+                                if filename.endswith(".json"):
+                                    with z.open(filename) as f:
+                                        data = json.load(f)
+                                        s = data.get("scrutin", {})
+                                        titre = s.get("titre", "")
+                                        
+                                        if "l'ensemble du projet de loi" in titre.lower() or "l'ensemble de la proposition de loi" in titre.lower():
+                                            uid = str(s.get("uid", ""))
+                                            numero = str(s.get("numero", ""))
+                                            
+                                            existing = session.exec(select(Law).where(Law.scrutin_id == uid)).first()
+                                            if not existing:
+                                                clean_title = re.sub(r'^.*l\'ensemble d[ue] (projet|proposition) de loi (.*)$', r'\2', titre, flags=re.IGNORECASE)
+                                                clean_title = clean_title.split("(texte")[0].strip().capitalize()
+                                                
+                                                category = "Justice / Intérieur" if "intérieur" in clean_title.lower() or "sécurité" in clean_title.lower() else "Législation"
+                                                category = "Écologie" if "climat" in clean_title.lower() or "environnement" in clean_title.lower() else category
+                                                category = "Économie" if "pouvoir d'achat" in clean_title.lower() or "finances" in clean_title.lower() else category
+                                                
+                                                vote_date_str = s.get("dateScrutin", "")
+                                                if not vote_date_str: continue
+
+                                                # Ignorer les lois votées il y a plus de 6 mois
+                                                vote_dt = datetime.strptime(vote_date_str, "%Y-%m-%d")
+                                                if (datetime.now() - vote_dt).days > 180:
+                                                    continue
+
+                                                sort_code = (s.get("sort") or {}).get("code", "")
+                                                synthese = s.get("syntheseVote", {}).get("decompte", {})
+                                                pours = synthese.get("pour", "0")
+                                                contres = synthese.get("contre", "0")
+                                                votants = s.get("syntheseVote", {}).get("nombreVotants", "0")
+                                                
+                                                new_law = Law(
+                                                    title=clean_title,
+                                                    subtitle=f"Scrutin National n°{numero}",
+                                                    description=f"Le texte original est intitulé : '{titre}'.\nVote effectué le {vote_date_str} avec un résultat '{sort_code}'.\n\nParticipants: {votants} votants dont {pours} 'Pour' et {contres} 'Contre'.",
+                                                    domain_id=domain.id,
+                                                    country_id=country.id,
+                                                    vote_date=datetime.strptime(vote_date_str, "%Y-%m-%d"),
+                                                    scrutin_id=uid,
+                                                    category=category,
+                                                    is_active=True
+                                                )
+                                                session.add(new_law)
+                                                laws_added += 1
                     else:
-                        print(f"[Scraper] Erreur accès API NosDeputes, statut {nd_resp.status_code}")
-                except Exception as nd_err:
-                    print(f"[Scraper] Impossible de joindre NosDeputes (Banni/Hors Ligne) : {repr(nd_err)}")
+                        print(f"[Scraper] Erreur accès Open Data AN, statut {an_resp.status_code}")
+                except Exception as an_err:
+                    print(f"[Scraper] Impossible de traiter le ZIP Open Data AN : {repr(an_err)}")
                 
                 # --- VRAIES LOIS À VENIR (Scrapées depuis vie-publique.fr RSS) ---
                 rss_url = "https://www.vie-publique.fr/lois-feeds.xml"

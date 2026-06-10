@@ -19,9 +19,12 @@ class _LawDetailScreenState extends State<LawDetailScreen>
   late AnimationController _animController;
   late Animation<double> _fadeAnimation;
 
-  List<dynamic> _assemblyVotes = [];
+  List<dynamic> _individualVotes = [];
+  List<dynamic> _groups = [];
+  Map<String, dynamic> _voteSummary = {};
   bool _isLoadingVotes = false;
   String? _hemicycleFilter; // null, 'pour', 'contre', 'abstention'
+  String? _selectedGroup; // null or group abbreviation
 
   @override
   void initState() {
@@ -45,13 +48,31 @@ class _LawDetailScreenState extends State<LawDetailScreen>
     try {
       final resp = await ApiService.getAssemblyVotes(widget.law.id);
       if (resp.success && resp.data != null) {
-        if (mounted) setState(() => _assemblyVotes = resp.data!['votes'] ?? []);
+        if (mounted) {
+          setState(() {
+            _voteSummary = resp.data!['summary'] ?? {};
+            _groups = resp.data!['groups'] ?? [];
+            _individualVotes = resp.data!['votes'] ?? [];
+          });
+        }
       } else {
-        if (mounted) setState(() => _assemblyVotes = []);
+        if (mounted) {
+          setState(() {
+            _voteSummary = {};
+            _groups = [];
+            _individualVotes = [];
+          });
+        }
       }
     } catch (e) {
       debugPrint('Error fetching votes: $e');
-      if (mounted) setState(() => _assemblyVotes = []);
+      if (mounted) {
+        setState(() {
+          _voteSummary = {};
+          _groups = [];
+          _individualVotes = [];
+        });
+      }
     }
     if (mounted) setState(() => _isLoadingVotes = false);
   }
@@ -67,9 +88,9 @@ class _LawDetailScreenState extends State<LawDetailScreen>
 
     // Feedback visuel
     final messages = {
-      'oui': 'Vous avez voté Pour ✅',
-      'non': 'Vous avez voté Contre ❌',
-      'abstention': 'Vous vous êtes abstenu(e) ⚪',
+      'oui': 'Vous avez voté Pour',
+      'non': 'Vous avez voté Contre',
+      'abstention': 'Vous vous êtes abstenu(e)',
     };
 
     ScaffoldMessenger.of(context).clearSnackBars();
@@ -433,7 +454,7 @@ class _LawDetailScreenState extends State<LawDetailScreen>
         child: const CircularProgressIndicator(color: AppColors.frBlue),
       );
     }
-    if (_assemblyVotes.isEmpty) {
+    if (_individualVotes.isEmpty) {
       return Container(
         height: 200,
         alignment: Alignment.center,
@@ -453,96 +474,267 @@ class _LawDetailScreenState extends State<LawDetailScreen>
       );
     }
 
-    // Extract totals from API
-    final firstVote = _assemblyVotes.first['vote']['scrutin'];
-    int dpour = int.tryParse(firstVote['nombre_pours'] ?? '0') ?? 0;
-    int dcontre = int.tryParse(firstVote['nombre_contres'] ?? '0') ?? 0;
-    int dabst = int.tryParse(firstVote['nombre_abstentions'] ?? '0') ?? 0;
+    int dpour = _voteSummary['pour'] ?? 0;
+    int dcontre = _voteSummary['contre'] ?? 0;
+    int dabst = _voteSummary['abstentions'] ?? 0;
+    int totalVotants = _voteSummary['votants'] ?? 1;
+    String sort = _voteSummary['sort'] ?? '';
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      decoration: BoxDecoration(
-        color: AppColors.cardBackground,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Filter Buttons
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildFilterBtn('Pour', 'pour', dpour, AppColors.accentGreen),
-              _buildFilterBtn('Contre', 'contre', dcontre, AppColors.frRed),
-              _buildFilterBtn(
-                'Abstention',
-                'abstention',
-                dabst,
-                AppColors.textMuted,
+    return Column(
+      children: [
+        // --- Main hemicycle card ---
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: AppColors.cardBackground,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.border),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.06),
+                blurRadius: 20,
+                offset: const Offset(0, 6),
               ),
             ],
           ),
-          const SizedBox(height: 32),
+          child: Column(
+            children: [
+              // Sort badge
+              if (sort.isNotEmpty)
+                Container(
+                  margin: const EdgeInsets.only(bottom: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: sort == 'adopté'
+                        ? AppColors.accentGreen.withValues(alpha: 0.1)
+                        : AppColors.frRed.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: sort == 'adopté'
+                          ? AppColors.accentGreen.withValues(alpha: 0.3)
+                          : AppColors.frRed.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        sort == 'adopté' ? Icons.check_circle_rounded : Icons.cancel_rounded,
+                        color: sort == 'adopté' ? AppColors.accentGreen : AppColors.frRed,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        sort == 'adopté' ? 'Texte adopté' : 'Texte rejeté',
+                        style: TextStyle(
+                          color: sort == 'adopté' ? AppColors.accentGreen : AppColors.frRed,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
 
-          // Dynamic Parliament Hemicycle
-          HemicycleChart(
-            votesList: _assemblyVotes,
-            activeFilter: _hemicycleFilter,
+              // Filter chips
+              Row(
+                children: [
+                  _buildFilterChip('Pour', 'pour', dpour, totalVotants, const Color(0xFF10B981)),
+                  const SizedBox(width: 8),
+                  _buildFilterChip('Contre', 'contre', dcontre, totalVotants, const Color(0xFFEF4444)),
+                  const SizedBox(width: 8),
+                  _buildFilterChip('Abst.', 'abstention', dabst, totalVotants, const Color(0xFF94A3B8)),
+                ],
+              ),
+              const SizedBox(height: 28),
+
+              // Hemicycle
+              HemicycleChart(
+                votesList: _individualVotes,
+                activeFilter: _hemicycleFilter,
+                selectedGroup: _selectedGroup,
+              ),
+
+              const SizedBox(height: 8),
+              Text(
+                _hemicycleFilter == null
+                    ? '577 sièges • Colorés par groupe'
+                    : 'Filtre actif — Appuyez à nouveau pour tout voir',
+                style: TextStyle(
+                  color: AppColors.textMuted.withValues(alpha: 0.6),
+                  fontSize: 11,
+                  letterSpacing: 0.2,
+                ),
+              ),
+            ],
           ),
+        ),
 
-          const SizedBox(height: 12),
-          Text(
-            _hemicycleFilter == null
-                ? 'Tous les suffrages'
-                : 'Sièges colorés par groupe politique',
-            style: TextStyle(
-              color: AppColors.textMuted.withValues(alpha: 0.8),
-              fontSize: 12,
+        const SizedBox(height: 16),
+
+        // --- Group legend card ---
+        if (_groups.isNotEmpty)
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.cardBackground,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.groups_rounded, size: 16, color: AppColors.textMuted.withValues(alpha: 0.6)),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Groupes parlementaires',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textMuted.withValues(alpha: 0.7),
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: _groups.where((g) {
+                    int gp = g['pour'] ?? 0;
+                    int gc = g['contre'] ?? 0;
+                    int ga = g['abstentions'] ?? 0;
+                    return (gp + gc + ga) > 0;
+                  }).map<Widget>((g) {
+                    final color = _parseColor(g['color'] ?? '#808080');
+                    final abbr = g['abbreviation'] ?? '?';
+                    final gTotal = (g['pour'] ?? 0) + (g['contre'] ?? 0) + (g['abstentions'] ?? 0);
+                    final bool isSelected = _selectedGroup == abbr;
+                    return GestureDetector(
+                      onTap: () => setState(() {
+                        _selectedGroup = isSelected ? null : abbr;
+                      }),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: isSelected ? color.withValues(alpha: 0.18) : color.withValues(alpha: 0.06),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: isSelected ? color : color.withValues(alpha: 0.12),
+                            width: isSelected ? 1.5 : 1,
+                          ),
+                          boxShadow: isSelected ? [
+                            BoxShadow(
+                              color: color.withValues(alpha: 0.2),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ] : [],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: color,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              abbr,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w700,
+                                color: isSelected ? color : color.withValues(alpha: 0.8),
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '($gTotal)',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                                color: isSelected
+                                    ? color.withValues(alpha: 0.7)
+                                    : AppColors.textMuted.withValues(alpha: 0.5),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
+      ],
     );
   }
 
-  Widget _buildFilterBtn(String title, String filterId, int count, Color c) {
+  Color _parseColor(String hex) {
+    hex = hex.replaceAll('#', '');
+    if (hex.length == 6) hex = 'FF$hex';
+    return Color(int.parse(hex, radix: 16));
+  }
+
+  Widget _buildFilterChip(String label, String filterId, int count, int total, Color c) {
     final bool isActive = _hemicycleFilter == filterId;
+    final double pct = total > 0 ? (count / total * 100) : 0;
+
     return Expanded(
       child: GestureDetector(
-        onTap: () =>
-            setState(() => _hemicycleFilter = isActive ? null : filterId),
+        onTap: () => setState(() => _hemicycleFilter = isActive ? null : filterId),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOutCubic,
+          padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: isActive ? c : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: isActive ? c : c.withValues(alpha: 0.2)),
+            color: isActive
+                ? c.withValues(alpha: 0.12)
+                : AppColors.background,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: isActive ? c.withValues(alpha: 0.4) : AppColors.border,
+              width: isActive ? 1.5 : 1,
+            ),
           ),
           child: Column(
             children: [
               Text(
                 count.toString(),
                 style: TextStyle(
-                  color: isActive ? Colors.white : c,
+                  color: isActive ? c : AppColors.textPrimary,
                   fontWeight: FontWeight.w900,
-                  fontSize: 18,
+                  fontSize: 20,
+                  height: 1.1,
                 ),
               ),
+              const SizedBox(height: 2),
               Text(
-                title,
+                '${pct.toStringAsFixed(0)}%',
                 style: TextStyle(
-                  color: isActive ? Colors.white : c.withValues(alpha: 0.9),
-                  fontSize: 12,
-                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                  color: isActive ? c.withValues(alpha: 0.7) : AppColors.textMuted,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 10,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  color: isActive ? c : AppColors.textSecondary,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.3,
                 ),
               ),
             ],
