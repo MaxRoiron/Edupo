@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../models/law.dart';
@@ -22,7 +23,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   bool _showUpcoming = true;
   late AnimationController _animController;
   late Animation<double> _fadeAnimation;
-  
+  late AnimationController _gradientController;
+  late ScrollController _scrollController;
+  double _scrollOffset = 0;
+
   bool _isLoading = true;
   List<Law> _allLaws = [];
 
@@ -37,6 +41,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       parent: _animController,
       curve: Curves.easeOutCubic,
     );
+
+    // Gradient animation for the background
+    _gradientController = AnimationController(
+      duration: const Duration(seconds: 8),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _scrollController = ScrollController()
+      ..addListener(() {
+        setState(() => _scrollOffset = _scrollController.offset);
+      });
+
     _animController.forward();
     _fetchLaws();
     _checkLoginStatus();
@@ -118,6 +134,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   void dispose() {
     _animController.dispose();
+    _gradientController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -127,145 +145,80 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       backgroundColor: AppColors.background,
       body: FadeTransition(
         opacity: _fadeAnimation,
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            // Hero Header
-            SliverToBoxAdapter(child: _buildHeroHeader()),
+        child: Stack(
+          children: [
+            // Animated gradient background
+            _buildAnimatedBackground(),
+            // Main content
+            CustomScrollView(
+              controller: _scrollController,
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                // Hero Header with hemicycle image
+                SliverToBoxAdapter(child: _buildHeroHeader()),
 
-            // Toggle Tabs
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: AppColors.frBlue.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => setState(() => _showUpcoming = true),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            decoration: BoxDecoration(
-                              color: _showUpcoming ? AppColors.frBlue : Colors.transparent,
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: _showUpcoming
-                                  ? [
-                                      BoxShadow(
-                                        color: AppColors.frBlue.withValues(alpha: 0.3),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 2),
+                // Toggle Tabs
+                SliverToBoxAdapter(child: _buildToggleTabs()),
+
+                // Law cards list
+                _isLoading
+                    ? const SliverFillRemaining(
+                        child: Center(child: CircularProgressIndicator(color: AppColors.frBlue)),
+                      )
+                    : SliverPadding(
+                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
+                        sliver: SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                              final currentList = _showUpcoming ? _upcomingLaws : _pastLaws;
+                              if (currentList.isEmpty && index == 0) {
+                                return const Padding(
+                                  padding: EdgeInsets.only(top: 40),
+                                  child: Center(
+                                    child: Text('Aucune loi trouvée.',
+                                      style: TextStyle(
+                                        color: AppColors.textSecondary,
+                                        fontSize: 15,
                                       ),
-                                    ]
-                                  : [],
-                            ),
-                            child: Center(
-                              child: Text(
-                                'À venir',
-                                style: TextStyle(
-                                  color: _showUpcoming ? Colors.white : AppColors.frBlue.withValues(alpha: 0.7),
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                );
+                              }
+                              if (index >= currentList.length) return const SizedBox.shrink();
+                              final law = currentList[index];
+                              return TweenAnimationBuilder<double>(
+                                tween: Tween(begin: 0.0, end: 1.0),
+                                key: ValueKey('${law.id}_$index'),
+                                duration: Duration(milliseconds: 400 + index * 80),
+                                curve: Curves.easeOutCubic,
+                                builder: (context, value, child) {
+                                  return Opacity(
+                                    opacity: value,
+                                    child: Transform.translate(
+                                      offset: Offset(0, 30 * (1 - value)),
+                                      child: child,
+                                    ),
+                                  );
+                                },
+                                child: LawCard(
+                                  law: law,
+                                  onTap: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) => LawDetailScreen(law: law),
+                                      ),
+                                    );
+                                  },
                                 ),
-                              ),
-                            ),
+                              );
+                            },
+                            childCount: _showUpcoming
+                                ? (_upcomingLaws.isEmpty ? 1 : _upcomingLaws.length)
+                                : (_pastLaws.isEmpty ? 1 : _pastLaws.length),
                           ),
                         ),
                       ),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => setState(() => _showUpcoming = false),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            decoration: BoxDecoration(
-                              color: !_showUpcoming ? AppColors.frBlue : Colors.transparent,
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: !_showUpcoming
-                                  ? [
-                                      BoxShadow(
-                                        color: AppColors.frBlue.withValues(alpha: 0.3),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ]
-                                  : [],
-                            ),
-                            child: Center(
-                              child: Text(
-                                'Déjà votées',
-                                style: TextStyle(
-                                  color: !_showUpcoming ? Colors.white : AppColors.frBlue.withValues(alpha: 0.7),
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-
-            // Law cards list
-            _isLoading
-                ? const SliverFillRemaining(
-                    child: Center(child: CircularProgressIndicator(color: AppColors.frBlue)),
-                  )
-                : SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
-                    sliver: SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          final currentList = _showUpcoming ? _upcomingLaws : _pastLaws;
-                          if (currentList.isEmpty && index == 0) {
-                            return const Padding(
-                              padding: EdgeInsets.only(top: 40),
-                              child: Center(
-                                child: Text('Aucune loi trouvée.'),
-                              ),
-                            );
-                          }
-                          if (index >= currentList.length) return const SizedBox.shrink();
-                          final law = currentList[index];
-                          return TweenAnimationBuilder<double>(
-                            tween: Tween(begin: 0.0, end: 1.0),
-                      // reset animation key when switching list
-                      key: ValueKey('${law.id}_$index'),
-                      duration: Duration(milliseconds: 300 + index * 50),
-                      curve: Curves.easeOut,
-                      builder: (context, value, child) {
-                        return Opacity(
-                          opacity: value,
-                          child: Transform.translate(
-                            offset: Offset(0, 20 * (1 - value)),
-                            child: child,
-                          ),
-                        );
-                      },
-                      child: LawCard(
-                        law: law,
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => LawDetailScreen(law: law),
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  },
-                  childCount: _showUpcoming ? _upcomingLaws.length : _pastLaws.length,
-                ),
-              ),
+              ],
             ),
           ],
         ),
@@ -273,110 +226,307 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildHeroHeader() {
-    return Container(
-      padding: EdgeInsets.fromLTRB(
-          24, MediaQuery.of(context).padding.top + 10, 24, 20),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF0036B3),
-            AppColors.frBlue,
-            AppColors.frBlue,
-            Color(0xFF0036B3),
-          ],
-        ),
-        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.frBlue.withValues(alpha: 0.25),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
+  /// Animated gradient background that slowly shifts
+  Widget _buildAnimatedBackground() {
+    return AnimatedBuilder(
+      animation: _gradientController,
+      builder: (context, child) {
+        final value = _gradientController.value;
+        return Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment(-.5 + value * 0.3, -1.0),
+              end: Alignment(.5 - value * 0.3, 1.0),
+              colors: [
+                Color.lerp(
+                  const Color(0xFFF0F4FF),
+                  const Color(0xFFEDF1FA),
+                  value,
+                )!,
+                Color.lerp(
+                  AppColors.background,
+                  const Color(0xFFF8F9FC),
+                  value,
+                )!,
+                Color.lerp(
+                  const Color(0xFFF8F9FC),
+                  const Color(0xFFF0F4FF),
+                  value,
+                )!,
+              ],
+              stops: [0.0, 0.5 + value * 0.1, 1.0],
+            ),
           ),
-        ],
+        );
+      },
+    );
+  }
+
+  /// Hero Header with hemicycle background and parallax
+  Widget _buildHeroHeader() {
+    final double parallaxOffset = _scrollOffset * 0.4;
+    final double headerOpacity = (1.0 - (_scrollOffset / 300)).clamp(0.0, 1.0);
+    
+    return Container(
+      height: 260,
+      clipBehavior: Clip.antiAlias,
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
+        fit: StackFit.expand,
         children: [
-          // Top bar
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Logo
-              Row(
+          // Background image with parallax
+          Transform.translate(
+            offset: Offset(0, -parallaxOffset),
+            child: Image.asset(
+              'assets/images/hemicycle.png',
+              fit: BoxFit.cover,
+              height: 320,
+              alignment: Alignment.center,
+            ),
+          ),
+
+          // Dark gradient overlay for readability
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black.withValues(alpha: 0.6),
+                  Colors.black.withValues(alpha: 0.35),
+                  AppColors.frBlue.withValues(alpha: 0.7),
+                ],
+                stops: const [0.0, 0.5, 1.0],
+              ),
+            ),
+          ),
+
+          // Decorative tricolor stripe at bottom
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Row(
+              children: [
+                Expanded(child: Container(height: 3, color: AppColors.frBlue)),
+                Expanded(child: Container(height: 3, color: AppColors.frWhite)),
+                Expanded(child: Container(height: 3, color: AppColors.frRed)),
+              ],
+            ),
+          ),
+
+          // Content overlay
+          Positioned(
+            left: 24,
+            right: 24,
+            top: MediaQuery.of(context).padding.top + 12,
+            bottom: 20,
+            child: Opacity(
+              opacity: headerOpacity,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.account_balance_rounded,
-                      color: Colors.white,
-                      size: 24,
+                  // Top bar: Logo + Profile
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Logo
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.2),
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.account_balance_rounded,
+                              color: Colors.white,
+                              size: 22,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          RichText(
+                            text: const TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: 'Édu',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -0.5,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: 'po',
+                                  style: TextStyle(
+                                    color: AppColors.frRed,
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: -0.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      // Profile button with glass effect
+                      GestureDetector(
+                        key: _profileButtonKey,
+                        onTap: () => _handleProfileTap(),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(14),
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                            child: Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.25),
+                                ),
+                              ),
+                              child: const Icon(
+                                Icons.person_outline_rounded,
+                                color: Colors.white,
+                                size: 22,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  // Tagline
+                  Text(
+                    'Mieux comprendre les lois,\nC\'est mieux comprendre son monde.',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.95),
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      height: 1.3,
+                      letterSpacing: -0.3,
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  RichText(
-                    text: const TextSpan(
-                      children: [
-                        TextSpan(
-                          text: 'Édu',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 24,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                        TextSpan(
-                          text: 'po',
-                          style: TextStyle(
-                            color: AppColors.frRed,
-                            fontSize: 24,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                      ],
+                  const SizedBox(height: 8),
+                  Text(
+                    '${_allLaws.length} textes de loi en cours de suivi',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.65),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
               ),
-              // Avatar / profile
-              GestureDetector(
-                key: _profileButtonKey,
-                onTap: () => _handleProfileTap(),
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.person_outline_rounded,
-                    color: Colors.white,
-                    size: 22,
-                  ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Modern pill-shaped toggle tabs
+  Widget _buildToggleTabs() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+          child: Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.85),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: AppColors.frBlue.withValues(alpha: 0.08),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.frBlue.withValues(alpha: 0.06),
+                  blurRadius: 20,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                _buildTabButton(
+                  label: 'À venir',
+                  icon: Icons.schedule_rounded,
+                  isSelected: _showUpcoming,
+                  onTap: () => setState(() => _showUpcoming = true),
+                ),
+                _buildTabButton(
+                  label: 'Déjà votées',
+                  icon: Icons.how_to_vote_rounded,
+                  isSelected: !_showUpcoming,
+                  onTap: () => setState(() => _showUpcoming = false),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabButton({
+    required String label,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOutCubic,
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.frBlue : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: AppColors.frBlue.withValues(alpha: 0.35),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
+                : [],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 16,
+                color: isSelected ? Colors.white : AppColors.frBlue.withValues(alpha: 0.5),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  color: isSelected ? Colors.white : AppColors.frBlue.withValues(alpha: 0.6),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          // Subtitle
-          // Text(
-          //   'Votez sur les lois de demain.',
-          //   style: TextStyle(
-          //     color: Colors.white.withValues(alpha: 0.85),
-          //     fontSize: 15,
-          //     fontWeight: FontWeight.w500,
-          //     height: 1.4,
-          //   ),
-          // ),
-        ],
+        ),
       ),
     );
   }

@@ -27,6 +27,11 @@ class AppColors {
   static const Color border = Color(0xFFE5E5E5);
   static const Color divider = Color(0xFFF0F0F0);
 
+  // Glassmorphism
+  static const Color glassWhite = Color(0xCCFFFFFF);   // 80% white
+  static const Color glassBorder = Color(0x33FFFFFF);    // 20% white
+  static const Color glassShadow = Color(0x0A000000);    // very subtle shadow
+
   // Category colors
   static const Color catDefense = Color(0xFF1E40AF);
   static const Color catEconomie = Color(0xFF047857);
