@@ -208,6 +208,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen>
                 child: Image.asset(
                   party.leaderAsset,
                   height: 220,
+                  cacheHeight: 660,
                   fit: BoxFit.cover,
                 ),
               ),
@@ -269,6 +270,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen>
                     ),
                     child: Image.asset(
                       party.logoAsset,
+                      cacheHeight: 168,
                       fit: BoxFit.contain,
                     ),
                   ),

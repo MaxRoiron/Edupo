@@ -25,7 +25,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late Animation<double> _fadeAnimation;
   late AnimationController _gradientController;
   late ScrollController _scrollController;
-  double _scrollOffset = 0;
 
   bool _isLoading = true;
   List<Law> _allLaws = [];
@@ -48,10 +47,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       vsync: this,
     )..repeat(reverse: true);
 
-    _scrollController = ScrollController()
-      ..addListener(() {
-        setState(() => _scrollOffset = _scrollController.offset);
-      });
+    _scrollController = ScrollController();
 
     _animController.forward();
     _fetchLaws();
@@ -148,12 +144,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         child: Stack(
           children: [
             // Animated gradient background
-            _buildAnimatedBackground(),
+            RepaintBoundary(
+              child: _buildAnimatedBackground(),
+            ),
             // Main content
-            CustomScrollView(
-              controller: _scrollController,
-              physics: const BouncingScrollPhysics(),
-              slivers: [
+            RepaintBoundary(
+              child: CustomScrollView(
+                controller: _scrollController,
+                physics: const BouncingScrollPhysics(),
+                slivers: [
                 // Hero Header with hemicycle image
                 SliverToBoxAdapter(child: _buildHeroHeader()),
 
@@ -220,6 +219,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ),
               ],
             ),
+            ),
           ],
         ),
       ),
@@ -264,25 +264,30 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   /// Hero Header with hemicycle background and parallax
   Widget _buildHeroHeader() {
-    final double parallaxOffset = _scrollOffset * 0.4;
-    final double headerOpacity = (1.0 - (_scrollOffset / 300)).clamp(0.0, 1.0);
-    
-    return Container(
-      height: 260,
-      clipBehavior: Clip.antiAlias,
-      decoration: const BoxDecoration(
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
-      ),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          // Background image with parallax
-          Transform.translate(
+    return AnimatedBuilder(
+      animation: _scrollController,
+      builder: (context, child) {
+        final double currentScrollOffset = _scrollController.hasClients ? _scrollController.offset : 0.0;
+        final double parallaxOffset = currentScrollOffset * 0.4;
+        final double headerOpacity = (1.0 - (currentScrollOffset / 300)).clamp(0.0, 1.0);
+
+        return Container(
+          height: 260,
+          clipBehavior: Clip.antiAlias,
+          decoration: const BoxDecoration(
+            borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
+          ),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Background image with parallax
+              Transform.translate(
             offset: Offset(0, -parallaxOffset),
             child: Image.asset(
               'assets/images/hemicycle.png',
               fit: BoxFit.cover,
               height: 320,
+              cacheHeight: 800,
               alignment: Alignment.center,
             ),
           ),
@@ -432,6 +437,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
         ],
       ),
+    );
+      },
     );
   }
 

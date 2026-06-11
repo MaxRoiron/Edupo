@@ -194,82 +194,85 @@ class _ProgramsScreenState extends State<ProgramsScreen>
             ),
           );
         },
-        child: Container(
-          decoration: BoxDecoration(
-            color: AppColors.cardBackground,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: AppColors.border),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Top colored bar with party info
-              Container(
-                padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      party.primaryColor,
-                      party.secondaryColor,
-                    ],
-                  ),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(18),
-                    topRight: Radius.circular(18),
-                  ),
+        child: RepaintBoundary(
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppColors.cardBackground,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: AppColors.border),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
                 ),
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    // Leader face — large and slightly transparent with bottom fade
-                    Positioned(
-                      right: 40,
-                      top: -20,
-                      bottom: -20,
-                      child: Opacity(
-                        opacity: 0.85,
-                        child: ShaderMask(
-                          shaderCallback: (bounds) => const LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [Colors.white, Colors.transparent],
-                            stops: [0.75, 1.0],
-                          ).createShader(bounds),
-                          blendMode: BlendMode.dstIn,
-                          child: Image.asset(
-                            party.leaderAsset,
-                            height: 200,
-                            fit: BoxFit.cover,
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Top colored bar with party info
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        party.primaryColor,
+                        party.secondaryColor,
+                      ],
+                    ),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(18),
+                      topRight: Radius.circular(18),
+                    ),
+                  ),
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      // Leader face — large and slightly transparent with bottom fade
+                      Positioned(
+                        right: 40,
+                        top: -20,
+                        bottom: -20,
+                        child: Opacity(
+                          opacity: 0.85,
+                          child: ShaderMask(
+                            shaderCallback: (bounds) => const LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [Colors.white, Colors.transparent],
+                              stops: [0.75, 1.0],
+                            ).createShader(bounds),
+                            blendMode: BlendMode.dstIn,
+                            child: Image.asset(
+                              party.leaderAsset,
+                              height: 200,
+                              cacheHeight: 600,
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    // Foreground: Logo + Name + Arrow
-                    Row(
-                      children: [
-                        // Party logo
-                        Container(
-                          width: 44,
-                          height: 44,
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(12),
+                      // Foreground: Logo + Name + Arrow
+                      Row(
+                        children: [
+                          // Party logo
+                          Container(
+                            width: 44,
+                            height: 44,
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Image.asset(
+                              party.logoAsset,
+                              cacheHeight: 150,
+                              fit: BoxFit.contain,
+                            ),
                           ),
-                          child: Image.asset(
-                            party.logoAsset,
-                            fit: BoxFit.contain,
-                          ),
-                        ),
                         const SizedBox(width: 14),
                         // Name + abbreviation
                         Expanded(
@@ -391,6 +394,7 @@ class _ProgramsScreenState extends State<ProgramsScreen>
               ),
             ],
           ),
+        ),
         ),
       ),
     );
