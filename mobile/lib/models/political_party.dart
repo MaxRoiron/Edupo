@@ -41,6 +41,8 @@ class PoliticalParty {
   final List<ProgramPoint> programPoints;
   final List<CriticalQuestion> criticalQuestions;
   final String summary;
+  final String logoAsset;    // Path to party logo in assets/images/
+  final String leaderAsset;  // Path to leader face in assets/images/
 
   const PoliticalParty({
     required this.name,
@@ -55,6 +57,8 @@ class PoliticalParty {
     required this.programPoints,
     required this.criticalQuestions,
     required this.summary,
+    required this.logoAsset,
+    required this.leaderAsset,
   });
 }
 
@@ -75,6 +79,8 @@ final List<PoliticalParty> frenchPoliticalParties = [
     secondaryColor: const Color(0xFF8B1A30),
     icon: Icons.front_hand_rounded,
     positioning: 'Gauche radicale',
+    logoAsset: 'assets/images/lfilogo.png',
+    leaderAsset: 'assets/images/jeanlucmelanchon.png',
     summary: 'La France Insoumise propose une transformation profonde de la société française à travers une politique de redistribution massive, une transition écologique ambitieuse et une refonte des institutions vers une VIe République. Le programme s\'articule autour de la justice sociale, de la planification écologique et de la souveraineté populaire.',
     programPoints: [
       ProgramPoint(
@@ -152,13 +158,15 @@ final List<PoliticalParty> frenchPoliticalParties = [
   PoliticalParty(
     name: 'Parti Socialiste',
     abbreviation: 'PS',
-    leader: 'Olivier Faure',
+    leader: 'Karim Bouamrane',
     ideology: 'Social-démocratie',
     shortDescription: 'Parti historique de la gauche, défendant l\'État-providence et la justice sociale.',
     primaryColor: const Color(0xFFE4003C),
     secondaryColor: const Color(0xFFB8002F),
     icon: Icons.favorite_rounded,
     positioning: 'Centre-gauche',
+    logoAsset: 'assets/images/pslogo.png',
+    leaderAsset: 'assets/images/karimbouamrane.png',
     summary: 'Le Parti Socialiste défend un projet social-démocrate fondé sur le renforcement de l\'État-providence, la transition écologique progressive et la réduction des inégalités. Il prône un capitalisme régulé, le dialogue social et l\'intégration européenne comme levier de progrès.',
     programPoints: [
       ProgramPoint(
@@ -231,6 +239,8 @@ final List<PoliticalParty> frenchPoliticalParties = [
     secondaryColor: const Color(0xFF007A3D),
     icon: Icons.park_rounded,
     positioning: 'Gauche',
+    logoAsset: 'assets/images/ellvlogo.png',
+    leaderAsset: 'assets/images/marinetondelier.png',
     summary: 'EELV place la crise climatique et environnementale au centre de son projet politique. Le parti propose une transformation radicale du modèle de production et de consommation, articulée autour de la sobriété, des énergies renouvelables, de l\'agroécologie et d\'une économie circulaire.',
     programPoints: [
       ProgramPoint(
@@ -296,13 +306,15 @@ final List<PoliticalParty> frenchPoliticalParties = [
   PoliticalParty(
     name: 'Renaissance',
     abbreviation: 'RE',
-    leader: 'Emmanuel Macron',
+    leader: 'Gabriel Attal',
     ideology: 'Libéralisme progressiste / Centrisme',
     shortDescription: 'Parti présidentiel positionnné au centre, prônant la modernisation de l\'économie française.',
     primaryColor: const Color(0xFF7B68EE),
     secondaryColor: const Color(0xFF5B4CD4),
     icon: Icons.auto_awesome_rounded,
     positioning: 'Centre',
+    logoAsset: 'assets/images/relogo.png',
+    leaderAsset: 'assets/images/gabrielattal.png',
     summary: 'Renaissance (ex-LREM) porte un projet de modernisation libérale de l\'économie française, combinant réformes structurelles (marché du travail, retraites), politique pro-business et investissements dans l\'innovation. Le parti assume une position pro-européenne forte et un « en même temps » entre mesures de gauche et de droite.',
     programPoints: [
       ProgramPoint(
@@ -374,13 +386,15 @@ final List<PoliticalParty> frenchPoliticalParties = [
   PoliticalParty(
     name: 'Les Républicains',
     abbreviation: 'LR',
-    leader: 'Laurent Wauquiez',
+    leader: 'Bruno Retailleau',
     ideology: 'Libéralisme conservateur / Gaullisme',
     shortDescription: 'Parti de droite classique, héritier du gaullisme, défendant l\'autorité et la liberté économique.',
     primaryColor: const Color(0xFF0066CC),
     secondaryColor: const Color(0xFF004C99),
     icon: Icons.shield_rounded,
     positioning: 'Droite',
+    logoAsset: 'assets/images/lrlogo.png',
+    leaderAsset: 'assets/images/brunoretailleu.png',
     summary: 'Les Républicains incarnent la droite classique française, alliant libéralisme économique, conservatisme sociétal et fermeté régalienne. Le parti défend une réduction de la dépense publique, une baisse des impôts, le renforcement de l\'autorité de l\'État et une politique migratoire restrictive.',
     programPoints: [
       ProgramPoint(
@@ -453,6 +467,8 @@ final List<PoliticalParty> frenchPoliticalParties = [
     secondaryColor: const Color(0xFF0A1F3D),
     icon: Icons.flag_rounded,
     positioning: 'Extrême droite',
+    logoAsset: 'assets/images/rnlogo.png',
+    leaderAsset: 'assets/images/jordanbardella.png',
     summary: 'Le Rassemblement National propose un programme centré sur la « priorité nationale », la réduction massive de l\'immigration, le protectionnisme économique et le renforcement de la souveraineté française face à l\'Union européenne. Le parti a modéré certaines positions économiques pour élargir son électorat.',
     programPoints: [
       ProgramPoint(
@@ -537,6 +553,8 @@ final List<PoliticalParty> frenchPoliticalParties = [
     secondaryColor: const Color(0xFF101025),
     icon: Icons.castle_rounded,
     positioning: 'Extrême droite',
+    logoAsset: 'assets/images/r!logo.png',
+    leaderAsset: 'assets/images/ericzemmour.png',
     summary: 'Reconquête se positionne comme un parti de droite identitaire, plaçant la question de l\'immigration et de l\'identité culturelle française au cœur de son programme. Le parti défend une vision conservatrice de la société, une politique économique libérale et un retour à la « civilisation française ».',
     programPoints: [
       ProgramPoint(
@@ -609,6 +627,8 @@ final List<PoliticalParty> frenchPoliticalParties = [
     secondaryColor: const Color(0xFF9B0000),
     icon: Icons.construction_rounded,
     positioning: 'Gauche',
+    logoAsset: 'assets/images/pcflogo.png',
+    leaderAsset: 'assets/images/fabienroussel.png',
     summary: 'Le PCF défend une politique de gauche axée sur la défense des travailleurs, la réindustrialisation, les services publics et la souveraineté nationale. Le parti se distingue par son attachement au nucléaire civil, son soutien à la laïcité et sa défense de la classe ouvrière.',
     programPoints: [
       ProgramPoint(

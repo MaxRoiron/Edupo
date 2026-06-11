@@ -61,6 +61,23 @@ flutter:
 
   assets:
     - assets/images/hemicycle.png
+    - assets/images/lfilogo.png
+    - assets/images/pslogo.png
+    - assets/images/ellvlogo.png
+    - assets/images/relogo.png
+    - assets/images/lrlogo.png
+    - assets/images/rnlogo.png
+    - assets/images/r!logo.png
+    - assets/images/pcflogo.png
+    - assets/images/jeanlucmelanchon.png
+    - assets/images/karimbouamrane.png
+    - assets/images/marinetondelier.png
+    - assets/images/gabrielattal.png
+    - assets/images/brunoretailleu.png
+    - assets/images/jordanbardella.png
+    - assets/images/marinelepen.png
+    - assets/images/ericzemmour.png
+    - assets/images/fabienroussel.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
