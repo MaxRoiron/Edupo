@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from .shemas import LawView, LawCreate, LawUpdate, VoteCreate, VoteUpdate, Voteview
 from .services import read_all_law, read_law, add_law, update_law, delete_law
 from .services import read_all_vote, read_vote, add_vote, update_vote, delete_vote
+from .scraper import resync_voted_laws
 
 from sqlmodel import Session
 import httpx
@@ -199,6 +200,13 @@ async def fetch_assembly_votes(scrutin_id: str):
         except Exception as e:
             print(f"[assembly_votes] Error: {e}")
             raise HTTPException(status_code=500, detail="Internal Error")
+
+
+@router.post("/admin/law/resync-voted", tags=["Admin"])
+async def resync_voted_laws_endpoint():
+    """Re-télécharge les données de l'AN et met à jour title/subtitle/description des lois votées existantes."""
+    count = await resync_voted_laws()
+    return {"message": f"{count} lois votées mises à jour avec le nouveau format."}
 
 @router.get("/law", response_model=list[LawView], tags=["Law"])
 def read_all_law_endpoint(session: Session = Depends(get_session)):
