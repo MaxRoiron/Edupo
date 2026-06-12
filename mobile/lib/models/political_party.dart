@@ -43,6 +43,10 @@ class PoliticalParty {
   final String summary;
   final String logoAsset;    // Path to party logo in assets/images/
   final String leaderAsset;  // Path to leader face in assets/images/
+  final String leaderCareer;
+  final String? assemblyLink;
+  final String? constituency;
+  final String? seatNumber;
 
   const PoliticalParty({
     required this.name,
@@ -59,6 +63,10 @@ class PoliticalParty {
     required this.summary,
     required this.logoAsset,
     required this.leaderAsset,
+    required this.leaderCareer,
+    this.assemblyLink,
+    this.constituency,
+    this.seatNumber,
   });
 }
 
@@ -73,14 +81,15 @@ final List<PoliticalParty> frenchPoliticalParties = [
     name: 'La France Insoumise',
     abbreviation: 'LFI',
     leader: 'Jean-Luc Mélenchon',
-    ideology: 'Gauche radicale / Populisme de gauche',
+    ideology: 'Gauche réformiste / Populisme de gauche',
     shortDescription: 'Mouvement prônant une rupture avec le libéralisme économique et une VIe République.',
     primaryColor: const Color(0xFFCC2443),
     secondaryColor: const Color(0xFF8B1A30),
     icon: Icons.front_hand_rounded,
-    positioning: 'Gauche radicale',
+    positioning: 'Gauche',
     logoAsset: 'assets/images/lfilogo.png',
     leaderAsset: 'assets/images/jeanlucmelanchon.png',
+    leaderCareer: 'Professeur de français, sénateur de l\'Essonne (1986-2000, 2004-2010), ministre de l\'Enseignement professionnel (2000-2002), député européen (2009-2017), député des Bouches-du-Rhône (2017-2022).',
     summary: 'La France Insoumise propose une transformation profonde de la société française à travers une politique de redistribution massive, une transition écologique ambitieuse et une refonte des institutions vers une VIe République. Le programme s\'articule autour de la justice sociale, de la planification écologique et de la souveraineté populaire.',
     programPoints: [
       ProgramPoint(
@@ -167,6 +176,7 @@ final List<PoliticalParty> frenchPoliticalParties = [
     positioning: 'Centre-gauche',
     logoAsset: 'assets/images/pslogo.png',
     leaderAsset: 'assets/images/karimbouamrane.png',
+    leaderCareer: 'Cadre dirigeant dans le secteur de la cybersécurité, conseiller municipal (1995), conseiller régional d\'Île-de-France, maire de Saint-Ouen-sur-Seine (depuis 2020).',
     summary: 'Le Parti Socialiste défend un projet social-démocrate fondé sur le renforcement de l\'État-providence, la transition écologique progressive et la réduction des inégalités. Il prône un capitalisme régulé, le dialogue social et l\'intégration européenne comme levier de progrès.',
     programPoints: [
       ProgramPoint(
@@ -241,6 +251,7 @@ final List<PoliticalParty> frenchPoliticalParties = [
     positioning: 'Gauche',
     logoAsset: 'assets/images/ellvlogo.png',
     leaderAsset: 'assets/images/marinetondelier.png',
+    leaderCareer: 'Attachée parlementaire, conseillère municipale d\'Hénin-Beaumont (depuis 2014), conseillère régionale des Hauts-de-France (depuis 2021), Secrétaire nationale d\'Europe Écologie Les Verts (depuis 2022).',
     summary: 'EELV place la crise climatique et environnementale au centre de son projet politique. Le parti propose une transformation radicale du modèle de production et de consommation, articulée autour de la sobriété, des énergies renouvelables, de l\'agroécologie et d\'une économie circulaire.',
     programPoints: [
       ProgramPoint(
@@ -312,9 +323,13 @@ final List<PoliticalParty> frenchPoliticalParties = [
     primaryColor: const Color(0xFF7B68EE),
     secondaryColor: const Color(0xFF5B4CD4),
     icon: Icons.auto_awesome_rounded,
-    positioning: 'Centre',
+    positioning: 'Centre-droite',
     logoAsset: 'assets/images/relogo.png',
     leaderAsset: 'assets/images/gabrielattal.png',
+    leaderCareer: 'Député des Hauts-de-Seine, Secrétaire d\'État auprès du ministre de l\'Éducation nationale, Porte-parole du gouvernement, Ministre de l\'Éducation nationale, Premier ministre (2024).',
+    assemblyLink: 'https://www.assemblee-nationale.fr/dyn/deputes/PA720370',
+    constituency: '10e circonscription des Hauts-de-Seine',
+    seatNumber: 'Non spécifié',
     summary: 'Renaissance (ex-LREM) porte un projet de modernisation libérale de l\'économie française, combinant réformes structurelles (marché du travail, retraites), politique pro-business et investissements dans l\'innovation. Le parti assume une position pro-européenne forte et un « en même temps » entre mesures de gauche et de droite.',
     programPoints: [
       ProgramPoint(
@@ -395,6 +410,7 @@ final List<PoliticalParty> frenchPoliticalParties = [
     positioning: 'Droite',
     logoAsset: 'assets/images/lrlogo.png',
     leaderAsset: 'assets/images/brunoretailleu.png',
+    leaderCareer: 'Député de la Vendée (1994-1997), président du conseil régional des Pays de la Loire (2015-2017), sénateur de la Vendée (2004-2024), président du groupe LR au Sénat (2014-2024), Ministre de l\'Intérieur (depuis 2024).',
     summary: 'Les Républicains incarnent la droite classique française, alliant libéralisme économique, conservatisme sociétal et fermeté régalienne. Le parti défend une réduction de la dépense publique, une baisse des impôts, le renforcement de l\'autorité de l\'État et une politique migratoire restrictive.',
     programPoints: [
       ProgramPoint(
@@ -460,7 +476,7 @@ final List<PoliticalParty> frenchPoliticalParties = [
   PoliticalParty(
     name: 'Rassemblement National',
     abbreviation: 'RN',
-    leader: 'Jordan Bardella / Marine Le Pen',
+    leader: 'Jordan Bardella',
     ideology: 'National-populisme / Souverainisme',
     shortDescription: 'Premier parti d\'opposition, axé sur la souveraineté nationale et la réduction de l\'immigration.',
     primaryColor: const Color(0xFF0D2C54),
@@ -469,6 +485,10 @@ final List<PoliticalParty> frenchPoliticalParties = [
     positioning: 'Extrême droite',
     logoAsset: 'assets/images/rnlogo.png',
     leaderAsset: 'assets/images/jordanbardella.png',
+    leaderCareer: 'Jordan Bardella: Député européen (depuis 2019), Président du RN (depuis 2022).',
+    assemblyLink: 'https://www.assemblee-nationale.fr/dyn/deputes/PA1206',
+    constituency: '11e circonscription du Pas-de-Calais',
+    seatNumber: 'Non spécifié',
     summary: 'Le Rassemblement National propose un programme centré sur la « priorité nationale », la réduction massive de l\'immigration, le protectionnisme économique et le renforcement de la souveraineté française face à l\'Union européenne. Le parti a modéré certaines positions économiques pour élargir son électorat.',
     programPoints: [
       ProgramPoint(
@@ -555,6 +575,7 @@ final List<PoliticalParty> frenchPoliticalParties = [
     positioning: 'Extrême droite',
     logoAsset: 'assets/images/r!logo.png',
     leaderAsset: 'assets/images/ericzemmour.png',
+    leaderCareer: 'Journaliste, essayiste, fondateur et président du parti Reconquête (depuis 2021).',
     summary: 'Reconquête se positionne comme un parti de droite identitaire, plaçant la question de l\'immigration et de l\'identité culturelle française au cœur de son programme. Le parti défend une vision conservatrice de la société, une politique économique libérale et un retour à la « civilisation française ».',
     programPoints: [
       ProgramPoint(
@@ -629,6 +650,10 @@ final List<PoliticalParty> frenchPoliticalParties = [
     positioning: 'Gauche',
     logoAsset: 'assets/images/pcflogo.png',
     leaderAsset: 'assets/images/fabienroussel.png',
+    leaderCareer: 'Journaliste, député du Nord (depuis 2017), secrétaire national du Parti communiste français (depuis 2018).',
+    assemblyLink: 'https://www.assemblee-nationale.fr/dyn/deputes/PA720692',
+    constituency: '20e circonscription du Nord',
+    seatNumber: 'Non spécifié',
     summary: 'Le PCF défend une politique de gauche axée sur la défense des travailleurs, la réindustrialisation, les services publics et la souveraineté nationale. Le parti se distingue par son attachement au nucléaire civil, son soutien à la laïcité et sa défense de la classe ouvrière.',
     programPoints: [
       ProgramPoint(

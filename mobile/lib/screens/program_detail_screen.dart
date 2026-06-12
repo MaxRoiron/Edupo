@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../models/political_party.dart';
 import 'text_reader_screen.dart';
+import 'politician_detail_screen.dart';
 
 class ProgramDetailScreen extends StatefulWidget {
   final PoliticalParty party;
@@ -16,6 +17,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _animController;
   late Animation<double> _fadeAnimation;
+  bool _isLeaderHovered = false;
 
   @override
   void initState() {
@@ -195,21 +197,61 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen>
             right: -25,
             top: -20,
             bottom: -20,
-            child: Opacity(
-              opacity: 0.85,
-              child: ShaderMask(
-                shaderCallback: (bounds) => const LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.white, Colors.transparent],
-                  stops: [0.75, 1.0],
-                ).createShader(bounds),
-                blendMode: BlendMode.dstIn,
-                child: Image.asset(
-                  party.leaderAsset,
-                  height: 220,
-                  cacheHeight: 660,
-                  fit: BoxFit.cover,
+            child: Tooltip(
+              message: party.leader,
+              decoration: BoxDecoration(
+                color: AppColors.cardBackground,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: party.primaryColor.withValues(alpha: 0.3)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  )
+                ],
+              ),
+              textStyle: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700),
+              verticalOffset: 80,
+              child: MouseRegion(
+                cursor: SystemMouseCursors.click,
+                onEnter: (_) => setState(() => _isLeaderHovered = true),
+                onExit: (_) => setState(() => _isLeaderHovered = false),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PoliticianDetailScreen(party: party),
+                      ),
+                    );
+                  },
+                  child: Hero(
+                    tag: 'leader_${party.abbreviation}',
+                    child: AnimatedScale(
+                      scale: _isLeaderHovered ? 1.05 : 1.0,
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeOut,
+                      child: Opacity(
+                        opacity: 0.85,
+                        child: ShaderMask(
+                          shaderCallback: (bounds) => const LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [Colors.white, Colors.transparent],
+                            stops: [0.75, 1.0],
+                          ).createShader(bounds),
+                          blendMode: BlendMode.dstIn,
+                          child: Image.asset(
+                            party.leaderAsset,
+                            height: 220,
+                            cacheHeight: 660,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -436,7 +478,8 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen>
   Widget _buildProgramPointCard(ProgramPoint point, int number) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
-      child: GestureDetector(
+      child: RepaintBoundary(
+        child: GestureDetector(
         onTap: () => _openReader(
           title: point.title,
           body: point.detailedContent,
@@ -510,6 +553,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen>
             ],
           ),
         ),
+        ),
       ),
     );
   }
@@ -522,7 +566,8 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen>
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
-      child: GestureDetector(
+      child: RepaintBoundary(
+        child: GestureDetector(
         onTap: () => _openReader(
           title: question.question,
           body: question.analysis,
@@ -627,6 +672,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen>
               ),
             ],
           ),
+        ),
         ),
       ),
     );

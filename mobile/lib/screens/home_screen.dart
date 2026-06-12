@@ -413,7 +413,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   const Spacer(),
                   // Tagline
                   Text(
-                    'Mieux comprendre les lois,\nC\'est mieux comprendre son monde.',
+                    'Vous aussi, prenez part à la vie politique !',
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.95),
                       fontSize: 22,

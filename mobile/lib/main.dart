@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'theme/app_theme.dart';
 import 'screens/home_screen.dart';
 import 'screens/programs_screen.dart';
+import 'models/political_party.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,6 +29,16 @@ class EdupoApp extends StatefulWidget {
 class _EdupoAppState extends State<EdupoApp> {
   int _currentIndex = 0;
   int _previousIndex = 0;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    precacheImage(const AssetImage('assets/images/hemicycle.png'), context);
+    for (var party in frenchPoliticalParties) {
+      precacheImage(AssetImage(party.leaderAsset), context);
+      precacheImage(AssetImage(party.logoAsset), context);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,7 +118,7 @@ class _EdupoAppState extends State<EdupoApp> {
           color: isSelected ? Colors.white : Colors.transparent,
           borderRadius: BorderRadius.circular(15),
         ),
-        child: Row(
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             AnimatedSwitcher(
@@ -121,12 +132,12 @@ class _EdupoAppState extends State<EdupoApp> {
               ),
             ),
             if (isSelected) ...[
-              const SizedBox(width: 8),
+              const SizedBox(height: 8),
               Text(
                 label,
                 style: const TextStyle(
                   color: AppColors.frBlue,
-                  fontSize: 14,
+                  fontSize: 12,
                   fontWeight: FontWeight.w700,
                 ),
               ),
