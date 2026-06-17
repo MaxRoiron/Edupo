@@ -3,7 +3,6 @@ import datetime
 
 class LawCreate(BaseModel):
     title: str
-    subtitle: str | None = None
     description: str
     domain_id: int
     source_url: str | None = None
@@ -15,7 +14,6 @@ class LawCreate(BaseModel):
 
 class LawUpdate(BaseModel):
     title: str | None = None
-    subtitle: str | None = None
     description: str | None = None
     domain_id: int | None = None
     source_url: str | None = None
@@ -28,7 +26,6 @@ class LawUpdate(BaseModel):
 class LawView(BaseModel):
     id: int
     title: str
-    subtitle: str | None
     description: str
     domain_id: int
     source_url: str | None

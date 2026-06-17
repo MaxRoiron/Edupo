@@ -33,7 +33,7 @@ class _EdupoAppState extends State<EdupoApp> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    precacheImage(const AssetImage('assets/images/hemicycle.png'), context);
+    precacheImage(const AssetImage('assets/images/slider/hemicycle.png'), context);
     for (var party in frenchPoliticalParties) {
       precacheImage(AssetImage(party.leaderAsset), context);
       precacheImage(AssetImage(party.logoAsset), context);

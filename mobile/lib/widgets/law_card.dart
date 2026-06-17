@@ -57,13 +57,13 @@ class _LawCardState extends State<LawCard> with SingleTickerProviderStateMixin {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Top accent line — subtle tricolor
-                Row(
-                  children: [
-                    Expanded(child: Container(height: 2.5, color: AppColors.frBlue.withValues(alpha: 0.7))),
-                    Expanded(child: Container(height: 2.5, color: Colors.white)),
-                    Expanded(child: Container(height: 2.5, color: AppColors.frRed.withValues(alpha: 0.7))),
-                  ],
-                ),
+                // Row(
+                //   children: [
+                //     Expanded(child: Container(height: 2.5, color: AppColors.frBlue.withValues(alpha: 0.7))),
+                //     Expanded(child: Container(height: 2.5, color: Colors.white)),
+                //     Expanded(child: Container(height: 2.5, color: AppColors.frRed.withValues(alpha: 0.7))),
+                //   ],
+                // ),
                 
                 // Category badge + date
                 Padding(
@@ -135,25 +135,10 @@ class _LawCardState extends State<LawCard> with SingleTickerProviderStateMixin {
                     widget.law.title,
                     style: const TextStyle(
                       color: AppColors.textPrimary,
-                      fontSize: 17,
+                      fontSize: 22,
                       fontWeight: FontWeight.w800,
                       height: 1.3,
                       letterSpacing: -0.2,
-                    ),
-                  ),
-                ),
-
-                // Subtitle
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-                  child: Text(
-                    widget.law.subtitle,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 13,
-                      height: 1.5,
                     ),
                   ),
                 ),

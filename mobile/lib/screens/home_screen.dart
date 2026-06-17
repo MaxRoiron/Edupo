@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../models/law.dart';
@@ -83,7 +84,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       'ivg', 'avortement', 'fin de vie', 'cannabis', 'légalisation', 'police', 'sécurité'
     ];
     
-    final textToSearch = '${law.title} ${law.subtitle} ${law.description}'.toLowerCase();
+    final textToSearch = '${law.title} ${law.description}'.toLowerCase();
     
     for (final kw in keywords) {
       if (textToSearch.contains(kw)) {
@@ -284,7 +285,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               Transform.translate(
             offset: Offset(0, -parallaxOffset),
             child: Image.asset(
-              'assets/images/hemicycle.png',
+              'assets/images/slider/hemicycle.png',
               fit: BoxFit.cover,
               height: 320,
               cacheHeight: 800,

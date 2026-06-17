@@ -4,7 +4,6 @@ import '../theme/app_theme.dart';
 class Law {
   final String id;
   final String title;
-  final String subtitle;
   final String description;
   final String date;
   final DateTime voteDate;
@@ -13,7 +12,6 @@ class Law {
   const Law({
     required this.id,
     required this.title,
-    required this.subtitle,
     required this.description,
     required this.date,
     required this.voteDate,
@@ -32,7 +30,6 @@ class Law {
     return Law(
       id: json['scrutin_id']?.toString() ?? json['id']?.toString() ?? '',
       title: json['title'] ?? 'Loi sans titre',
-      subtitle: json['subtitle'] ?? '',
       description: json['description'] ?? '',
       date: '${vDate.day} ${months[vDate.month - 1]} ${vDate.year}',
       voteDate: vDate,

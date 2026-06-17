@@ -15,6 +15,133 @@ from app.modules.political_party.model import Domain
 from app.modules.law.model import Law
 
 
+def clean_law_title(raw_title: str) -> str:
+    if raw_title.startswith("Êtes-vous favorable à ") and not "visant à" in raw_title and not "relatif à" in raw_title and not "projet de loi" in raw_title and not "proposition de loi" in raw_title and not "portant sur" in raw_title:
+        if "l'ensemble de la" not in raw_title:
+            return raw_title
+
+    t = re.sub(r'(?i)^Êtes-vous favorable à l\'ensemble de la (proposition|projet) de loi ', '', raw_title)
+    t = re.sub(r'(?i)^Êtes-vous favorable à (la )?(proposition|projet) de loi ', '', t)
+    t = re.sub(r'(?i)^Êtes-vous favorable à ', '', t)
+    t = re.sub(r'(?i)^Êtes-vous favorable( aux?| l\'| la )', r'\1', t)
+    t = re.sub(r' \?$', '', t)
+    
+    t = re.sub(r'(?i)^.*l\'ensemble d[ue] (projet|proposition) de loi\s+', '', t)
+    t = re.sub(r'(?i)^(projet|proposition) de loi( organique)?\s+', '', t)
+    
+    t = t.split("(texte")[0].strip()
+    t = re.sub(r'(?i),?\s*en\s+(nouvelle\s+lecture|première\s+lecture|deuxième\s+lecture|lecture\s+définitive).*$', '', t).strip()
+    t = re.sub(r'(?i)\s*\(première lecture\)\.?$', '', t).strip()
+    
+    t = re.sub(r'(?i)^(organique )?(relatif|relative|relatifs|relatives) à\s+', '', t)
+    t = re.sub(r'(?i)^portant( sur)?\s+', '', t)
+    t = re.sub(r'(?i)^tendant à\s+', '', t)
+    
+    if re.search(r'(?i)^visant à\s+', t):
+        t = re.sub(r'(?i)^visant à\s+', '', t)
+        
+        verb_map = {
+            r'^lutter\b': 'la lutte',
+            r'^protéger\b': 'la protection de',
+            r'^renforcer\b': 'le renforcement de',
+            r'^garantir\b': 'la garantie de',
+            r'^améliorer\b': "l'amélioration de",
+            r'^instaurer\b': "l'instauration de",
+            r'^faciliter\b': 'la facilitation de',
+            r'^interdire\b': "l'interdiction de",
+            r'^réguler\b': 'la régulation de',
+            r'^encadrer\b': "l'encadrement de",
+            r'^revaloriser\b': 'la revalorisation de',
+            r'^conforter\b': 'le confortement de',
+            r'^réparer\b': 'la réparation de',
+            r'^réserver\b': 'la réservation de',
+            r'^reconnaître\b': 'la reconnaissance de',
+            r'^moderniser\b': 'la modernisation de',
+            r'^exercer\b': "l'exercice de",
+            r'^pérenniser\b': 'la pérennisation de',
+            r'^étendre\b': "l'extension de",
+            r'^créer\b': 'la création de',
+            r'^limiter\b': 'la limitation de',
+            r'^adapter\b': "l'adaptation de",
+            r'^favoriser\b': 'la promotion de',
+            r'^promouvoir\b': 'la promotion de',
+            r'^assurer\b': "la garantie de",
+            r'^offrir\b': "l'apport de",
+            r'^supprimer\b': 'la suppression de',
+            r'^sanctionner\b': 'la sanction de',
+            r'^dépénaliser\b': 'la dépénalisation de',
+            r'^légaliser\b': 'la légalisation de',
+            r'^autoriser\b': "l'autorisation de",
+            r'^simplifier\b': 'la simplification de',
+            r'^accélérer\b': "l'accélération de",
+            r'^financer\b': 'le financement de',
+            r'^soutenir\b': 'le soutien de',
+            r'^développer\b': 'le développement de',
+            r'^orienter\b': "l'orientation de",
+            r'^programmer\b': 'la programmation de',
+            r'^réformer\b': 'la réforme de',
+            r'^abroger\b': "l'abrogation de",
+            r'^rétablir\b': 'le rétablissement de',
+            r'^mieux reconnaître et protéger\b': 'une meilleure reconnaissance et protection de',
+            r'^mieux reconnaître\b': 'une meilleure reconnaissance de',
+            r'^mieux protéger\b': 'une meilleure protection de',
+            r'^actualiser\b': "l'actualisation de",
+            r'^allonger\b': "l'allongement de",
+            r'^réduire\b': "la réduction de",
+            r'^augmenter\b': "l'augmentation de",
+            r'^lutter contre\b': 'la lutte contre',
+            r'^améliorant\b': "l'amélioration de",
+        }
+        
+        replaced = False
+        for pattern, replacement in verb_map.items():
+            if re.search(pattern, t, flags=re.IGNORECASE):
+                t = re.sub(pattern, replacement, t, flags=re.IGNORECASE)
+                replaced = True
+                break
+                
+        if replaced:
+            t = re.sub(r'\bde le\b', 'du', t)
+            t = re.sub(r'\bde les\b', 'des', t)
+            t = re.sub(r'\bde l\'\s+', "de l'", t)
+            t = re.sub(r'\bde l\'\b', "de l'", t)
+            t = re.sub(r'\bde des\b', 'des', t)
+        else:
+            return f"Êtes-vous favorable à la proposition de loi visant à {t} ?"
+            
+    t = re.sub(r'^ux ', 'aux ', t)
+    t = re.sub(r'^\s*d\'expérimentation\b', "l'expérimentation", t, flags=re.IGNORECASE)
+    if t.startswith("l'") or t.startswith("l ") or t.startswith("la ") or t.startswith("le ") or t.startswith("les ") or t.startswith("un ") or t.startswith("une ") or t.startswith("des ") or t.startswith("aux "):
+        pass
+    else:
+        t = t[0].lower() + t[1:]
+        
+    return f"Êtes-vous favorable à {t} ?"
+
+
+def _score_law(title: str, description: str) -> int:
+    score = 0
+    keywords = [
+      'jeune', 'étudiant', 'école', 'ecole', 'université', 'lycée', 'éducation', 'enseignement',
+      'numérique', 'internet', 'réseaux', 'cyber', 'harcèlement', 'mineur',
+      'climat', 'écologie', 'environnement', 'logement', "pouvoir d'achat", 'inflation',
+      'emploi', 'loyer', 'smic', 'transport', 'permis', 'précarité', 'santé mentale',
+      'ivg', 'avortement', 'fin de vie', 'cannabis', 'légalisation', 'police', 'sécurité'
+    ]
+    text_to_search = f"{title} {description}".lower()
+    
+    for kw in keywords:
+        if kw in text_to_search:
+            score += 3
+            
+    if 'ratification' in text_to_search or 'ordonnance' in text_to_search or 'approbation' in text_to_search:
+        score -= 5
+    if 'codification' in text_to_search or 'simplification administrative' in text_to_search:
+        score -= 3
+        
+    return score
+
+
 def _build_rss_description_lookup(rss_content: bytes) -> dict:
     """
     Parse le RSS de vie-publique.fr et construit un dictionnaire
@@ -34,6 +161,8 @@ def _build_rss_description_lookup(rss_content: bytes) -> dict:
         # Nettoyer HTML
         clean_desc = re.sub('<[^<]+?>', '', desc).strip()
         clean_desc = clean_desc.replace('&nbsp;', ' ').replace('&amp;', '&').replace('&#039;', "'")
+        # Enlever le lien de suivi
+        clean_desc = re.sub(r'(?i)lien de suivi.*', '', clean_desc).strip()
         # Normaliser le titre pour le matching
         norm = title.lower()
         norm = re.sub(r'^(loi du \d+ \w+ \d+ )', '', norm)
@@ -130,8 +259,7 @@ async def scrape_and_sync_laws():
                                             
                                             existing = session.exec(select(Law).where(Law.scrutin_id == uid)).first()
                                             if not existing:
-                                                clean_title = re.sub(r'^.*l\'ensemble d[ue] (projet|proposition) de loi (.*)$', r'\2', titre, flags=re.IGNORECASE)
-                                                clean_title = clean_title.split("(texte")[0].strip().capitalize()
+                                                clean_title = clean_law_title(titre)
                                                 
                                                 category = "Justice / Intérieur" if "intérieur" in clean_title.lower() or "sécurité" in clean_title.lower() else "Législation"
                                                 category = "Écologie" if "climat" in clean_title.lower() or "environnement" in clean_title.lower() else category
@@ -158,9 +286,12 @@ async def scrape_and_sync_laws():
                                                 else:
                                                     description = f"Le texte original est intitulé : '{titre}'.\nVote effectué le {vote_date_str} avec un résultat '{sort_code}'.\n\nParticipants: {votants} votants dont {pours} 'Pour' et {contres} 'Contre'."
                                                 
+                                                # Filtrage par score de pertinence
+                                                if _score_law(clean_title, description) < 1:
+                                                    continue
+
                                                 new_law = Law(
                                                     title=clean_title,
-                                                    subtitle=f"Scrutin National n°{numero}",
                                                     description=description,
                                                     domain_id=domain.id,
                                                     country_id=country.id,
@@ -201,8 +332,7 @@ async def scrape_and_sync_laws():
                                 fake_id = hashlib.sha256(link.encode()).hexdigest()[:8]
                                 existing = session.exec(select(Law).where(Law.scrutin_id == fake_id)).first()
                                 if not existing:
-                                    clean_title = re.sub(r'^(Projet|Proposition) de loi (.*)$', r'\2', title, flags=re.IGNORECASE)
-                                    clean_title = clean_title.capitalize()
+                                    clean_title = clean_law_title(title)
                                     
                                     # Set a future date within the next 2 months
                                     future_date = datetime.now() + timedelta(days=10 + (future_count % 45))
@@ -212,11 +342,15 @@ async def scrape_and_sync_laws():
                                     
                                     # Use a plain HTML tag removal for description
                                     clean_desc = re.sub('<[^<]+?>', '', description)
+                                    clean_desc = re.sub(r'(?i)lien de suivi.*', '', clean_desc).strip()
+                                    
+                                    # Filtrage par score de pertinence
+                                    if _score_law(clean_title, clean_desc) < 1:
+                                        continue
                                     
                                     session.add(Law(
                                         title=clean_title,
-                                        subtitle="Texte à venir",
-                                        description=f"{clean_desc}\n\nLien de suivi : {link}",
+                                        description=clean_desc,
                                         domain_id=domain.id,
                                         country_id=country.id,
                                         vote_date=future_date,
@@ -285,9 +419,7 @@ async def resync_voted_laws():
                                 existing = session.exec(select(Law).where(Law.scrutin_id == uid)).first()
                                 if existing:
                                     # Recalculer titre propre
-                                    clean_title = re.sub(r'^.*l\'ensemble d[ue] (projet|proposition) de loi (.*)$', r'\2', titre, flags=re.IGNORECASE)
-                                    clean_title = clean_title.split("(texte")[0].strip().capitalize()
-                                    clean_title = re.sub(r',?\s*en\s+(nouvelle\s+lecture|première\s+lecture|deuxième\s+lecture|lecture\s+définitive).*$', '', clean_title, flags=re.IGNORECASE).strip()
+                                    clean_title = clean_law_title(titre)
 
                                     sort_code = (s.get("sort") or {}).get("code", "")
                                     synthese = s.get("syntheseVote", {}).get("decompte", {})
@@ -295,8 +427,6 @@ async def resync_voted_laws():
                                     contres = synthese.get("contre", "0")
                                     votants = s.get("syntheseVote", {}).get("nombreVotants", "0")
                                     vote_date_str = s.get("dateScrutin", "")
-
-                                    subtitle = f"Scrutin National n°{numero}"
 
                                     # Chercher la vraie description dans vie-publique.fr
                                     rss_desc = _find_rss_description(titre, rss_lookup)
@@ -307,7 +437,6 @@ async def resync_voted_laws():
                                         description = f"Le texte original est intitulé : '{titre}'.\nVote effectué le {vote_date_str} avec un résultat '{sort_label}'.\n\nParticipants: {votants} votants dont {pours} 'Pour' et {contres} 'Contre'."
 
                                     existing.title = clean_title
-                                    existing.subtitle = subtitle
                                     existing.description = description
                                     session.add(existing)
                                     updated += 1

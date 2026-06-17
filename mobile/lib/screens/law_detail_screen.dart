@@ -223,18 +223,6 @@ class _LawDetailScreenState extends State<LawDetailScreen>
                     ),
                     const SizedBox(height: 10),
 
-                    // Subtitle
-                    Text(
-                      widget.law.subtitle,
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                        height: 1.5,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
                     // Divider
                     Divider(
                       color: AppColors.border.withValues(alpha: 0.6),

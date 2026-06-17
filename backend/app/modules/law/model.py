@@ -8,7 +8,6 @@ import datetime
 class Law(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
     title: str = Field(index=True)
-    subtitle: str | None = Field(default=None)
     description: str
     domain_id: int = Field(index=True, foreign_key="domain.id")
     source_url: str | None = Field(default=None, index=True)

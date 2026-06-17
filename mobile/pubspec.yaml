@@ -61,7 +61,6 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/images/hemicycle.png
     - assets/images/lfilogo.png
     - assets/images/pslogo.png
     - assets/images/ellvlogo.png
@@ -79,6 +78,15 @@ flutter:
     - assets/images/marinelepen.png
     - assets/images/ericzemmour.png
     - assets/images/fabienroussel.png
+    - assets/images/slider/hemicycle.png
+    # - assets/images/slider/attal.jpg
+    # - assets/images/slider/bompard.jpeg
+    # - assets/images/slider/glucksmann.jpeg
+    # - assets/images/slider/guiraud.jpeg
+    # - assets/images/slider/jlm.jpg
+    # - assets/images/slider/lfimeeting.jpg
+    # - assets/images/slider/macron.jpg
+    # - assets/images/slider/marinelepen.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
