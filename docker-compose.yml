@@ -2,6 +2,11 @@ services:
   db:
     image: postgres:17-alpine
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
     env_file:
       - backend/.env
     ports:
@@ -18,7 +23,8 @@ services:
     env_file:
       - backend/.env
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     restart: unless-stopped
     environment:
       - PYTHONUNBUFFERED=1

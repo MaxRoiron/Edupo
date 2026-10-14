@@ -16,7 +16,7 @@ class HemicycleChart extends StatelessWidget {
   Color _parseColor(String hex) {
     hex = hex.replaceAll('#', '');
     if (hex.length == 6) hex = 'FF$hex';
-    return Color(int.parse(hex, radix: 16));
+    return Color(int.tryParse(hex, radix: 16) ?? 0xFF808080);
   }
 
   @override
@@ -44,7 +44,8 @@ class HemicycleChart extends StatelessWidget {
           List<int> seatsPerRow = [];
           double totalArcSum = 0;
           for (int r = 0; r < rows; r++) {
-            double radius = innerRadius + (r / (rows - 1)) * (outerRadius - innerRadius);
+            double radius =
+                innerRadius + (r / (rows - 1)) * (outerRadius - innerRadius);
             totalArcSum += radius;
           }
 
@@ -53,79 +54,78 @@ class HemicycleChart extends StatelessWidget {
             if (r == rows - 1) {
               seatsPerRow.add(totalSeats - assigned);
             } else {
-              double radius = innerRadius + (r / (rows - 1)) * (outerRadius - innerRadius);
+              double radius =
+                  innerRadius + (r / (rows - 1)) * (outerRadius - innerRadius);
               int s = ((radius / totalArcSum) * totalSeats).round();
               seatsPerRow.add(s);
               assigned += s;
             }
           }
 
-          // Pre-compute all seat data for the painter
-          List<_SeatData> seats = [];
-          int seatIndex = 0;
-
-          const double anglePadding = 0.06;
-
+          // Allocate by angular column across all rows, so each group forms
+          // a continuous sector instead of restarting at the left of each row.
+          final slots = <({double x, double y, double angle, double size})>[];
+          const anglePadding = 0.06;
           for (int r = 0; r < rows; r++) {
-            double progress = r / (rows - 1);
-            double currentRadius = innerRadius + progress * (outerRadius - innerRadius);
-            int seatsInRow = seatsPerRow[r];
-
-            double dotSize = 5.0 + progress * 2.5;
-
-            for (int s = 0; s < seatsInRow; s++) {
-              if (seatIndex >= totalSeats) break;
-
-              final voteObj = sortedVotes[seatIndex];
-              final position = voteObj['position']?.toString() ?? '';
-              final colorHex = voteObj['color']?.toString() ?? '#808080';
-              final groupe = voteObj['groupe']?.toString() ?? '';
-              final groupColor = _parseColor(colorHex);
-
-              double t = seatsInRow <= 1 ? 0.5 : s / (seatsInRow - 1);
-              double angle = (math.pi - anglePadding) - t * (math.pi - 2 * anglePadding);
-
-              double x = centerX + currentRadius * math.cos(angle);
-              double y = centerY - currentRadius * math.sin(angle);
-
-              // --- Color logic ---
-              bool matchesFilter = activeFilter == null || activeFilter == position;
-              bool matchesGroup = selectedGroup == null || selectedGroup == groupe;
-              bool isHighlighted = matchesFilter && matchesGroup;
-
-              Color dotColor;
-              double opacity = 1.0;
-              bool showGlow = false;
-
-              if (activeFilter == null && selectedGroup == null) {
-                // No filter: show all with party colors
-                dotColor = groupColor;
-              } else if (isHighlighted) {
-                // Matches active filters
-                dotColor = groupColor;
-                showGlow = true;
-              } else {
-                // Dimmed
-                dotColor = const Color(0xFFE5E7EB);
-                opacity = 0.3;
-              }
-
-              seats.add(_SeatData(
-                x: x,
-                y: y,
-                color: dotColor,
-                opacity: opacity,
-                size: dotSize,
-                showGlow: showGlow,
+            final progress = r / (rows - 1);
+            final radius = innerRadius + progress * (outerRadius - innerRadius);
+            final count = seatsPerRow[r];
+            for (int seat = 0; seat < count; seat++) {
+              final t = count <= 1 ? .5 : seat / (count - 1);
+              final angle =
+                  (math.pi - anglePadding) - t * (math.pi - 2 * anglePadding);
+              slots.add((
+                x: centerX + radius * math.cos(angle),
+                y: centerY - radius * math.sin(angle),
+                angle: angle,
+                size: 5 + progress * 2.5,
               ));
-              seatIndex++;
             }
+          }
+          slots.sort((a, b) => b.angle.compareTo(a.angle));
+          final seats = <_SeatData>[];
+          for (int index = 0; index < slots.length; index++) {
+            final slot = slots[index];
+            final vote = sortedVotes[index];
+            final matches =
+                (activeFilter == null || activeFilter == vote['position']) &&
+                (selectedGroup == null || selectedGroup == vote['groupe']);
+            final groupColor = _parseColor(
+              vote['color']?.toString() ?? '#808080',
+            );
+            // Non-voters remain neutral until specifically selected.
+            final neutral =
+                vote['position'] == 'non_votant' &&
+                activeFilter == null &&
+                selectedGroup == null;
+            seats.add(
+              _SeatData(
+                x: slot.x,
+                y: slot.y,
+                size: slot.size,
+                color: !matches
+                    ? const Color(0xFFE5E7EB)
+                    : neutral
+                    ? const Color(0xFFC8CCD2)
+                    : groupColor,
+                opacity: matches ? 1 : .3,
+                showGlow:
+                    matches && (activeFilter != null || selectedGroup != null),
+              ),
+            );
           }
 
           return CustomPaint(
             size: Size(width, height),
             painter: _HemicyclePainter(
               seats: seats,
+              signature: Object.hash(
+                width,
+                height,
+                identityHashCode(votesList),
+                activeFilter,
+                selectedGroup,
+              ),
               centerX: centerX,
               centerY: centerY,
               innerRadius: innerRadius * 0.7,
@@ -155,10 +155,12 @@ class _SeatData {
 
 class _HemicyclePainter extends CustomPainter {
   final List<_SeatData> seats;
+  final int signature;
   final double centerX, centerY, innerRadius, outerRadius;
 
   _HemicyclePainter({
     required this.seats,
+    required this.signature,
     required this.centerX,
     required this.centerY,
     required this.innerRadius,
@@ -226,20 +228,12 @@ class _HemicyclePainter extends CustomPainter {
         final glowPaint = Paint()
           ..color = seat.color.withValues(alpha: 0.25)
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
-        canvas.drawCircle(
-          Offset(seat.x, seat.y),
-          seat.size * 0.9,
-          glowPaint,
-        );
+        canvas.drawCircle(Offset(seat.x, seat.y), seat.size * 0.9, glowPaint);
       }
 
       final dotPaint = Paint()
         ..color = seat.color.withValues(alpha: seat.opacity);
-      canvas.drawCircle(
-        Offset(seat.x, seat.y),
-        seat.size / 2,
-        dotPaint,
-      );
+      canvas.drawCircle(Offset(seat.x, seat.y), seat.size / 2, dotPaint);
 
       if (seat.opacity > 0.5) {
         final highlightPaint = Paint()
@@ -254,5 +248,6 @@ class _HemicyclePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _HemicyclePainter oldDelegate) => true;
+  bool shouldRepaint(covariant _HemicyclePainter oldDelegate) =>
+      signature != oldDelegate.signature;
 }

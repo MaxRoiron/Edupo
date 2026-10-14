@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'theme/app_theme.dart';
 import 'screens/home_screen.dart';
 import 'screens/programs_screen.dart';
-import 'models/political_party.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,17 +27,9 @@ class EdupoApp extends StatefulWidget {
 
 class _EdupoAppState extends State<EdupoApp> {
   int _currentIndex = 0;
-  int _previousIndex = 0;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    precacheImage(const AssetImage('assets/images/slider/hemicycle.png'), context);
-    for (var party in frenchPoliticalParties) {
-      precacheImage(AssetImage(party.leaderAsset), context);
-      precacheImage(AssetImage(party.logoAsset), context);
-    }
-  }
+  // Keep the law feed and its scroll position alive. Other tabs are created
+  // only when opened, instead of decoding all their images during startup.
+  final List<Widget?> _pages = [const HomeScreen(), null, null];
 
   @override
   Widget build(BuildContext context) {
@@ -47,28 +38,15 @@ class _EdupoAppState extends State<EdupoApp> {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       home: Scaffold(
-        body: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          switchInCurve: Curves.easeInOut,
-          switchOutCurve: Curves.easeInOut,
-          transitionBuilder: (child, animation) {
-            final slideDirection = _currentIndex > _previousIndex ? 1.0 : -1.0;
-            final inAnimation = Tween<Offset>(
-              begin: Offset(slideDirection, 0),
-              end: Offset.zero,
-            ).animate(animation);
-            final outAnimation = Tween<Offset>(
-              begin: Offset(-slideDirection, 0),
-              end: Offset.zero,
-            ).animate(animation);
-            // Use the entering animation for the new child, exiting for the old
-            if (child.key == ValueKey(_currentIndex)) {
-              return SlideTransition(position: inAnimation, child: child);
-            } else {
-              return SlideTransition(position: outAnimation, child: child);
-            }
-          },
-          child: _buildPage(_currentIndex),
+        body: IndexedStack(
+          index: _currentIndex,
+          children: List.generate(
+            3,
+            (index) => TickerMode(
+              enabled: index == _currentIndex,
+              child: _pages[index] ?? const SizedBox.shrink(),
+            ),
+          ),
         ),
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
@@ -88,9 +66,24 @@ class _EdupoAppState extends State<EdupoApp> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildNavItem(0, Icons.home_rounded, Icons.home_outlined, 'Accueil'),
-                  _buildNavItem(1, Icons.description_rounded, Icons.description_outlined, 'Programmes'),
-                  _buildNavItem(2, Icons.account_balance_rounded, Icons.account_balance_outlined, 'Structure'),
+                  _buildNavItem(
+                    0,
+                    Icons.home_rounded,
+                    Icons.home_outlined,
+                    'Accueil',
+                  ),
+                  _buildNavItem(
+                    1,
+                    Icons.description_rounded,
+                    Icons.description_outlined,
+                    'Programmes',
+                  ),
+                  _buildNavItem(
+                    2,
+                    Icons.account_balance_rounded,
+                    Icons.account_balance_outlined,
+                    'Structure',
+                  ),
                 ],
               ),
             ),
@@ -100,13 +93,19 @@ class _EdupoAppState extends State<EdupoApp> {
     );
   }
 
-  Widget _buildNavItem(int index, IconData activeIcon, IconData inactiveIcon, String label) {
+  Widget _buildNavItem(
+    int index,
+    IconData activeIcon,
+    IconData inactiveIcon,
+    String label,
+  ) {
     final isSelected = _currentIndex == index;
     return GestureDetector(
       onTap: () {
+        if (_currentIndex == index) return;
         setState(() {
-          _previousIndex = _currentIndex;
           _currentIndex = index;
+          _pages[index] ??= _buildPage(index);
         });
       },
       behavior: HitTestBehavior.opaque,
@@ -123,11 +122,14 @@ class _EdupoAppState extends State<EdupoApp> {
           children: [
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 200),
-              transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: child),
+              transitionBuilder: (child, animation) =>
+                  ScaleTransition(scale: animation, child: child),
               child: Icon(
                 isSelected ? activeIcon : inactiveIcon,
                 key: ValueKey<bool>(isSelected),
-                color: isSelected ? AppColors.frBlue : Colors.white.withValues(alpha: 0.7),
+                color: isSelected
+                    ? AppColors.frBlue
+                    : Colors.white.withValues(alpha: 0.7),
                 size: 24,
               ),
             ),
@@ -197,10 +199,7 @@ class _EdupoAppState extends State<EdupoApp> {
           const SizedBox(height: 8),
           Text(
             subtitle,
-            style: const TextStyle(
-              color: AppColors.textMuted,
-              fontSize: 15,
-            ),
+            style: const TextStyle(color: AppColors.textMuted, fontSize: 15),
           ),
           const SizedBox(height: 32),
           Container(
@@ -208,7 +207,9 @@ class _EdupoAppState extends State<EdupoApp> {
             decoration: BoxDecoration(
               color: AppColors.frBlue.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.frBlue.withValues(alpha: 0.15)),
+              border: Border.all(
+                color: AppColors.frBlue.withValues(alpha: 0.15),
+              ),
             ),
             child: const Text(
               'Bientôt disponible',

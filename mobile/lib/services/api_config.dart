@@ -1,4 +1,5 @@
-import 'package:flutter/foundation.dart' show kIsWeb, TargetPlatform, defaultTargetPlatform;
+import 'package:flutter/foundation.dart'
+    show kIsWeb, TargetPlatform, defaultTargetPlatform;
 
 class ApiConfig {
   /// Base URL du backend.
@@ -7,6 +8,8 @@ class ApiConfig {
   /// - iOS Simulator / Linux Desktop : localhost
   /// - Appareil physique : remplacer par l'IP locale (ex: 192.168.x.x)
   static String get baseUrl {
+    const configured = String.fromEnvironment('API_BASE_URL');
+    if (configured.isNotEmpty) return configured;
     if (kIsWeb) {
       return 'http://127.0.0.1:8000';
     }

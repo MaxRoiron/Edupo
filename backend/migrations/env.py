@@ -3,7 +3,7 @@ import os
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from sqlalchemy import pool, text
 
 from alembic import context
 
@@ -14,12 +14,30 @@ sys.path.insert(0, os.getcwd())
 # Import de SQLModel et des modèles
 from sqlmodel import SQLModel
 from app.core.config import settings
+
 # Import de tous les modèles pour qu'ils soient connus d'Alembic
 from app.modules import (
-    User, ProfessionalStatus, SocialStatus, GenderIdentities, UserData,
-    Country, Institution, InstitutionType, Power,
-    PoliticalRole, PoliticalFigure, PoliticalParty, Domain, PoliticalProgram, PoliticalTopic, ElectionType,
-    Law, Vote, VoteResult, UserVote, PartyVote
+    User,
+    ProfessionalStatus,
+    SocialStatus,
+    GenderIdentities,
+    UserData,
+    Country,
+    Institution,
+    InstitutionType,
+    Power,
+    PoliticalRole,
+    PoliticalFigure,
+    PoliticalParty,
+    Domain,
+    PoliticalProgram,
+    PoliticalTopic,
+    ElectionType,
+    Law,
+    Vote,
+    VoteResult,
+    UserVote,
+    PartyVote,
 )
 
 # this is the Alembic Config object, which provides
@@ -38,6 +56,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 target_metadata = SQLModel.metadata
 
+
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode."""
     url = config.get_main_option("sqlalchemy.url")
@@ -51,19 +70,30 @@ def run_migrations_offline() -> None:
     with context.begin_transaction():
         context.run_migrations()
 
+
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode."""
     # On crée l'engine à partir de notre URL
     from sqlmodel import create_engine
+
     connectable = create_engine(settings.DATABASE_URL)
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        # Only one replica may migrate the shared PostgreSQL schema at a time.
+        lock_key = 0x45445551
+        connection.execute(text("SELECT pg_advisory_lock(:key)"), {"key": lock_key})
+        connection.commit()
+        try:
+            context.configure(connection=connection, target_metadata=target_metadata)
+            with context.begin_transaction():
+                context.run_migrations()
+        finally:
+            connection.rollback()
+            connection.execute(
+                text("SELECT pg_advisory_unlock(:key)"), {"key": lock_key}
+            )
+            connection.commit()
 
-        with context.begin_transaction():
-            context.run_migrations()
 
 if context.is_offline_mode():
     run_migrations_offline()

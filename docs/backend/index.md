@@ -272,7 +272,10 @@ Module complexe gérant les partis, leurs idéologies et leurs programmes par é
 **Votes des Partis** :
 - `PartyVote` : Consigne de vote officielle d'un parti sur une loi. 🆕
 
-### 7. Module `law` — Lois et Scrutins 🆕
+### 7. Module `law` — Lois et Scrutins
+
+La référence actuelle est le [guide de collecte et d’affichage des lois](./lois.md). Il décrit les nouveaux statuts, la provenance, la synchronisation au lancement, les scrutins par dossier et les avis citoyens.
+
 
 Gère les textes de loi et les résultats des votes officiels dans les institutions.
 

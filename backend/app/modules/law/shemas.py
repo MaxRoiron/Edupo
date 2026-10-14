@@ -1,5 +1,7 @@
 from pydantic import BaseModel
+from typing import Literal
 import datetime
+
 
 class LawCreate(BaseModel):
     title: str
@@ -11,6 +13,10 @@ class LawCreate(BaseModel):
     category: str | None = None
     country_id: int
     is_active: bool
+    status: Literal[
+        "pending", "adopted", "rejected", "promulgated", "withdrawn", "unknown"
+    ] = "unknown"
+
 
 class LawUpdate(BaseModel):
     title: str | None = None
@@ -22,6 +28,11 @@ class LawUpdate(BaseModel):
     category: str | None = None
     country_id: int | None = None
     is_active: bool | None = None
+    status: (
+        Literal["pending", "adopted", "rejected", "promulgated", "withdrawn", "unknown"]
+        | None
+    ) = None
+
 
 class LawView(BaseModel):
     id: int
@@ -34,13 +45,32 @@ class LawView(BaseModel):
     category: str | None
     country_id: int
     is_active: bool
+    official_title: str | None = None
+    short_title: str | None = None
+    status: str = "unknown"
+    source: str = "manual"
+    source_urls: list[str] = []
+    description_source_url: str | None = None
+    updated_at: datetime.datetime | None = None
+    published_at: datetime.datetime | None = None
+
+
+class CitizenVoteInput(BaseModel):
+    position: Literal["pour", "contre", "abstention"]
+
+
+class CitizenVoteView(BaseModel):
+    law_id: int
+    position: str | None = None
 
 
 class VoteCreate(BaseModel):
     position: str
 
+
 class VoteUpdate(BaseModel):
     position: str | None = None
+
 
 class Voteview(BaseModel):
     id: int
@@ -56,6 +86,7 @@ class VoteResultCreate(BaseModel):
     adopted: bool
     vote_date: datetime.datetime
 
+
 class VoteResultTypeUpdate(BaseModel):
     law_id: int | None = None
     institution_id: int | None = None
@@ -64,6 +95,7 @@ class VoteResultTypeUpdate(BaseModel):
     total_against: int | None = None
     adopted: bool | None = None
     vote_date: datetime.datetime | None = None
+
 
 class VoteResultTypeView(BaseModel):
     id: int

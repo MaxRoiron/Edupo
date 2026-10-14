@@ -38,3 +38,6 @@ docker/
 __pycache__/
 .coverage
 .pytest_cache
+
+# official source HTTP caches
+.cache/

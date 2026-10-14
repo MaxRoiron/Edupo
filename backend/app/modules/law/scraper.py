@@ -1,450 +1,371 @@
-import httpx
-import re
+"""Idempotent source synchronization, shared by startup, clients and admins."""
+
 import asyncio
-import zipfile
-import io
-import json
-import xml.etree.ElementTree as ET
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timezone, timedelta
 import hashlib
-from datetime import datetime, timedelta
+import logging
+from pathlib import Path
+import re
+import time
+
+import httpx
+from sqlalchemy import text as sql_text, update
 from sqlmodel import Session, select
+from app.core.config import settings
 from app.core.database import engine
+from .model import Law, LawSyncState
+from .sources import (
+    OfficialLinks,
+    parse_dossiers,
+    parse_scrutins,
+    parse_rss,
+    merge_rss,
+    zip_documents,
+)
+from .text import clean_law_title  # compatibility for existing callers
 
-from app.modules.country.model import Country
-from app.modules.political_party.model import Domain
-from app.modules.law.model import Law
+from .repository import persist_records
 
-
-def clean_law_title(raw_title: str) -> str:
-    if raw_title.startswith("Êtes-vous favorable à ") and not "visant à" in raw_title and not "relatif à" in raw_title and not "projet de loi" in raw_title and not "proposition de loi" in raw_title and not "portant sur" in raw_title:
-        if "l'ensemble de la" not in raw_title:
-            return raw_title
-
-    t = re.sub(r'(?i)^Êtes-vous favorable à l\'ensemble de la (proposition|projet) de loi ', '', raw_title)
-    t = re.sub(r'(?i)^Êtes-vous favorable à (la )?(proposition|projet) de loi ', '', t)
-    t = re.sub(r'(?i)^Êtes-vous favorable à ', '', t)
-    t = re.sub(r'(?i)^Êtes-vous favorable( aux?| l\'| la )', r'\1', t)
-    t = re.sub(r' \?$', '', t)
-    
-    t = re.sub(r'(?i)^.*l\'ensemble d[ue] (projet|proposition) de loi\s+', '', t)
-    t = re.sub(r'(?i)^(projet|proposition) de loi( organique)?\s+', '', t)
-    
-    t = t.split("(texte")[0].strip()
-    t = re.sub(r'(?i),?\s*en\s+(nouvelle\s+lecture|première\s+lecture|deuxième\s+lecture|lecture\s+définitive).*$', '', t).strip()
-    t = re.sub(r'(?i)\s*\(première lecture\)\.?$', '', t).strip()
-    
-    t = re.sub(r'(?i)^(organique )?(relatif|relative|relatifs|relatives) à\s+', '', t)
-    t = re.sub(r'(?i)^portant( sur)?\s+', '', t)
-    t = re.sub(r'(?i)^tendant à\s+', '', t)
-    
-    if re.search(r'(?i)^visant à\s+', t):
-        t = re.sub(r'(?i)^visant à\s+', '', t)
-        
-        verb_map = {
-            r'^lutter\b': 'la lutte',
-            r'^protéger\b': 'la protection de',
-            r'^renforcer\b': 'le renforcement de',
-            r'^garantir\b': 'la garantie de',
-            r'^améliorer\b': "l'amélioration de",
-            r'^instaurer\b': "l'instauration de",
-            r'^faciliter\b': 'la facilitation de',
-            r'^interdire\b': "l'interdiction de",
-            r'^réguler\b': 'la régulation de',
-            r'^encadrer\b': "l'encadrement de",
-            r'^revaloriser\b': 'la revalorisation de',
-            r'^conforter\b': 'le confortement de',
-            r'^réparer\b': 'la réparation de',
-            r'^réserver\b': 'la réservation de',
-            r'^reconnaître\b': 'la reconnaissance de',
-            r'^moderniser\b': 'la modernisation de',
-            r'^exercer\b': "l'exercice de",
-            r'^pérenniser\b': 'la pérennisation de',
-            r'^étendre\b': "l'extension de",
-            r'^créer\b': 'la création de',
-            r'^limiter\b': 'la limitation de',
-            r'^adapter\b': "l'adaptation de",
-            r'^favoriser\b': 'la promotion de',
-            r'^promouvoir\b': 'la promotion de',
-            r'^assurer\b': "la garantie de",
-            r'^offrir\b': "l'apport de",
-            r'^supprimer\b': 'la suppression de',
-            r'^sanctionner\b': 'la sanction de',
-            r'^dépénaliser\b': 'la dépénalisation de',
-            r'^légaliser\b': 'la légalisation de',
-            r'^autoriser\b': "l'autorisation de",
-            r'^simplifier\b': 'la simplification de',
-            r'^accélérer\b': "l'accélération de",
-            r'^financer\b': 'le financement de',
-            r'^soutenir\b': 'le soutien de',
-            r'^développer\b': 'le développement de',
-            r'^orienter\b': "l'orientation de",
-            r'^programmer\b': 'la programmation de',
-            r'^réformer\b': 'la réforme de',
-            r'^abroger\b': "l'abrogation de",
-            r'^rétablir\b': 'le rétablissement de',
-            r'^mieux reconnaître et protéger\b': 'une meilleure reconnaissance et protection de',
-            r'^mieux reconnaître\b': 'une meilleure reconnaissance de',
-            r'^mieux protéger\b': 'une meilleure protection de',
-            r'^actualiser\b': "l'actualisation de",
-            r'^allonger\b': "l'allongement de",
-            r'^réduire\b': "la réduction de",
-            r'^augmenter\b': "l'augmentation de",
-            r'^lutter contre\b': 'la lutte contre',
-            r'^améliorant\b': "l'amélioration de",
-        }
-        
-        replaced = False
-        for pattern, replacement in verb_map.items():
-            if re.search(pattern, t, flags=re.IGNORECASE):
-                t = re.sub(pattern, replacement, t, flags=re.IGNORECASE)
-                replaced = True
-                break
-                
-        if replaced:
-            t = re.sub(r'\bde le\b', 'du', t)
-            t = re.sub(r'\bde les\b', 'des', t)
-            t = re.sub(r'\bde l\'\s+', "de l'", t)
-            t = re.sub(r'\bde l\'\b', "de l'", t)
-            t = re.sub(r'\bde des\b', 'des', t)
-        else:
-            return f"Êtes-vous favorable à la proposition de loi visant à {t} ?"
-            
-    t = re.sub(r'^ux ', 'aux ', t)
-    t = re.sub(r'^\s*d\'expérimentation\b', "l'expérimentation", t, flags=re.IGNORECASE)
-    if t.startswith("l'") or t.startswith("l ") or t.startswith("la ") or t.startswith("le ") or t.startswith("les ") or t.startswith("un ") or t.startswith("une ") or t.startswith("des ") or t.startswith("aux "):
-        pass
-    else:
-        t = t[0].lower() + t[1:]
-        
-    return f"Êtes-vous favorable à {t} ?"
+logger = logging.getLogger(__name__)
+SYNC_LOCK = 0x45445550
+# A new parser/formatter release must reprocess unchanged official snapshots.
+PROCESSOR_VERSION = hashlib.sha256(
+    b"".join(
+        Path(__file__).with_name(name).read_bytes()
+        for name in ("text.py", "sources.py", "repository.py")
+    )
+).hexdigest()
+_task: asyncio.Task | None = None
 
 
-def _score_law(title: str, description: str) -> int:
-    score = 0
-    keywords = [
-      'jeune', 'étudiant', 'école', 'ecole', 'université', 'lycée', 'éducation', 'enseignement',
-      'numérique', 'internet', 'réseaux', 'cyber', 'harcèlement', 'mineur',
-      'climat', 'écologie', 'environnement', 'logement', "pouvoir d'achat", 'inflation',
-      'emploi', 'loyer', 'smic', 'transport', 'permis', 'précarité', 'santé mentale',
-      'ivg', 'avortement', 'fin de vie', 'cannabis', 'légalisation', 'police', 'sécurité'
-    ]
-    text_to_search = f"{title} {description}".lower()
-    
-    for kw in keywords:
-        if kw in text_to_search:
-            score += 3
-            
-    if 'ratification' in text_to_search or 'ordonnance' in text_to_search or 'approbation' in text_to_search:
-        score -= 5
-    if 'codification' in text_to_search or 'simplification administrative' in text_to_search:
-        score -= 3
-        
-    return score
+def source_urls() -> dict[str, str]:
+    base = f"https://data.assemblee-nationale.fr/static/openData/repository/{settings.LAW_LEGISLATURE}"
+    return {
+        "rss": "https://www.vie-publique.fr/lois-feeds.xml",
+        "dossiers": base + "/loi/dossiers_legislatifs/Dossiers_Legislatifs.json.zip",
+        "scrutins": base + "/loi/scrutins/Scrutins.json.zip",
+        "organes": base
+        + "/amo/deputes_actifs_mandats_actifs_organes/AMO10_deputes_actifs_mandats_actifs_organes.json.zip",
+    }
 
 
-def _build_rss_description_lookup(rss_content: bytes) -> dict:
-    """
-    Parse le RSS de vie-publique.fr et construit un dictionnaire
-    qui mappe des mots-clés normalisés du titre → description.
-    Permet de retrouver la description d'une loi votée à partir du titre du scrutin AN.
-    """
-    root = ET.fromstring(rss_content)
-    dc_ns = "{http://purl.org/dc/elements/1.1/}"
-    lookup = []
-
-    for item in root.findall(".//item"):
-        title = item.findtext("title", "").strip()
-        desc = item.findtext(f"{dc_ns}description", "").strip()
-        link = item.findtext("link", "").strip()
-        if not desc:
-            continue
-        # Nettoyer HTML
-        clean_desc = re.sub('<[^<]+?>', '', desc).strip()
-        clean_desc = clean_desc.replace('&nbsp;', ' ').replace('&amp;', '&').replace('&#039;', "'")
-        # Enlever le lien de suivi
-        clean_desc = re.sub(r'(?i)lien de suivi.*', '', clean_desc).strip()
-        # Normaliser le titre pour le matching
-        norm = title.lower()
-        norm = re.sub(r'^(loi du \d+ \w+ \d+ )', '', norm)
-        norm = re.sub(r'^(projet|proposition) de loi (organique )?', '', norm)
-        norm = re.sub(r'^(visant à |relative? à |portant |d[\'e] |sur |de )', '', norm)
-        lookup.append({
-            'title': title,
-            'norm': norm.strip(),
-            'description': clean_desc,
-            'link': link,
-        })
-
-    return lookup
-
-
-def _find_rss_description(scrutin_titre: str, rss_lookup: list) -> str | None:
-    """
-    Cherche dans le lookup RSS la meilleure description correspondant
-    au titre d'un scrutin de l'Assemblée nationale.
-    """
-    # Extraire la partie significative du titre du scrutin
-    norm_scrutin = scrutin_titre.lower()
-    norm_scrutin = re.sub(r'^.*l\'ensemble d[ue] (projet|proposition) de loi ', '', norm_scrutin)
-    norm_scrutin = re.sub(r'\(texte.*$', '', norm_scrutin).strip()
-    norm_scrutin = re.sub(r',?\s*en\s+(nouvelle|première|deuxième|lecture|définitive)[\s,]*', ' ', norm_scrutin).strip()
-
-    # Extraire les mots significatifs (4+ chars) du titre du scrutin
-    scrutin_words = {w for w in norm_scrutin.split() if len(w) >= 4}
-    if not scrutin_words:
-        return None
-
-    best_desc = None
-    best_score = 0
-
-    for entry in rss_lookup:
-        rss_words = {w for w in entry['norm'].split() if len(w) >= 4}
-        if not rss_words:
-            continue
-        common = scrutin_words & rss_words
-        if len(common) < 2:
-            continue
-        score = len(common) / min(len(scrutin_words), len(rss_words))
-        if score > best_score:
-            best_score = score
-            best_desc = entry['description']
-
-    return best_desc if best_score >= 0.4 else None
-
-async def scrape_and_sync_laws():
-    """
-    Système automatique de mise à jour des lois.
-    Se connecte à l'Open Data de nosdeputes.fr pour scanner les scrutins récents,
-    et mettre à jour notre base de données postgres "law" automatiquement.
-    """
-    url = "https://www.nosdeputes.fr/16/scrutins/json"
-    
-    async with httpx.AsyncClient() as client:
+def _download(name: str, url: str, state: dict) -> tuple[bytes, dict]:
+    folder = Path(settings.LAW_SOURCE_CACHE_DIR)
+    folder.mkdir(parents=True, exist_ok=True)
+    path = folder / f"{settings.LAW_LEGISLATURE}-{name}"
+    cached = path.read_bytes() if path.exists() else None
+    cached_hash = hashlib.sha256(cached).hexdigest() if cached is not None else None
+    # Disk writes precede the database transaction. Only a snapshot whose hash
+    # was committed with its laws may use conditional HTTP requests.
+    committed_cache = cached_hash is not None and cached_hash == state.get(
+        "content_hash"
+    )
+    headers = {"User-Agent": "Edupo/1.0 (education citoyenne; official open data)"}
+    if committed_cache:
+        if state.get("etag"):
+            headers["If-None-Match"] = state["etag"]
+        if state.get("modified"):
+            headers["If-Modified-Since"] = state["modified"]
+    for attempt in range(3):
         try:
-            with Session(engine) as session:
-                country = session.exec(select(Country).where(Country.name == "France")).first()
-                domain = session.exec(select(Domain).where(Domain.name == "Général")).first()
-                if not country or not domain:
-                    print("[Scraper] Pays ou Domaine manquant, impossible de scraper.")
-                    return 0
-                
-                laws_added = 0
-
-                # --- Récupérer le RSS vie-publique.fr pour avoir les vraies descriptions ---
-                rss_lookup = []
-                try:
-                    rss_resp = await client.get("https://www.vie-publique.fr/lois-feeds.xml", timeout=15.0)
-                    if rss_resp.status_code == 200:
-                        rss_lookup = _build_rss_description_lookup(rss_resp.content)
-                        print(f"[Scraper] {len(rss_lookup)} descriptions RSS chargées depuis vie-publique.fr")
-                except Exception as e:
-                    print(f"[Scraper] Impossible de charger le RSS vie-publique : {e}")
-                
-                # Check les scrutins de l'Assemblée nationale (17ème législature Open Data)
-                try:
-                    zip_url = "https://data.assemblee-nationale.fr/static/openData/repository/17/loi/scrutins/Scrutins.json.zip"
-                    an_resp = await client.get(zip_url, timeout=30.0, follow_redirects=True)
-                    if an_resp.status_code == 200:
-                        with zipfile.ZipFile(io.BytesIO(an_resp.content)) as z:
-                            for filename in z.namelist():
-                                if filename.endswith(".json"):
-                                    with z.open(filename) as f:
-                                        data = json.load(f)
-                                        s = data.get("scrutin", {})
-                                        titre = s.get("titre", "")
-                                        
-                                        if "l'ensemble du projet de loi" in titre.lower() or "l'ensemble de la proposition de loi" in titre.lower():
-                                            uid = str(s.get("uid", ""))
-                                            numero = str(s.get("numero", ""))
-                                            
-                                            existing = session.exec(select(Law).where(Law.scrutin_id == uid)).first()
-                                            if not existing:
-                                                clean_title = clean_law_title(titre)
-                                                
-                                                category = "Justice / Intérieur" if "intérieur" in clean_title.lower() or "sécurité" in clean_title.lower() else "Législation"
-                                                category = "Écologie" if "climat" in clean_title.lower() or "environnement" in clean_title.lower() else category
-                                                category = "Économie" if "pouvoir d'achat" in clean_title.lower() or "finances" in clean_title.lower() else category
-                                                
-                                                vote_date_str = s.get("dateScrutin", "")
-                                                if not vote_date_str: continue
-
-                                                # Ignorer les lois votées il y a plus de 6 mois
-                                                vote_dt = datetime.strptime(vote_date_str, "%Y-%m-%d")
-                                                if (datetime.now() - vote_dt).days > 180:
-                                                    continue
-
-                                                sort_code = (s.get("sort") or {}).get("code", "")
-                                                synthese = s.get("syntheseVote", {}).get("decompte", {})
-                                                pours = synthese.get("pour", "0")
-                                                contres = synthese.get("contre", "0")
-                                                votants = s.get("syntheseVote", {}).get("nombreVotants", "0")
-
-                                                # Chercher la vraie description dans vie-publique.fr (comme pour les lois à venir)
-                                                rss_desc = _find_rss_description(titre, rss_lookup)
-                                                if rss_desc:
-                                                    description = rss_desc
-                                                else:
-                                                    description = f"Le texte original est intitulé : '{titre}'.\nVote effectué le {vote_date_str} avec un résultat '{sort_code}'.\n\nParticipants: {votants} votants dont {pours} 'Pour' et {contres} 'Contre'."
-                                                
-                                                # Filtrage par score de pertinence
-                                                if _score_law(clean_title, description) < 1:
-                                                    continue
-
-                                                new_law = Law(
-                                                    title=clean_title,
-                                                    description=description,
-                                                    domain_id=domain.id,
-                                                    country_id=country.id,
-                                                    vote_date=datetime.strptime(vote_date_str, "%Y-%m-%d"),
-                                                    scrutin_id=uid,
-                                                    category=category,
-                                                    is_active=True
-                                                )
-                                                session.add(new_law)
-                                                laws_added += 1
+            with httpx.Client(
+                timeout=settings.LAW_SYNC_TIMEOUT_SECONDS, follow_redirects=True
+            ) as client:
+                with client.stream("GET", url, headers=headers) as response:
+                    if response.status_code == 304:
+                        if not committed_cache:
+                            raise ValueError("Réponse 304 sans snapshot validé en base")
+                        return cached, {**state, "not_modified": True}
+                    response.raise_for_status()
+                    chunks, size = [], 0
+                    for chunk in response.iter_bytes():
+                        size += len(chunk)
+                        if size > 64 * 1024 * 1024:
+                            raise ValueError("Réponse officielle trop volumineuse")
+                        chunks.append(chunk)
+                    content = b"".join(chunks)
+                    # Validate before replacing a previously valid disk cache.
+                    if name == "rss":
+                        parse_rss(content)
                     else:
-                        print(f"[Scraper] Erreur accès Open Data AN, statut {an_resp.status_code}")
-                except Exception as an_err:
-                    print(f"[Scraper] Impossible de traiter le ZIP Open Data AN : {repr(an_err)}")
-                
-                # --- VRAIES LOIS À VENIR (Scrapées depuis vie-publique.fr RSS) ---
-                rss_url = "https://www.vie-publique.fr/lois-feeds.xml"
-                try:
-                    rss_resp = await client.get(rss_url, timeout=15.0)
-                    if rss_resp.status_code == 200:
-                        import xml.etree.ElementTree as ET
-                        import hashlib
-                        root = ET.fromstring(rss_resp.content)
-                        
-                        items = root.findall(".//item")
-                        future_count = 0
-                        dc_namespace = "{http://purl.org/dc/elements/1.1/}"
-                        
-                        # We only take the first few to avoid overloading
-                        for item in items:
-                            title = item.findtext("title", "")
-                            description = item.findtext(f"{dc_namespace}description", "")
-                            link = item.findtext("link", "")
-                            pubDate = item.findtext("pubDate", "")
-                            
-                            if "projet de loi" in title.lower() or "proposition de loi" in title.lower():
-                                # Uniq ID from link hash (deterministic)
-                                fake_id = hashlib.sha256(link.encode()).hexdigest()[:8]
-                                existing = session.exec(select(Law).where(Law.scrutin_id == fake_id)).first()
-                                if not existing:
-                                    clean_title = clean_law_title(title)
-                                    
-                                    # Set a future date within the next 2 months
-                                    future_date = datetime.now() + timedelta(days=10 + (future_count % 45))
-                                    
-                                    category = "Justice / Politique" if "justice" in clean_title.lower() or "sécurité" in clean_title.lower() else "Société et Débat Public"
-                                    category = "Économie" if "finances" in clean_title.lower() or "budget" in clean_title.lower() else category
-                                    
-                                    # Use a plain HTML tag removal for description
-                                    clean_desc = re.sub('<[^<]+?>', '', description)
-                                    clean_desc = re.sub(r'(?i)lien de suivi.*', '', clean_desc).strip()
-                                    
-                                    # Filtrage par score de pertinence
-                                    if _score_law(clean_title, clean_desc) < 1:
-                                        continue
-                                    
-                                    session.add(Law(
-                                        title=clean_title,
-                                        description=clean_desc,
-                                        domain_id=domain.id,
-                                        country_id=country.id,
-                                        vote_date=future_date,
-                                        scrutin_id=fake_id,
-                                        category=category,
-                                        is_active=True
-                                    ))
-                                    laws_added += 1
-                                    future_count += 1
-                except Exception as ex_rss:
-                    print(f"[Scraper] Erreur RSS vie-publique : {ex_rss}")
-
-                session.commit()
-                print(f"[Scraper] Automatisme exécuté avec succès. {laws_added} nouvelles lois intégrées.")
-                return laws_added
-
-        except Exception as e:
-            print(f"[Scraper] Erreur interne lors du scraping: {e}")
-            return 0
-
-# Boucle pour l'exécution en arrière-plan
-async def periodic_law_scraper():
-    while True:
-        print("[Scraper] Lancement de la synchronisation automatique des lois...")
-        await scrape_and_sync_laws()
-        # Scan toutes les 6 heures
-        await asyncio.sleep(60 * 60 * 6)
+                        next(zip_documents(content))
+                    content_hash = hashlib.sha256(content).hexdigest()
+                    if cached_hash != content_hash:
+                        temporary = path.with_suffix(".tmp")
+                        temporary.write_bytes(content)
+                        temporary.replace(path)
+                    return content, {
+                        "etag": response.headers.get("etag"),
+                        "modified": response.headers.get("last-modified"),
+                        "content_hash": content_hash,
+                        "not_modified": content_hash == state.get("content_hash"),
+                    }
+        except (httpx.HTTPError, ValueError, OSError) as error:
+            if attempt == 2:
+                raise RuntimeError(
+                    f"{name}: source indisponible ou invalide"
+                ) from error
+            time.sleep(2**attempt)
+    raise RuntimeError(name)
 
 
-async def resync_voted_laws():
-    """
-    Met à jour le title/subtitle/description de toutes les lois déjà votées
-    existantes en base, en re-téléchargeant les données de l'Assemblée nationale
-    et en croisant avec vie-publique.fr pour avoir de vraies descriptions.
-    """
-    async with httpx.AsyncClient() as client:
+def _rss_links(entry) -> tuple[str, set[str]]:
+    # Sources are fixed trusted URLs from the official RSS, never user input.
+    if not re.match(r"^https://www\.vie-publique\.fr/loi/", entry.source_url):
+        return entry.key, set()
+    folder = Path(settings.LAW_SOURCE_CACHE_DIR)
+    cache = folder / (
+        "article-" + hashlib.sha256(entry.source_url.encode()).hexdigest()
+    )
+    # Dossier links are stable; refresh the cached mapping at least daily.
+    if cache.exists() and time.time() - cache.stat().st_mtime < 86400:
+        return entry.key, set(cache.read_text().splitlines())
+    try:
+        with httpx.Client(timeout=5, follow_redirects=True) as client:
+            response = client.get(entry.source_url)
+            response.raise_for_status()
+        parser = OfficialLinks()
+        parser.feed(response.text)
+        cache.write_text("\n".join(sorted(parser.links)))
+        return entry.key, parser.links
+    except httpx.HTTPError:
+        logger.warning("Lien de dossier indisponible pour %s", entry.key)
+        return entry.key, (
+            set(cache.read_text().splitlines()) if cache.exists() else set()
+        )
+
+
+def _sync_once(force: bool = False) -> dict:
+    now = datetime.now(timezone.utc)
+    with engine.connect() as connection:
+        postgres = connection.dialect.name == "postgresql"
+        if (
+            postgres
+            and not connection.execute(
+                sql_text("SELECT pg_try_advisory_lock(:key)"), {"key": SYNC_LOCK}
+            ).scalar()
+        ):
+            connection.rollback()
+            return {"status": "busy", "message": "Synchronisation déjà en cours"}
+        connection.commit()
         try:
-            with Session(engine) as session:
-                # Charger les descriptions depuis vie-publique.fr
-                rss_lookup = []
-                try:
-                    rss_resp = await client.get("https://www.vie-publique.fr/lois-feeds.xml", timeout=15.0)
-                    if rss_resp.status_code == 200:
-                        rss_lookup = _build_rss_description_lookup(rss_resp.content)
-                        print(f"[Resync] {len(rss_lookup)} descriptions RSS chargées")
-                except Exception as e:
-                    print(f"[Resync] RSS indisponible : {e}")
-
-                zip_url = "https://data.assemblee-nationale.fr/static/openData/repository/17/loi/scrutins/Scrutins.json.zip"
-                an_resp = await client.get(zip_url, timeout=30.0, follow_redirects=True)
-                if an_resp.status_code != 200:
-                    print(f"[Resync] Erreur accès Open Data AN, statut {an_resp.status_code}")
-                    return 0
-
-                updated = 0
-                with zipfile.ZipFile(io.BytesIO(an_resp.content)) as z:
-                    for filename in z.namelist():
-                        if filename.endswith(".json"):
-                            with z.open(filename) as f:
-                                data = json.load(f)
-                                s = data.get("scrutin", {})
-                                titre = s.get("titre", "")
-                                uid = str(s.get("uid", ""))
-                                numero = str(s.get("numero", ""))
-
-                                existing = session.exec(select(Law).where(Law.scrutin_id == uid)).first()
-                                if existing:
-                                    # Recalculer titre propre
-                                    clean_title = clean_law_title(titre)
-
-                                    sort_code = (s.get("sort") or {}).get("code", "")
-                                    synthese = s.get("syntheseVote", {}).get("decompte", {})
-                                    pours = synthese.get("pour", "0")
-                                    contres = synthese.get("contre", "0")
-                                    votants = s.get("syntheseVote", {}).get("nombreVotants", "0")
-                                    vote_date_str = s.get("dateScrutin", "")
-
-                                    # Chercher la vraie description dans vie-publique.fr
-                                    rss_desc = _find_rss_description(titre, rss_lookup)
-                                    if rss_desc:
-                                        description = rss_desc
-                                    else:
-                                        sort_label = "adopté" if sort_code == "adopté" else "rejeté" if sort_code == "rejeté" else sort_code
-                                        description = f"Le texte original est intitulé : '{titre}'.\nVote effectué le {vote_date_str} avec un résultat '{sort_label}'.\n\nParticipants: {votants} votants dont {pours} 'Pour' et {contres} 'Contre'."
-
-                                    existing.title = clean_title
-                                    existing.description = description
-                                    session.add(existing)
-                                    updated += 1
-
+            with Session(bind=connection) as session:
+                states = {
+                    state.source: state
+                    for state in session.exec(select(LawSyncState)).all()
+                }
+                last = states.get("sync")
+                attempt = last.last_attempt_at if last else None
+                if attempt and attempt.tzinfo is None:
+                    attempt = attempt.replace(tzinfo=timezone.utc)
+                if (
+                    not force
+                    and attempt
+                    and last.etag == PROCESSOR_VERSION
+                    and (now - attempt).total_seconds()
+                    < settings.LAW_SYNC_COOLDOWN_SECONDS
+                ):
+                    return {
+                        "status": "cached",
+                        "last_success_at": last.last_success_at,
+                        "message": last.error,
+                    }
+                last = last or LawSyncState(source="sync")
+                last.last_attempt_at = now
+                session.add(last)
                 session.commit()
-                print(f"[Resync] {updated} lois votées mises à jour avec le nouveau format.")
-                return updated
+                headers = {
+                    key: {
+                        "etag": value.etag,
+                        "modified": value.modified,
+                        "content_hash": value.content_hash,
+                    }
+                    for key, value in states.items()
+                }
+                contents, errors, response_headers = {}, {}, {}
+                with ThreadPoolExecutor(max_workers=4) as executor:
+                    futures = {
+                        name: executor.submit(
+                            _download, name, url, headers.get(name, {})
+                        )
+                        for name, url in source_urls().items()
+                    }
+                    for name, future in futures.items():
+                        try:
+                            contents[name], response_headers[name] = future.result()
+                        except Exception:
+                            errors[name] = (
+                                f"Source {name} indisponible; données précédentes conservées"
+                            )
+                            logger.exception("Échec du téléchargement %s", name)
+                if (
+                    not force
+                    and not errors
+                    and last.last_success_at
+                    and last.error is None
+                    and last.etag == PROCESSOR_VERSION
+                    and all(
+                        metadata.get("not_modified")
+                        for metadata in response_headers.values()
+                    )
+                ):
+                    completed = datetime.now(timezone.utc)
+                    last.last_attempt_at = last.last_success_at = completed
+                    session.add(last)
+                    for name, metadata in response_headers.items():
+                        state = states.get(name) or LawSyncState(source=name)
+                        state.etag = metadata.get("etag", state.etag)
+                        state.modified = metadata.get("modified", state.modified)
+                        state.content_hash = metadata.get(
+                            "content_hash", state.content_hash
+                        )
+                        state.last_attempt_at = state.last_success_at = completed
+                        state.error = None
+                        session.add(state)
+                    session.execute(
+                        update(Law)
+                        .where(
+                            Law.source.in_(["assemblee", "vie_publique"]),
+                            Law.activity_at < now - timedelta(days=365),
+                        )
+                        .values(is_active=False)
+                    )
+                    session.commit()
+                    connection.commit()
+                    return {
+                        "status": "ok",
+                        "not_modified": True,
+                        "created": 0,
+                        "updated": 0,
+                        "records": 0,
+                        "errors": {},
+                        "last_success_at": completed,
+                    }
+                records = {}
+                if "dossiers" in contents and "scrutins" in contents:
+                    records, references = parse_dossiers(
+                        contents["dossiers"], settings.LAW_LEGISLATURE
+                    )
+                    parse_scrutins(
+                        contents["scrutins"],
+                        records,
+                        references,
+                        settings.LAW_LEGISLATURE,
+                    )
+                if "rss" in contents:
+                    rss = parse_rss(contents["rss"])
+                    with ThreadPoolExecutor(max_workers=4) as executor:
+                        links = dict(executor.map(_rss_links, rss))
+                    merge_rss(records, rss, links)
+                # Per-source atomic transaction: a failure never deactivates its prior feed.
+                result = (
+                    persist_records(session, records, now)
+                    if records
+                    else {"created": 0, "updated": 0, "records": 0}
+                )
+                if "dossiers" in contents and "scrutins" in contents:
+                    for old in session.exec(
+                        select(Law).where(
+                            Law.source == "assemblee", Law.is_active == True
+                        )
+                    ).all():
+                        if old.source_key not in records:
+                            old.is_active = False
+                            session.add(old)
+                # RSS is a rolling feed: absence from it does not imply withdrawal.
+                completed = datetime.now(timezone.utc)
+                last.last_attempt_at = completed
+                for name, metadata in response_headers.items():
+                    state = states.get(name) or LawSyncState(source=name)
+                    state.last_success_at = completed
+                    state.last_attempt_at = completed
+                    state.error = None
+                    state.etag, state.modified = metadata.get("etag"), metadata.get(
+                        "modified"
+                    )
+                    state.content_hash = metadata.get("content_hash")
+                    session.add(state)
+                for name, error in errors.items():
+                    state = states.get(name) or LawSyncState(source=name)
+                    state.last_attempt_at, state.error = now, error
+                    session.add(state)
+                last.etag = PROCESSOR_VERSION
+                last.error = "; ".join(errors.values()) or None
+                if records and not errors:
+                    last.last_success_at = completed
+                session.add(last)
+                session.commit()
+                connection.commit()
+                result.update(
+                    status=(
+                        "partial"
+                        if errors and records
+                        else "failed" if errors else "ok"
+                    ),
+                    errors=errors,
+                    last_success_at=last.last_success_at,
+                )
+                logger.info("Synchronisation lois: %s", result)
+                return result
+        except Exception:
+            connection.rollback()
+            logger.exception("Synchronisation annulée, données précédentes conservées")
+            with Session(bind=connection) as session:
+                state = session.get(LawSyncState, "sync") or LawSyncState(source="sync")
+                state.etag = PROCESSOR_VERSION
+                state.last_attempt_at, state.error = (
+                    now,
+                    "Synchronisation échouée; données précédentes conservées",
+                )
+                session.add(state)
+                session.commit()
+                connection.commit()
+            return {
+                "status": "failed",
+                "errors": {
+                    "sync": "Synchronisation échouée; données précédentes conservées"
+                },
+            }
+        finally:
+            if postgres:
+                connection.execute(
+                    sql_text("SELECT pg_advisory_unlock(:key)"), {"key": SYNC_LOCK}
+                )
+                connection.commit()
 
-        except Exception as e:
-            print(f"[Resync] Erreur lors de la mise à jour : {e}")
-            return 0
+
+async def _coordinated_sync(force: bool) -> dict:
+    result = await asyncio.to_thread(_sync_once, force)
+    # Other workers share the PostgreSQL lock. Wait for their snapshot instead
+    # of presenting an empty feed on the first cold launch.
+    for _ in range(120):
+        if result.get("status") != "busy":
+            return result
+        await asyncio.sleep(1)
+        result = await asyncio.to_thread(_sync_once, False)
+    return result
+
+
+async def synchronize_laws(force: bool = False) -> dict:
+    global _task
+    if not settings.LAW_SYNC_ENABLED:
+        return {"status": "disabled"}
+    if _task is None or _task.done():
+        _task = asyncio.create_task(_coordinated_sync(force))
+    # A client disconnect must not cancel a shared synchronization.
+    return await asyncio.shield(_task)
+
+
+async def periodic_law_scraper() -> None:
+    while True:
+        await synchronize_laws()
+        await asyncio.sleep(settings.LAW_SYNC_INTERVAL_SECONDS)
+
+
+async def scrape_and_sync_laws() -> dict:
+    return await synchronize_laws()
+
+
+async def resync_voted_laws() -> dict:
+    return await synchronize_laws(force=True)

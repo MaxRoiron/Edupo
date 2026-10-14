@@ -9,6 +9,9 @@ Bienvenue dans le centre de documentation technique du projet. Ce dossier regrou
 ### 🔙 [Backend (API)](./backend/index.md)
 *Tout ce qui concerne le serveur Python, la logique métier et la sécurité.*
 - **[Guide Général](./backend/index.md)** : Architecture, modules, API endpoints, sécurité et tests.
+- **[Lois : collecte et affichage](./backend/lois.md)** : Synchronisation, provenance, statuts, questions et avis citoyens.
+- **[Rapport des corrections](./backend/rapport_corrections_lois.md)** : Reprise point par point et validations.
+- **[Optimisation des lois](./backend/rapport_optimisation_lois.md)** : Chargement sans attente du scraper, défilement, cache et tests de concurrence.
 - **[Base de données](./backend/database.md)** : Schéma relationnel, détail des tables, migrations Alembic.
 
 ### 🎨 [Frontend (Web)](./frontend/index.md)

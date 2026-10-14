@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'api_config.dart';
 import 'auth_service.dart';
@@ -15,7 +16,12 @@ class ApiResponse {
 
 /// Service pour les appels HTTP au backend FastAPI
 class ApiService {
-  static final http.Client _client = createHttpClient();
+  static http.Client _client = createHttpClient();
+
+  @visibleForTesting
+  static void setHttpClient(http.Client client) {
+    _client = client;
+  }
 
   /// POST /register
   /// Retourne le JWT si succès
@@ -26,7 +32,7 @@ class ApiService {
   }) async {
     try {
       final url = '${ApiConfig.baseUrl}/register';
-      print('[DEBUG] POST $url');
+      debugPrint('[DEBUG] POST $url');
       final response = await _client.post(
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
@@ -39,7 +45,7 @@ class ApiService {
 
       final body = jsonDecode(response.body) as Map<String, dynamic>;
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final token = body['access_token'] as String;
         await AuthService.saveToken(token);
         return ApiResponse(success: true, data: body);
@@ -51,16 +57,14 @@ class ApiService {
       } else {
         return ApiResponse(
           success: false,
-          message: body['detail']?.toString() ?? 'Erreur lors de l\'inscription.',
+          message:
+              body['detail']?.toString() ?? 'Erreur lors de l\'inscription.',
         );
       }
     } catch (e, stackTrace) {
-      print('[DEBUG] Register error: $e');
-      print('[DEBUG] Stack: $stackTrace');
-      return ApiResponse(
-        success: false,
-        message: 'Erreur: $e',
-      );
+      debugPrint('[DEBUG] Register error: $e');
+      debugPrint('[DEBUG] Stack: $stackTrace');
+      return ApiResponse(success: false, message: 'Erreur: $e');
     }
   }
 
@@ -72,14 +76,11 @@ class ApiService {
   }) async {
     try {
       final url = '${ApiConfig.baseUrl}/login';
-      print('[DEBUG] POST $url');
+      debugPrint('[DEBUG] POST $url');
       final response = await _client.post(
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': email,
-          'password': password,
-        }),
+        body: jsonEncode({'email': email, 'password': password}),
       );
 
       final body = jsonDecode(response.body) as Map<String, dynamic>;
@@ -100,12 +101,9 @@ class ApiService {
         );
       }
     } catch (e, stackTrace) {
-      print('[DEBUG] Login error: $e');
-      print('[DEBUG] Stack: $stackTrace');
-      return ApiResponse(
-        success: false,
-        message: 'Erreur: $e',
-      );
+      debugPrint('[DEBUG] Login error: $e');
+      debugPrint('[DEBUG] Stack: $stackTrace');
+      return ApiResponse(success: false, message: 'Erreur: $e');
     }
   }
 
@@ -150,7 +148,9 @@ class ApiService {
   static Future<ApiResponse> getUserData() async {
     try {
       final token = await AuthService.getToken();
-      if (token == null) return ApiResponse(success: false, message: 'Non connecté.');
+      if (token == null) {
+        return ApiResponse(success: false, message: 'Non connecté.');
+      }
 
       final response = await _client.get(
         Uri.parse('${ApiConfig.baseUrl}/me/data'),
@@ -164,7 +164,10 @@ class ApiService {
       if (response.statusCode == 200) {
         return ApiResponse(success: true, data: body);
       }
-      return ApiResponse(success: false, message: body['detail']?.toString() ?? 'Erreur.');
+      return ApiResponse(
+        success: false,
+        message: body['detail']?.toString() ?? 'Erreur.',
+      );
     } catch (e) {
       return ApiResponse(success: false, message: 'Erreur: $e');
     }
@@ -174,7 +177,9 @@ class ApiService {
   static Future<ApiResponse> createUserData(Map<String, dynamic> data) async {
     try {
       final token = await AuthService.getToken();
-      if (token == null) return ApiResponse(success: false, message: 'Non connecté.');
+      if (token == null) {
+        return ApiResponse(success: false, message: 'Non connecté.');
+      }
 
       final response = await _client.post(
         Uri.parse('${ApiConfig.baseUrl}/me/data'),
@@ -186,10 +191,13 @@ class ApiService {
       );
 
       final body = jsonDecode(response.body) as Map<String, dynamic>;
-      if (response.statusCode == 200) {
+      if ((response.statusCode == 200 || response.statusCode == 201)) {
         return ApiResponse(success: true, data: body);
       }
-      return ApiResponse(success: false, message: body['detail']?.toString() ?? 'Erreur.');
+      return ApiResponse(
+        success: false,
+        message: body['detail']?.toString() ?? 'Erreur.',
+      );
     } catch (e) {
       return ApiResponse(success: false, message: 'Erreur: $e');
     }
@@ -199,7 +207,9 @@ class ApiService {
   static Future<ApiResponse> updateUserData(Map<String, dynamic> data) async {
     try {
       final token = await AuthService.getToken();
-      if (token == null) return ApiResponse(success: false, message: 'Non connecté.');
+      if (token == null) {
+        return ApiResponse(success: false, message: 'Non connecté.');
+      }
 
       final response = await _client.patch(
         Uri.parse('${ApiConfig.baseUrl}/me/data'),
@@ -214,7 +224,10 @@ class ApiService {
       if (response.statusCode == 200) {
         return ApiResponse(success: true, data: body);
       }
-      return ApiResponse(success: false, message: body['detail']?.toString() ?? 'Erreur.');
+      return ApiResponse(
+        success: false,
+        message: body['detail']?.toString() ?? 'Erreur.',
+      );
     } catch (e) {
       return ApiResponse(success: false, message: 'Erreur: $e');
     }
@@ -229,7 +242,10 @@ class ApiService {
         headers: {'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {
-        return ApiResponse(success: true, data: {'list': jsonDecode(response.body)});
+        return ApiResponse(
+          success: true,
+          data: {'list': jsonDecode(response.body)},
+        );
       }
       return ApiResponse(success: false);
     } catch (e) {
@@ -245,7 +261,10 @@ class ApiService {
         headers: {'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {
-        return ApiResponse(success: true, data: {'list': jsonDecode(response.body)});
+        return ApiResponse(
+          success: true,
+          data: {'list': jsonDecode(response.body)},
+        );
       }
       return ApiResponse(success: false);
     } catch (e) {
@@ -256,7 +275,9 @@ class ApiService {
   static Future<ApiResponse> getAllUsers() async {
     try {
       final token = await AuthService.getToken();
-      if (token == null) return ApiResponse(success: false, message: 'Non connecté.');
+      if (token == null) {
+        return ApiResponse(success: false, message: 'Non connecté.');
+      }
 
       final response = await _client.get(
         Uri.parse('${ApiConfig.baseUrl}/admin/users'),
@@ -270,9 +291,14 @@ class ApiService {
         final List<dynamic> body = jsonDecode(response.body);
         return ApiResponse(success: true, data: {'list': body});
       }
-      
+
       final errorBody = jsonDecode(response.body) as Map<String, dynamic>;
-      return ApiResponse(success: false, message: errorBody['detail']?.toString() ?? 'Erreur lors de la récupération des utilisateurs.');
+      return ApiResponse(
+        success: false,
+        message:
+            errorBody['detail']?.toString() ??
+            'Erreur lors de la récupération des utilisateurs.',
+      );
     } catch (e) {
       return ApiResponse(success: false, message: 'Erreur: $e');
     }
@@ -282,9 +308,7 @@ class ApiService {
     try {
       final response = await _client.get(
         Uri.parse('${ApiConfig.baseUrl}/law/assembly_votes/$scrutinId'),
-        headers: {
-          'Accept': 'application/json',
-        },
+        headers: {'Accept': 'application/json'},
       );
 
       if (response.statusCode == 200) {
@@ -298,27 +322,110 @@ class ApiService {
     }
   }
 
-  static Future<ApiResponse> getAllLaws() async {
+  static Future<ApiResponse> synchronizeLaws() async {
     try {
-      final token = await AuthService.getToken();
-      // Even if not logged in, we might want to see laws, but let's send token if we have it
-      
-      final url = '${ApiConfig.baseUrl}/law';
-      final response = await _client.get(
-        Uri.parse(url),
-        headers: token != null ? {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        } : { 'Content-Type': 'application/json' },
+      final response = await _client
+          .post(Uri.parse('${ApiConfig.baseUrl}/law/sync'))
+          .timeout(const Duration(seconds: 180));
+      final body = jsonDecode(response.body) as Map<String, dynamic>;
+      return ApiResponse(
+        success:
+            response.statusCode == 200 &&
+            !['failed', 'partial', 'busy'].contains(body['status']) &&
+            body['message'] == null,
+        data: body,
+        message: response.statusCode == 200
+            ? 'Dernière mise à jour incomplète. Les fiches enregistrées restent disponibles.'
+            : 'Mise à jour indisponible.',
       );
+    } catch (_) {
+      return ApiResponse(
+        success: false,
+        message:
+            'Mise à jour indisponible. Les fiches enregistrées restent disponibles.',
+      );
+    }
+  }
 
+  static Future<ApiResponse> getAllLaws({
+    String? group,
+    String query = '',
+    int offset = 0,
+    int limit = 25,
+  }) async {
+    try {
+      final uri = Uri.parse('${ApiConfig.baseUrl}/law').replace(
+        queryParameters: {
+          'group': ?group,
+          'q': query,
+          'offset': '$offset',
+          'limit': '$limit',
+        },
+      );
+      final response = await _client
+          .get(uri)
+          .timeout(const Duration(seconds: 20));
       if (response.statusCode == 200) {
-        final List<dynamic> body = jsonDecode(response.body);
-        return ApiResponse(success: true, data: {'list': body});
+        return ApiResponse(
+          success: true,
+          data: {'list': jsonDecode(response.body)},
+        );
       }
-      return ApiResponse(success: false, message: 'Erreur lors de la récupération des lois.');
-    } catch (e) {
-      return ApiResponse(success: false, message: 'Erreur réseau: $e');
+      return ApiResponse(
+        success: false,
+        message: 'Impossible de charger les lois.',
+      );
+    } catch (_) {
+      return ApiResponse(
+        success: false,
+        message: 'Connexion au serveur impossible. Réessayez.',
+      );
+    }
+  }
+
+  static Future<ApiResponse> getMyLawVote(String lawId) async =>
+      _lawVote(lawId);
+  static Future<ApiResponse> saveLawVote(String lawId, String position) async =>
+      _lawVote(lawId, position: position);
+
+  static Future<ApiResponse> _lawVote(String lawId, {String? position}) async {
+    final token = await AuthService.getToken();
+    if (token == null) {
+      return ApiResponse(
+        success: false,
+        message: 'Connectez-vous pour enregistrer votre avis.',
+      );
+    }
+    try {
+      final uri = Uri.parse('${ApiConfig.baseUrl}/law/$lawId/my-vote');
+      final headers = {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      };
+      final response = position == null
+          ? await _client
+                .get(uri, headers: headers)
+                .timeout(const Duration(seconds: 20))
+          : await _client
+                .put(
+                  uri,
+                  headers: headers,
+                  body: jsonEncode({'position': position}),
+                )
+                .timeout(const Duration(seconds: 20));
+      final body = jsonDecode(response.body) as Map<String, dynamic>;
+      return ApiResponse(
+        success: response.statusCode == 200,
+        data: body,
+        message: response.statusCode == 401
+            ? 'Connectez-vous pour enregistrer votre avis.'
+            : body['detail']?.toString(),
+      );
+    } catch (_) {
+      return ApiResponse(
+        success: false,
+        message: 'Enregistrement impossible. Réessayez.',
+      );
     }
   }
 }
