@@ -1,13 +1,16 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/foundation.dart';
 
 /// Service de gestion de l'authentification.
 /// Stocke et récupère le JWT de manière sécurisée.
 class AuthService {
   static const _storage = FlutterSecureStorage();
   static const _tokenKey = 'access_token';
+  static final sessionChanges = ValueNotifier<int>(0);
 
   static Future<void> saveToken(String token) async {
     await _storage.write(key: _tokenKey, value: token);
+    sessionChanges.value++;
   }
 
   static Future<String?> getToken() async {
@@ -16,6 +19,7 @@ class AuthService {
 
   static Future<void> deleteToken() async {
     await _storage.delete(key: _tokenKey);
+    sessionChanges.value++;
   }
 
   static Future<bool> isLoggedIn() async {

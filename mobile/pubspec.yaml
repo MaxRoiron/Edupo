@@ -60,7 +60,14 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  fonts:
+    - family: Manrope
+      fonts:
+        - asset: assets/fonts/Manrope.ttf
+
   assets:
+    - assets/data/political_parties_2027.json
+    - assets/images/politicians/
     - assets/images/lfilogo.png
     - assets/images/pslogo.png
     - assets/images/ellvlogo.png
@@ -69,15 +76,6 @@ flutter:
     - assets/images/rnlogo.png
     - assets/images/r!logo.png
     - assets/images/pcflogo.png
-    - assets/images/jeanlucmelanchon.png
-    - assets/images/karimbouamrane.png
-    - assets/images/marinetondelier.png
-    - assets/images/gabrielattal.png
-    - assets/images/brunoretailleu.png
-    - assets/images/jordanbardella.png
-    - assets/images/marinelepen.png
-    - assets/images/ericzemmour.png
-    - assets/images/fabienroussel.png
     - assets/images/slider/hemicycle.png
     # - assets/images/slider/attal.jpg
     # - assets/images/slider/bompard.jpeg

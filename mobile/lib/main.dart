@@ -1,172 +1,164 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'theme/app_theme.dart';
+import 'theme/civic_theme.dart';
+import 'widgets/civic_components.dart';
 import 'screens/home_screen.dart';
 import 'screens/programs_screen.dart';
+import 'screens/profile_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Make status bar transparent for immersive header
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
-    ),
-  );
-
   runApp(const EdupoApp());
 }
 
 class EdupoApp extends StatefulWidget {
   const EdupoApp({super.key});
-
   @override
   State<EdupoApp> createState() => _EdupoAppState();
 }
 
 class _EdupoAppState extends State<EdupoApp> {
   int _currentIndex = 0;
-  // Keep the law feed and its scroll position alive. Other tabs are created
-  // only when opened, instead of decoding all their images during startup.
-  final List<Widget?> _pages = [const HomeScreen(), null, null];
-
+  final List<Widget?> _pages = [const HomeScreen(), null, null, null];
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Édupo',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      home: Scaffold(
+  Widget build(BuildContext context) => MaterialApp(
+    title: 'Édupo',
+    debugShowCheckedModeBanner: false,
+    theme: AppTheme.lightTheme,
+    home: AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.dark,
+      child: Scaffold(
+        backgroundColor: Civic.paper,
         body: IndexedStack(
           index: _currentIndex,
           children: List.generate(
-            3,
+            4,
             (index) => TickerMode(
               enabled: index == _currentIndex,
               child: _pages[index] ?? const SizedBox.shrink(),
             ),
           ),
         ),
-        bottomNavigationBar: Container(
-          decoration: BoxDecoration(
-            color: AppColors.frBlue,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.frBlue.withValues(alpha: 0.25),
-                blurRadius: 24,
-                offset: const Offset(0, -8),
-              ),
-            ],
-          ),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildNavItem(
-                    0,
-                    Icons.home_rounded,
-                    Icons.home_outlined,
-                    'Accueil',
+        bottomNavigationBar: SafeArea(
+          top: false,
+          child: Center(
+            heightFactor: 1,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 540),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                child: Material(
+                  color: Colors.white,
+                  elevation: 3,
+                  shadowColor: Civic.ink.withValues(alpha: .12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                    side: const BorderSide(color: Civic.line),
                   ),
-                  _buildNavItem(
-                    1,
-                    Icons.description_rounded,
-                    Icons.description_outlined,
-                    'Programmes',
+                  child: Padding(
+                    padding: const EdgeInsets.all(6),
+                    child: Row(
+                      children: [
+                        _nav(
+                          0,
+                          Icons.home_rounded,
+                          Icons.home_outlined,
+                          'Lois',
+                        ),
+                        _nav(
+                          1,
+                          Icons.description_rounded,
+                          Icons.description_outlined,
+                          'Partis',
+                        ),
+                        _nav(
+                          2,
+                          Icons.account_balance_rounded,
+                          Icons.account_balance_outlined,
+                          'Structure',
+                        ),
+                        _nav(
+                          3,
+                          Icons.person_rounded,
+                          Icons.person_outline_rounded,
+                          'Compte',
+                        ),
+                      ],
+                    ),
                   ),
-                  _buildNavItem(
-                    2,
-                    Icons.account_balance_rounded,
-                    Icons.account_balance_outlined,
-                    'Structure',
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavItem(
-    int index,
-    IconData activeIcon,
-    IconData inactiveIcon,
-    String label,
-  ) {
-    final isSelected = _currentIndex == index;
-    return GestureDetector(
-      onTap: () {
-        if (_currentIndex == index) return;
-        setState(() {
-          _currentIndex = index;
-          _pages[index] ??= _buildPage(index);
-        });
-      },
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.white : Colors.transparent,
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              transitionBuilder: (child, animation) =>
-                  ScaleTransition(scale: animation, child: child),
-              child: Icon(
-                isSelected ? activeIcon : inactiveIcon,
-                key: ValueKey<bool>(isSelected),
-                color: isSelected
-                    ? AppColors.frBlue
-                    : Colors.white.withValues(alpha: 0.7),
-                size: 24,
-              ),
-            ),
-            if (isSelected) ...[
-              const SizedBox(height: 8),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: AppColors.frBlue,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
                 ),
               ),
-            ],
-          ],
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+
+  Widget _nav(int index, IconData selectedIcon, IconData icon, String label) {
+    final selected = _currentIndex == index;
+    return Expanded(
+      child: Semantics(
+        selected: selected,
+        child: Material(
+          color: selected ? Civic.blue : Colors.white,
+          borderRadius: BorderRadius.circular(19),
+          child: CivicPress(
+            radius: 19,
+            onTap: () {
+              if (index == _currentIndex) return;
+              setState(() {
+                _currentIndex = index;
+                _pages[index] ??= _buildPage(index);
+              });
+            },
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 61),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 8),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      selected ? selectedIcon : icon,
+                      color: selected ? Colors.white : Civic.muted,
+                      size: 22,
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: selected ? Colors.white : Civic.muted,
+                        fontSize: 10,
+                        fontWeight: selected
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildPage(int index) {
-    switch (index) {
-      case 0:
-        return const HomeScreen(key: ValueKey(0));
-      case 1:
-        return const ProgramsScreen(key: ValueKey(1));
-      case 2:
-        return _buildPlaceholderPage(
-          key: const ValueKey(2),
-          icon: Icons.account_balance_rounded,
-          title: 'Structure',
-          subtitle: 'Organisation institutionnelle',
-        );
-      default:
-        return const HomeScreen(key: ValueKey(0));
-    }
-  }
+  Widget _buildPage(int index) => switch (index) {
+    0 => const HomeScreen(),
+    1 => const ProgramsScreen(),
+    2 => _buildPlaceholderPage(
+      icon: Icons.account_balance_rounded,
+      title: 'Structure',
+      subtitle: 'Organisation institutionnelle',
+    ),
+    3 => const ProfileScreen(embedded: true),
+    _ => const HomeScreen(),
+  };
 
   Widget _buildPlaceholderPage({
     Key? key,

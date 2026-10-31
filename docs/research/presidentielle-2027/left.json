@@ -1,0 +1,1437 @@
+{
+  "checkedAt": "2026-10-20",
+  "scope": "Gauche, écologistes et organisations anticapitalistes ; onze organisations distinctes.",
+  "methodology": "Sources primaires consultées et presse de référence pour recoupement. Une candidature déclarée ne vaut pas validation par le Conseil constitutionnel. Les propositions sont attribuées à leur document et à son contexte, sans extrapolation de coût ou d'effet. Les pages non datées portent publishedAt:null.",
+  "parties": [
+    {
+      "id": "lfi",
+      "name": "La France insoumise",
+      "abbreviation": "LFI",
+      "description": "Mouvement de gauche défendant une transformation sociale, écologique et institutionnelle autour de L’Avenir en commun.",
+      "officialWebsite": "https://lafranceinsoumise.fr/",
+      "leadership": [
+        {
+          "name": "Manuel Bompard",
+          "role": "Coordinateur du mouvement",
+          "sourceIds": [
+            "lfi-organisation"
+          ]
+        },
+        {
+          "name": "Jean-Luc Mélenchon",
+          "role": "Fondateur et candidat à la présidentielle ; fonction distincte de la coordination du mouvement",
+          "sourceIds": [
+            "lfi-candidature"
+          ]
+        }
+      ],
+      "election2027": {
+        "status": "declared",
+        "summary": "La candidature de Jean-Luc Mélenchon est annoncée en mai 2026 et portée par le mouvement.",
+        "people": [
+          {
+            "name": "Jean-Luc Mélenchon",
+            "status": "Candidat déclaré",
+            "sourceIds": [
+              "lfi-candidature",
+              "lfi-declaration-presse"
+            ]
+          }
+        ],
+        "sourceIds": [
+          "lfi-candidature",
+          "lfi-declaration-presse"
+        ]
+      },
+      "proposals": [
+        {
+          "id": "lfi-smic",
+          "theme": "Travail",
+          "title": "Porter le SMIC à 1 700 € net",
+          "summary": "Revaloriser le salaire minimum et indexer les salaires sur l’inflation.",
+          "detail": "Le document prévoit aussi une conférence exceptionnelle sur les salaires (p. 9 du PDF).",
+          "context": "Orientations budgétaires pour 2027, octobre 2026.",
+          "sourceIds": [
+            "lfi-budget2027"
+          ]
+        },
+        {
+          "id": "lfi-retraites",
+          "theme": "Retraites",
+          "title": "Abroger la réforme et viser la retraite à 60 ans",
+          "summary": "Abroger immédiatement la réforme ; atteindre 60 ans avec 40 annuités sur le mandat.",
+          "detail": "Le retour à 60 ans est présenté comme un objectif de mandat (p. 11), distinct de l’abrogation immédiate.",
+          "context": "Orientations budgétaires pour 2027, octobre 2026.",
+          "sourceIds": [
+            "lfi-budget2027"
+          ]
+        },
+        {
+          "id": "lfi-isf",
+          "theme": "Fiscalité",
+          "title": "Rétablir un impôt renforcé sur la fortune",
+          "summary": "Rétablir un impôt sur la fortune et remettre en cause la fiscalité forfaitaire du capital.",
+          "detail": "Ces orientations fiscales figurent p. 13 ; les rendements annoncés ne sont pas repris comme résultats acquis.",
+          "context": "Orientations budgétaires pour 2027, octobre 2026.",
+          "sourceIds": [
+            "lfi-budget2027"
+          ]
+        },
+        {
+          "id": "lfi-six-republique",
+          "theme": "Institutions",
+          "title": "Passer à une VIe République",
+          "summary": "Remplacer le cadre institutionnel actuel par une VIe République.",
+          "detail": "Orientation explicitement affichée sur les supports de la campagne ; ne constitue pas ici un exposé constitutionnel complet.",
+          "context": "Supports de campagne présidentielle 2027 consultés en octobre 2026.",
+          "sourceIds": [
+            "lfi-campagne"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "id": "lfi-organisation",
+          "title": "La France insoumise, comment ça marche ?",
+          "publisher": "La France insoumise",
+          "url": "https://lafranceinsoumise.fr/lfi-comment-ca-marche/",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "lfi-candidature",
+          "title": "Déclaration de l’intergroupe de la France insoumise du 3 mai 2026",
+          "publisher": "La France insoumise",
+          "url": "https://lafranceinsoumise.fr/2026/05/03/declaration-de-lintergroupe-de-la-france-insoumise-du-3-mai-2026/",
+          "publishedAt": "2026-05-03",
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "lfi-declaration-presse",
+          "title": "Jean-Luc Mélenchon announces fourth presidential run",
+          "publisher": "Le Monde / AFP",
+          "url": "https://www.lemonde.fr/en/politics/article/2026/05/04/jean-luc-melenchon-announces-fourth-presidential-run_6753097_5.html",
+          "publishedAt": "2026-05-04",
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "lfi-budget2027",
+          "title": "Comment nous allons remettre de l’ordre dans les comptes publics",
+          "publisher": "Campagne Mélenchon 2027",
+          "url": "https://melenchon2027.fr/wp-content/uploads/2026/10/Comment-nous-allons-remettre-de-l-ordre-dans-les-comptes-publics.pdf",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "lfi-campagne",
+          "title": "Mélenchon 2027 — site officiel de campagne",
+          "publisher": "Campagne Mélenchon 2027",
+          "url": "https://melenchon2027.fr/",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "lfi-programme-etat",
+          "title": "Découvrir le programme",
+          "publisher": "Campagne Mélenchon 2027",
+          "url": "https://melenchon2027.fr/programme/decouvrir/",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        }
+      ],
+      "notes": [
+        "Le site annonce le livre-programme réactualisé pour le 6 novembre : ne pas présenter sa publication future comme déjà réalisée au 20 octobre.",
+        "Le PDF budgétaire indique expressément qu’il n’est pas le chiffrage complet du programme pluriannuel.",
+        "Les anciens montants de SMIC des programmes 2022/2024 ne remplacent pas le montant annoncé dans le document d’octobre 2026."
+      ],
+      "unknowns": [
+        "Programme final complet à réexaminer lors de sa publication ; validation légale de la candidature non encore acquise."
+      ]
+    },
+    {
+      "id": "ps",
+      "name": "Parti socialiste",
+      "abbreviation": "PS",
+      "description": "Parti de gauche socialiste portant un projet national de services publics, de redistribution et de souveraineté européenne.",
+      "officialWebsite": "https://parti-socialiste.fr/",
+      "leadership": [
+        {
+          "name": "Olivier Faure",
+          "role": "Premier secrétaire",
+          "sourceIds": [
+            "ps-direction"
+          ]
+        }
+      ],
+      "election2027": {
+        "status": "declared",
+        "summary": "Le PS soutient Raphaël Glucksmann, issu de Place publique, après la primaire du 11 octobre 2026.",
+        "people": [
+          {
+            "name": "Raphaël Glucksmann",
+            "status": "Candidat désigné à la primaire, soutenu par le PS et Place publique",
+            "sourceIds": [
+              "ps-primaire"
+            ]
+          }
+        ],
+        "sourceIds": [
+          "ps-primaire",
+          "pp-resultat"
+        ]
+      },
+      "proposals": [
+        {
+          "id": "ps-smic",
+          "theme": "Travail",
+          "title": "Rehausser le SMIC à 1 690 € net",
+          "summary": "Augmenter le salaire minimum ainsi que les salaires et traitements publics.",
+          "detail": "Montant du Projet socialiste ; il ne vaut pas attribution automatique au programme commun du candidat.",
+          "context": "Projet national socialiste 2026.",
+          "sourceIds": [
+            "ps-projet-bref"
+          ]
+        },
+        {
+          "id": "ps-retraites",
+          "theme": "Retraites",
+          "title": "Abroger la réforme Borne puis négocier un nouveau système",
+          "summary": "Convoquer une conférence sociale après l’abrogation de la réforme.",
+          "detail": "Le texte maintient la répartition ; il ne formule pas ici un âge unique de départ à 60 ans.",
+          "context": "Projet national socialiste 2026.",
+          "sourceIds": [
+            "ps-projet-bref"
+          ]
+        },
+        {
+          "id": "ps-loyers",
+          "theme": "Logement",
+          "title": "Encadrer les loyers et mobiliser les locaux vacants",
+          "summary": "Réguler les loyers et convertir des bureaux en logements.",
+          "detail": "Le projet prévoit aussi la réquisition de logements vacants pour augmenter l’offre.",
+          "context": "Projet national socialiste 2026.",
+          "sourceIds": [
+            "ps-projet-bref"
+          ]
+        },
+        {
+          "id": "ps-sante",
+          "theme": "Santé",
+          "title": "Créer une mutuelle publique de Sécurité sociale",
+          "summary": "Réunir les remboursements d’un panier de soins et médicaments essentiels.",
+          "detail": "Le projet de « Grande Sécu » vise une prise en charge intégrale de ce panier ; aucun effet budgétaire n’est affirmé ici.",
+          "context": "Projet national socialiste 2026, chapitre santé.",
+          "sourceIds": [
+            "ps-projet-sante"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "id": "ps-direction",
+          "title": "Le premier secrétaire — Olivier Faure",
+          "publisher": "Parti socialiste",
+          "url": "https://parti-socialiste.fr/le-premier-secretaire/",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "ps-primaire",
+          "title": "Primaire socialiste : vainqueur dès le 1er tour, Raphaël Glucksmann sera le candidat de la gauche sociale-démocrate à la présidentielle",
+          "publisher": "LCP Assemblée nationale",
+          "url": "https://lcp.fr/actualites/primaire-socialiste-vainqueur-des-le-1er-tour-raphael-glucksmann-sera-le-candidat-de-la",
+          "publishedAt": "2026-10-11",
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "pp-resultat",
+          "title": "Raphaël Glucksmann remporte la primaire !",
+          "publisher": "Place publique",
+          "url": "https://place-publique.eu/",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "ps-projet-bref",
+          "title": "Vivre libres — Le projet en bref",
+          "publisher": "Projet socialiste / Parti socialiste",
+          "url": "https://projet-socialiste.fr/vivre-libres/",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "ps-projet-sante",
+          "title": "Être en sécurité(s) — Projet socialiste",
+          "publisher": "Projet socialiste / Parti socialiste",
+          "url": "https://projet-socialiste.fr/projet/etre-en-securites/",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "ps-projet-actualite",
+          "title": "Les socialistes clarifient leur ligne politique",
+          "publisher": "Parti socialiste Ariège",
+          "url": "https://www.parti-socialiste-ariege.fr/les-socialistes-clarifient-leur-ligne-politique/",
+          "publishedAt": "2026-07-23",
+          "checkedAt": "2026-10-20"
+        }
+      ],
+      "notes": [
+        "Olivier Faure dirige le PS ; il ne faut pas le présenter comme le candidat retenu après le 11 octobre.",
+        "Les mesures ci-dessus sont celles du Projet socialiste 2026, pas un programme final commun PS–Place publique vérifié."
+      ],
+      "unknowns": [
+        "Arbitrages programmatiques définitifs de la campagne commune non établis par les sources consultées."
+      ]
+    },
+    {
+      "id": "ecologistes",
+      "name": "Les Écologistes",
+      "abbreviation": "Les Écologistes",
+      "description": "Parti d’écologie politique articulant transformation environnementale, justice sociale et démocratie participative.",
+      "officialWebsite": "https://lesecologistes.fr/",
+      "leadership": [
+        {
+          "name": "Marine Tondelier",
+          "role": "Secrétaire nationale, réélue en avril 2025",
+          "sourceIds": [
+            "eco-direction"
+          ]
+        }
+      ],
+      "election2027": {
+        "status": "declared",
+        "summary": "Marine Tondelier est la candidate désignée ; sa campagne reste ouverte à un rassemblement de la gauche et de l’écologie.",
+        "people": [
+          {
+            "name": "Marine Tondelier",
+            "status": "Candidate désignée ; stratégie de rassemblement encore discutée",
+            "sourceIds": [
+              "eco-strategie",
+              "eco-actualite-octobre"
+            ]
+          }
+        ],
+        "sourceIds": [
+          "eco-strategie",
+          "eco-actualite-octobre"
+        ]
+      },
+      "proposals": [
+        {
+          "id": "eco-renovation",
+          "theme": "Logement",
+          "title": "Atteindre 500 000 rénovations performantes par an",
+          "summary": "Accélérer la rénovation énergétique par MaPrimeRénov’.",
+          "detail": "Objectif indiqué p. 21 du PDF ; l’impact annoncé par le parti n’est pas repris comme résultat démontré.",
+          "context": "Projet 2027 des Écologistes.",
+          "sourceIds": [
+            "eco-programme2027"
+          ]
+        },
+        {
+          "id": "eco-temps-travail",
+          "theme": "Travail",
+          "title": "Passer à 32 heures dans les métiers pénibles ou de nuit",
+          "summary": "Réduire le temps de travail sans perte de salaire dans ces métiers.",
+          "detail": "Mesure ciblée p. 57 ; ne pas la présenter comme un passage immédiat généralisé pour tous.",
+          "context": "Projet 2027 des Écologistes.",
+          "sourceIds": [
+            "eco-programme2027"
+          ]
+        },
+        {
+          "id": "eco-sante",
+          "theme": "Santé",
+          "title": "Créer 2 000 centres de santé d’ici 2030",
+          "summary": "Développer des centres notamment ruraux et dans les quartiers prioritaires.",
+          "detail": "Le texte prévoit plusieurs professions de santé dans ces centres (p. 114).",
+          "context": "Projet 2027 des Écologistes.",
+          "sourceIds": [
+            "eco-programme2027"
+          ]
+        },
+        {
+          "id": "eco-proportionnelle",
+          "theme": "Institutions",
+          "title": "Instaurer la proportionnelle intégrale aux législatives",
+          "summary": "Élire l’Assemblée à la proportionnelle sans prime majoritaire.",
+          "detail": "Le projet retient des circonscriptions régionales et la représentativité territoriale (p. 162).",
+          "context": "Projet 2027 des Écologistes.",
+          "sourceIds": [
+            "eco-programme2027"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "id": "eco-direction",
+          "title": "À la suite du Congrès national, les Ligérien·ne·s se renforcent dans les instances nationales",
+          "publisher": "Les Écologistes Pays de la Loire",
+          "url": "https://pays-de-la-loire.lesecologistes.fr/posts/5aXIhuLIawWxNmLO6qMVDN/a-la-suite-du-congres-national-les-ligerien-ne-s-se-renforcent-dans-les-instances-nationales",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "eco-strategie",
+          "title": "Communiqué de presse du Bureau politique des Écologistes",
+          "publisher": "Les Écologistes",
+          "url": "https://lesecologistes.fr/posts/6JnaFACGYNXg7YHgA8uDXu/communique-de-presse-du-bureau-politique-des-ecologistes",
+          "publishedAt": "2026-06-09",
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "eco-actualite-octobre",
+          "title": "2027 presidential election: Green and Communist activists express concern over left-wing unity",
+          "publisher": "Le Monde",
+          "url": "https://www.lemonde.fr/en/politics/article/2026/10/01/2027-presidential-election-green-and-communist-activists-express-concern-over-left-wing-unity_6758144_5.html",
+          "publishedAt": "2026-10-01",
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "eco-page-projet",
+          "title": "Projet 2027",
+          "publisher": "Les Écologistes",
+          "url": "https://lesecologistes.fr/pages/6ImK65GKUnvibm33WGkjkj/projet-2027",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "eco-programme2027",
+          "title": "Projet 2027 — programme des Écologistes, 208 pages",
+          "publisher": "Les Écologistes",
+          "url": "https://lesecologistes.fr/document/3N4JsAEmq6vsx42IITGNZa/vdef-programme-1.pdf",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        }
+      ],
+      "notes": [
+        "Le Projet 2027 publié est distinct du programme de Yannick Jadot en 2022.",
+        "La désignation partisane ne préjuge pas d’éventuels accords de retrait ou de rassemblement ultérieurs."
+      ],
+      "unknowns": [
+        "Issue des négociations d’alliance ; validation légale des candidatures non encore acquise."
+      ]
+    },
+    {
+      "id": "pcf",
+      "name": "Parti communiste français",
+      "abbreviation": "PCF",
+      "description": "Parti communiste défendant le rôle du travail, l’appropriation publique, les services publics et une planification écologique.",
+      "officialWebsite": "https://www.pcf.fr/",
+      "leadership": [
+        {
+          "name": "Fabien Roussel",
+          "role": "Secrétaire national, réélu au congrès de juillet 2026",
+          "sourceIds": [
+            "pcf-direction"
+          ]
+        }
+      ],
+      "election2027": {
+        "status": "declared",
+        "summary": "Les adhérents du PCF ont désigné Fabien Roussel le 6 septembre 2026.",
+        "people": [
+          {
+            "name": "Fabien Roussel",
+            "status": "Candidat désigné par les adhérents",
+            "sourceIds": [
+              "pcf-candidature"
+            ]
+          }
+        ],
+        "sourceIds": [
+          "pcf-candidature"
+        ]
+      },
+      "proposals": [
+        {
+          "id": "pcf-energie",
+          "theme": "Énergie",
+          "title": "Combiner nucléaire, hydraulique et renouvelables",
+          "summary": "Électrifier les usages pour viser la neutralité carbone en 2050.",
+          "detail": "L’orientation du plan Empreinte 2050 est explicitement réaffirmée en janvier 2026.",
+          "context": "Position nationale du PCF du 15 janvier 2026.",
+          "sourceIds": [
+            "pcf-energie2026"
+          ]
+        },
+        {
+          "id": "pcf-chaleur",
+          "theme": "Climat",
+          "title": "Protéger travailleurs et services publics face aux canicules",
+          "summary": "Prévoir des seuils nationaux déclenchant l’arrêt du travail et équiper écoles, hôpitaux et EHPAD.",
+          "detail": "La déclaration demande aussi la gratuité de l’eau pendant les pics de chaleur.",
+          "context": "Déclaration nationale du PCF du 22 juin 2026.",
+          "sourceIds": [
+            "pcf-chaleur2026"
+          ]
+        },
+        {
+          "id": "pcf-eau",
+          "theme": "Agriculture",
+          "title": "Planifier la gestion de l’eau et la transition agroécologique",
+          "summary": "Adapter l’agriculture aux sécheresses par une planification démocratique.",
+          "detail": "La déclaration associe adaptation des sols, infrastructures et territoires à la réduction des émissions.",
+          "context": "Déclaration nationale du PCF du 15 août 2026.",
+          "sourceIds": [
+            "pcf-eau2026"
+          ]
+        },
+        {
+          "id": "pcf-aides",
+          "theme": "Économie",
+          "title": "Conditionner et contrôler les aides publiques aux entreprises",
+          "summary": "Orienter les aides vers l’emploi, les salaires et la transition écologique.",
+          "detail": "Le projet budgétaire propose un contrôle démocratique avec les représentants des salariés et des populations.",
+          "context": "Propositions économiques pour le budget 2026, octobre 2025.",
+          "sourceIds": [
+            "pcf-budget2026"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "id": "pcf-direction",
+          "title": "Agenda / vie du Parti — bilan du 40e congrès",
+          "publisher": "PCF Loos",
+          "url": "https://loos.pcf.fr/?page_id=99",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "pcf-candidature",
+          "title": "Élection présidentielle : Fabien Roussel désigné candidat à 72 % par les communistes",
+          "publisher": "Parti communiste français",
+          "url": "https://www.pcf.fr/presidentielle2027_fabien_roussel_designe_candidat",
+          "publishedAt": "2026-09-06",
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "pcf-energie2026",
+          "title": "Garantissons la transparence et la sécurité énergétique",
+          "publisher": "Parti communiste français",
+          "url": "https://www.pcf.fr/garantissons_la_transparence_et_la_securite_energetique",
+          "publishedAt": "2026-01-15",
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "pcf-chaleur2026",
+          "title": "Canicule : face à l’urgence climatique, l’inaction du pouvoir est criminelle",
+          "publisher": "Parti communiste français",
+          "url": "https://www.pcf.fr/urgence_climatique_inaction_pouvoir",
+          "publishedAt": "2026-06-22",
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "pcf-eau2026",
+          "title": "Sécheresse et changement climatique : adapter notre agriculture et la gestion de l’eau",
+          "publisher": "Parti communiste français",
+          "url": "https://www.pcf.fr/secheresse_adapter_agriculture_gestion_eau",
+          "publishedAt": "2026-08-15",
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "pcf-budget2026",
+          "title": "Commission économique — propositions pour le budget 2026",
+          "publisher": "PCF, commission économique ; hébergement fédération Pyrénées-Orientales",
+          "url": "https://po.pcf.fr/wp-content/uploads/sites/40/2025/10/Commissioneconomiquebudget2026.pdf",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        }
+      ],
+      "notes": [
+        "Ces mesures proviennent de positions et documents du PCF antérieurs au 20 octobre ; elles ne sont pas présentées comme le programme présidentiel final de 2027."
+      ],
+      "unknowns": [
+        "Programme final complet de la campagne Roussel 2027 non vérifié ; site de campagne non accessible lors de cette recherche."
+      ]
+    },
+    {
+      "id": "place-publique",
+      "name": "Place publique",
+      "abbreviation": "PP",
+      "description": "Parti de gauche pro-européen proposant une transformation sociale, écologique et démocratique.",
+      "officialWebsite": "https://place-publique.eu/",
+      "leadership": [
+        {
+          "name": "Raphaël Glucksmann",
+          "role": "Co-président",
+          "sourceIds": [
+            "pp-direction"
+          ]
+        },
+        {
+          "name": "Aurore Lalucq",
+          "role": "Co-présidente",
+          "sourceIds": [
+            "pp-direction"
+          ]
+        }
+      ],
+      "election2027": {
+        "status": "declared",
+        "summary": "Raphaël Glucksmann est candidat et vainqueur de la primaire du 11 octobre 2026, soutenu par Place publique et le PS.",
+        "people": [
+          {
+            "name": "Raphaël Glucksmann",
+            "status": "Candidat déclaré et désigné à la primaire",
+            "sourceIds": [
+              "pp-resultat",
+              "pp-primaire-presse"
+            ]
+          }
+        ],
+        "sourceIds": [
+          "pp-resultat",
+          "pp-primaire-presse"
+        ]
+      },
+      "proposals": [
+        {
+          "id": "pp-nucleaire",
+          "theme": "Énergie",
+          "title": "Conforter le nucléaire et développer les renouvelables",
+          "summary": "Assurer les centrales existantes et construire de nouvelles unités.",
+          "detail": "L’Acte I associe cette orientation à la recherche sur les déchets et au développement d’autres énergies décarbonées.",
+          "context": "Projet partisan L’Acte I, juin 2025.",
+          "sourceIds": [
+            "pp-acte1-pdf"
+          ]
+        },
+        {
+          "id": "pp-proportionnelle",
+          "theme": "Institutions",
+          "title": "Instaurer la proportionnelle aux législatives",
+          "summary": "Privilégier des circonscriptions régionales avec un ancrage départemental des candidats.",
+          "detail": "Mesure figurant dans le chantier consacré à la démocratie.",
+          "context": "Projet partisan L’Acte I, juin 2025.",
+          "sourceIds": [
+            "pp-acte1-pdf"
+          ]
+        },
+        {
+          "id": "pp-loyers",
+          "theme": "Logement",
+          "title": "Encadrer les loyers dans les zones très tendues",
+          "summary": "Associer régulation locative, construction et rénovation.",
+          "detail": "Le chantier logement propose également d’élargir les bénéficiaires de la garantie Visale.",
+          "context": "Projet partisan L’Acte I, juin 2025.",
+          "sourceIds": [
+            "pp-acte1-pdf"
+          ]
+        },
+        {
+          "id": "pp-enseignants",
+          "theme": "Éducation",
+          "title": "Revaloriser les salaires des enseignants sur cinq ans",
+          "summary": "Planifier une hausse continue des rémunérations enseignantes.",
+          "detail": "Cette proposition figure dans le chantier sur l’école républicaine.",
+          "context": "Projet partisan L’Acte I, juin 2025.",
+          "sourceIds": [
+            "pp-acte1-pdf"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "id": "pp-direction",
+          "title": "Nos membres — Co-présidence",
+          "publisher": "Place publique",
+          "url": "https://place-publique.eu/trombinoscope",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "pp-resultat",
+          "title": "Raphaël Glucksmann remporte la primaire !",
+          "publisher": "Place publique",
+          "url": "https://place-publique.eu/",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "pp-primaire-presse",
+          "title": "Primaire socialiste : vainqueur dès le 1er tour, Raphaël Glucksmann sera le candidat de la gauche sociale-démocrate à la présidentielle",
+          "publisher": "LCP Assemblée nationale",
+          "url": "https://lcp.fr/actualites/primaire-socialiste-vainqueur-des-le-1er-tour-raphael-glucksmann-sera-le-candidat-de-la",
+          "publishedAt": "2026-10-11",
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "pp-acte1-page",
+          "title": "L’Acte I — Notre vision pour la France",
+          "publisher": "Place publique",
+          "url": "https://place-publique.eu/pages/6mRSwq5tuSrSi68Cw1IADX/l-acte-i",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "pp-acte1-pdf",
+          "title": "Projet Place publique — Acte I, 42 chantiers",
+          "publisher": "Place publique",
+          "url": "https://drive.google.com/file/d/1OEujLZOuDzn8kvse_Nx7ZrEmb1oDI-ok/view",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "pp-acte1-date",
+          "title": "Raphaël Glucksmann pose ses jalons, et son programme, pour l’élection présidentielle 2027",
+          "publisher": "Le Monde",
+          "url": "https://www.lemonde.fr/politique/article/2025/06/24/raphael-glucksmann-pose-ses-jalons-et-son-programme-pour-l-election-presidentielle-2027_6615544_823448.html",
+          "publishedAt": "2025-06-24",
+          "checkedAt": "2026-10-20"
+        }
+      ],
+      "notes": [
+        "L’Acte I est un projet partisan de 2025 et une base de travail ; ne pas le rebaptiser programme présidentiel final commun 2027.",
+        "Le PDF a été téléchargé depuis le lien Google Drive donné par la page officielle et son texte vérifié."
+      ],
+      "unknowns": [
+        "Évolutions postérieures de la campagne et arbitrages définitifs avec le PS à suivre."
+      ]
+    },
+    {
+      "id": "lutte-ouvriere",
+      "name": "Lutte ouvrière",
+      "abbreviation": "LO",
+      "description": "Organisation communiste révolutionnaire défendant l’indépendance politique et l’organisation collective des travailleurs.",
+      "officialWebsite": "https://www.lutte-ouvriere.org/",
+      "leadership": [
+        {
+          "name": "Nathalie Arthaud",
+          "role": "Porte-parole ; ne pas assimiler ce rôle à une présidence du parti",
+          "sourceIds": [
+            "lo-porte-parole"
+          ]
+        }
+      ],
+      "election2027": {
+        "status": "declared",
+        "summary": "Nathalie Arthaud porte la candidature de Lutte ouvrière en 2027.",
+        "people": [
+          {
+            "name": "Nathalie Arthaud",
+            "status": "Candidate déclarée",
+            "sourceIds": [
+              "lo-candidature",
+              "lo-brochure2027"
+            ]
+          }
+        ],
+        "sourceIds": [
+          "lo-candidature",
+          "lo-brochure2027"
+        ]
+      },
+      "proposals": [
+        {
+          "id": "lo-salaires",
+          "theme": "Travail",
+          "title": "Augmenter les revenus et les indexer sur les prix",
+          "summary": "Relever salaires, allocations et pensions puis les faire suivre la hausse des prix.",
+          "detail": "La brochure cite des revendications de 300 à 500 € supplémentaires et un revenu nécessaire de 2 200 € net (p. 11).",
+          "context": "Brochure Arthaud 2027, juin 2026.",
+          "sourceIds": [
+            "lo-brochure2027"
+          ]
+        },
+        {
+          "id": "lo-partage-travail",
+          "theme": "Emploi",
+          "title": "Répartir le travail sans perte de salaire",
+          "summary": "Réduire le temps et la charge de travail pour lutter contre le chômage.",
+          "detail": "La brochure demande d’établir les besoins d’embauche avec les personnels, notamment dans les services publics (p. 12).",
+          "context": "Brochure Arthaud 2027, juin 2026.",
+          "sourceIds": [
+            "lo-brochure2027"
+          ]
+        },
+        {
+          "id": "lo-comptes",
+          "theme": "Économie",
+          "title": "Rendre publics les comptes des grands groupes",
+          "summary": "Lever le secret commercial et le secret des affaires.",
+          "detail": "La mesure vise les filiales, maisons-mères et circuits financiers des grandes entreprises (p. 13–14).",
+          "context": "Brochure Arthaud 2027, juin 2026.",
+          "sourceIds": [
+            "lo-brochure2027"
+          ]
+        },
+        {
+          "id": "lo-regularisation",
+          "theme": "Immigration",
+          "title": "Régulariser les personnes sans papiers",
+          "summary": "Garantir la liberté de circulation et d’installation.",
+          "detail": "La revendication est explicitement formulée p. 16 de la brochure.",
+          "context": "Brochure Arthaud 2027, juin 2026.",
+          "sourceIds": [
+            "lo-brochure2027"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "id": "lo-porte-parole",
+          "title": "Nathalie Arthaud : une candidature révolutionnaire pour 2027 face à la recomposition de la gauche",
+          "publisher": "Lutte ouvrière — revue de presse",
+          "url": "https://lutte-ouvriere.org/portail/revue-de-presse/nathalie-arthaud-candidature-revolutionnaire-2027-face-recomposition-gauche-194900.html",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "lo-candidature",
+          "title": "Présidentielle 2027 : soutenez la campagne de Nathalie Arthaud !",
+          "publisher": "Lutte ouvrière",
+          "url": "https://www.lutte-ouvriere.org/journal/article/presidentielle-2027-soutenez-campagne-nathalie-arthaud-196575.html",
+          "publishedAt": "2026-08-26",
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "lo-brochure2027",
+          "title": "Nathalie Arthaud — Présidentielle 2027 — brochure de campagne",
+          "publisher": "Lutte ouvrière",
+          "url": "https://www.lutte-ouvriere.org/medias/document/fichiers/2026/06/brochure_caravane_2026-01_-_couleur.pdf",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        }
+      ],
+      "notes": [
+        "Programme de revendications à imposer collectivement ; document de campagne 2027, dont le jour de publication est absent."
+      ],
+      "unknowns": [
+        "Validation légale de la candidature non encore acquise."
+      ]
+    },
+    {
+      "id": "npa-revolutionnaires",
+      "name": "Nouveau Parti anticapitaliste — Révolutionnaires",
+      "abbreviation": "NPA-R",
+      "description": "Organisation anticapitaliste et communiste révolutionnaire, distincte du NPA–L’Anticapitaliste.",
+      "officialWebsite": "https://npa-revolutionnaires.org/",
+      "leadership": [
+        {
+          "name": "Selma Labib",
+          "role": "Porte-parole et candidate présidentielle",
+          "sourceIds": [
+            "npar-candidature",
+            "npar-porte-parole"
+          ]
+        },
+        {
+          "name": "Gaël Quirante",
+          "role": "Porte-parole national de campagne, en soutien à Selma Labib",
+          "sourceIds": [
+            "npar-frontieres"
+          ]
+        }
+      ],
+      "election2027": {
+        "status": "declared",
+        "summary": "Le NPA-R présente Selma Labib, soutenue par Gaël Quirante, selon son communiqué du 17 juin 2026.",
+        "people": [
+          {
+            "name": "Selma Labib",
+            "status": "Candidate désignée",
+            "sourceIds": [
+              "npar-candidature"
+            ]
+          }
+        ],
+        "sourceIds": [
+          "npar-candidature"
+        ]
+      },
+      "proposals": [
+        {
+          "id": "npar-salaires",
+          "theme": "Travail",
+          "title": "Augmenter salaires et pensions de 400 € par mois",
+          "summary": "Relever les revenus avec un minimum revendiqué de 2 000 € net.",
+          "detail": "La candidate demande aussi une hausse du salaire brut et des cotisations, sans les remplacer par des allégements.",
+          "context": "Intervention de campagne publiée le 15 septembre 2026.",
+          "sourceIds": [
+            "npar-huma2026"
+          ]
+        },
+        {
+          "id": "npar-licenciements",
+          "theme": "Emploi",
+          "title": "Interdire les licenciements",
+          "summary": "S’opposer aux fermetures d’entreprises et protéger l’emploi.",
+          "detail": "Revendication du programme de luttes exposé aux rencontres d’été ; salaires et pensions doivent également suivre l’inflation.",
+          "context": "Intervention de campagne publiée le 7 septembre 2026.",
+          "sourceIds": [
+            "npar-programme-luttes"
+          ]
+        },
+        {
+          "id": "npar-frontieres",
+          "theme": "Immigration",
+          "title": "Ouvrir les frontières et garantir la circulation",
+          "summary": "Défendre la liberté de circulation des travailleurs entre les pays.",
+          "detail": "Orientation portée par Gaël Quirante dans son intervention de campagne.",
+          "context": "Intervention de campagne publiée le 7 septembre 2026.",
+          "sourceIds": [
+            "npar-frontieres"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "id": "npar-candidature",
+          "title": "Présidentielle 2027 : Selma Labib, une candidature ouvrière et révolutionnaire, soutenue par Gaël Quirante",
+          "publisher": "NPA-Révolutionnaires",
+          "url": "https://npa-revolutionnaires.org/articles/communique-presidentielle-2027-selma-labib-une-candidature-ouvriere-et-revolutionnaire-soutenue-par-gael-quirante",
+          "publishedAt": "2026-06-17",
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "npar-porte-parole",
+          "title": "Dans Libération — Le NPA-Révolutionnaires désigne Selma Labib comme candidate du parti",
+          "publisher": "NPA-Révolutionnaires — reprise de Libération",
+          "url": "https://www.npa-revolutionnaires.org/articles/dans-liberation-election-presidentielle-2027-le-npa-revolutionnaires-designe-selma-labib-comme-candidate-du-parti",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "npar-huma2026",
+          "title": "Intervention de Selma Labib à la fête de l’Humanité 2026",
+          "publisher": "NPA-Révolutionnaires",
+          "url": "https://npa-revolutionnaires.org/articles/intervention-de-selma-labib-a-la-fete-de-lhumanite-2026",
+          "publishedAt": "2026-09-15",
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "npar-programme-luttes",
+          "title": "Intervention de Selma, conductrice de bus, 31 ans — Une travailleuse communiste révolutionnaire",
+          "publisher": "NPA-Révolutionnaires",
+          "url": "https://npa-revolutionnaires.org/articles/intervention-de-selma-conductrice-de-bus-31-ans-une-travailleuse-communiste-revolutionnaire-qui-portera-la-voix-de-celles-et-ceux-qui-ne-baisseront-jamais-la-tete-a-lelection-rein",
+          "publishedAt": "2026-09-07",
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "npar-frontieres",
+          "title": "Intervention de Gaël, notre porte-parole national de campagne — Oui à l’ouverture des frontières, oui à la liberté de circulation !",
+          "publisher": "NPA-Révolutionnaires",
+          "url": "https://npa-revolutionnaires.org/articles/intervention-de-gael-notre-porte-parole-national-de-campagne-oui-a-louverture-des-frontieres-oui-a-la-liberte-de-circulation",
+          "publishedAt": "2026-09-07",
+          "checkedAt": "2026-10-20"
+        }
+      ],
+      "notes": [
+        "Le NPA-R présente son offre comme un programme de luttes ; ne pas le confondre avec une promesse de gouvernement chiffrée.",
+        "Gaël Quirante soutient la candidate : il ne s’agit pas d’une candidature présidentielle à deux titulaires."
+      ],
+      "unknowns": [
+        "Validation légale de la candidature et obtention des parrainages non encore acquises."
+      ]
+    },
+    {
+      "id": "npa-anticapitaliste",
+      "name": "Nouveau Parti anticapitaliste — L’Anticapitaliste",
+      "abbreviation": "NPA-A",
+      "description": "Organisation anticapitaliste et écosocialiste, distincte du NPA-Révolutionnaires, privilégiant une stratégie unitaire de gauche.",
+      "officialWebsite": "https://npa-lanticapitaliste.org/",
+      "leadership": [
+        {
+          "name": "Philippe Poutou",
+          "role": "Porte-parole et ancien candidat présidentiel",
+          "sourceIds": [
+            "npaa-porte-parole",
+            "npaa-presse2026"
+          ]
+        },
+        {
+          "name": "Olivier Besancenot",
+          "role": "Porte-parole et ancien candidat présidentiel",
+          "sourceIds": [
+            "npaa-porte-parole",
+            "npaa-presse2026"
+          ]
+        }
+      ],
+      "election2027": {
+        "status": "support",
+        "summary": "Le NPA-A ne présente pas de candidature propre et souhaite contribuer à la campagne Mélenchon ; sa déclaration prévoit des discussions sur les modalités de soutien.",
+        "people": [
+          {
+            "name": "Jean-Luc Mélenchon",
+            "status": "Candidature extérieure soutenue dans une démarche de rassemblement, modalités discutées",
+            "sourceIds": [
+              "npaa-resolution2027"
+            ]
+          }
+        ],
+        "sourceIds": [
+          "npaa-resolution2027",
+          "npaa-presse2026"
+        ]
+      },
+      "proposals": [
+        {
+          "id": "npaa-banques",
+          "theme": "Économie",
+          "title": "Réquisitionner les banques",
+          "summary": "Réorienter le crédit et rompre avec la finance privée.",
+          "detail": "La déclaration associe cette revendication à l’annulation des dettes publiques.",
+          "context": "Déclaration de conférence nationale publiée le 1er juillet 2026.",
+          "sourceIds": [
+            "npaa-resolution2027"
+          ]
+        },
+        {
+          "id": "npaa-services",
+          "theme": "Services publics",
+          "title": "Développer des services publics gratuits",
+          "summary": "Renforcer les services publics et rendre gratuits les transports collectifs.",
+          "detail": "Orientation écosocialiste de l’organisation, distincte des arbitrages du programme de LFI.",
+          "context": "Déclaration de conférence nationale publiée le 1er juillet 2026.",
+          "sourceIds": [
+            "npaa-resolution2027"
+          ]
+        },
+        {
+          "id": "npaa-institutions",
+          "theme": "Institutions",
+          "title": "Supprimer la fonction présidentielle",
+          "summary": "Mettre fin à la Ve République au moyen d’une assemblée constituante.",
+          "detail": "Le texte lie ce changement aux mobilisations sociales.",
+          "context": "Déclaration de conférence nationale publiée le 1er juillet 2026.",
+          "sourceIds": [
+            "npaa-resolution2027"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "id": "npaa-resolution2027",
+          "title": "Anticapitalistes et antifascistes. En campagne pour battre l’extrême droite par nos luttes et dans les urnes, pour la victoire de notre camp social !",
+          "publisher": "NPA–L’Anticapitaliste",
+          "url": "https://npa-lanticapitaliste.org/arguments/politique/anticapitalistes-et-antifascistes-en-campagne-pour-battre-lextreme-droite-par",
+          "publishedAt": "2026-07-01",
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "npaa-porte-parole",
+          "title": "Un 1er mai massif et bruyant, avec les porte-parole Philippe Poutou, Olivier Besancenot et Christine Poupin",
+          "publisher": "NPA–L’Anticapitaliste",
+          "url": "https://npa-lanticapitaliste.org/taxonomy/term/779",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "npaa-presse2026",
+          "title": "Présidentielle 2027 : pas de candidat pour le NPA-Anticapitaliste, qui veut se rallier à Jean-Luc Mélenchon",
+          "publisher": "TF1 Info / LCI",
+          "url": "https://www.tf1info.fr/politique/presidentielle-2027-pas-de-candidat-pour-le-npa-qui-veut-discuter-d-un-ralliement-a-jean-luc-melenchon-2450028.html",
+          "publishedAt": "2026-06-28",
+          "checkedAt": "2026-10-20"
+        }
+      ],
+      "notes": [
+        "Ne pas annoncer Philippe Poutou candidat en 2027.",
+        "Soutenir une candidature extérieure ne transfère pas automatiquement toutes les propositions du NPA-A au programme de cette candidature."
+      ],
+      "unknowns": [
+        "Composition exhaustive actuelle des porte-parole non vérifiée ; la référence officielle du trio Poutou–Besancenot–Poupin date de 2023.",
+        "Accord détaillé final avec LFI et formes de participation à la campagne non établis dans les documents consultés."
+      ]
+    },
+    {
+      "id": "debout",
+      "name": "Debout !",
+      "abbreviation": "Debout !",
+      "description": "Mouvement de gauche autour de François Ruffin, défendant la reconnaissance du travail, la relocalisation et une transformation écologique.",
+      "officialWebsite": "https://debout.fr/",
+      "leadership": [
+        {
+          "name": "François Ruffin",
+          "role": "Président du mouvement",
+          "sourceIds": [
+            "debout-direction"
+          ]
+        }
+      ],
+      "election2027": {
+        "status": "declared",
+        "summary": "François Ruffin mène une campagne présidentielle autonome sous l’intitulé Nous Président !.",
+        "people": [
+          {
+            "name": "François Ruffin",
+            "status": "Candidat déclaré",
+            "sourceIds": [
+              "debout-campagne"
+            ]
+          }
+        ],
+        "sourceIds": [
+          "debout-campagne"
+        ]
+      },
+      "proposals": [
+        {
+          "id": "debout-horaires",
+          "theme": "Travail",
+          "title": "Mieux rémunérer les horaires atypiques",
+          "summary": "Doubler la rémunération des heures avant 8 h et après 18 h.",
+          "detail": "Le cahier sur les travailleurs essentiels propose une catégorie protectrice d’horaires atypiques, à portée plus large que ces seuls métiers.",
+          "context": "Cahier de campagne 2027 : travailleurs essentiels, 2026.",
+          "sourceIds": [
+            "debout-essentiels"
+          ]
+        },
+        {
+          "id": "debout-penibilite",
+          "theme": "Retraites",
+          "title": "Accorder des trimestres supplémentaires pour pénibilité",
+          "summary": "Ajouter un trimestre de retraite pour quatre trimestres dans un métier exposé.",
+          "detail": "Le cahier propose une attribution automatique à la place du mécanisme individuel actuel de prise en compte de la pénibilité.",
+          "context": "Cahier de campagne 2027 : travailleurs essentiels, 2026.",
+          "sourceIds": [
+            "debout-essentiels"
+          ]
+        },
+        {
+          "id": "debout-probite",
+          "theme": "Institutions",
+          "title": "Encadrer les reconversions privées des ministres",
+          "summary": "Imposer un contrôle renforcé des conflits d’intérêts après le gouvernement.",
+          "detail": "Le cahier prévoit une période de dix ans et l’examen public des reconversions par une Haute Autorité à la Probité.",
+          "context": "Cahier de campagne 2027 : séparation de l’argent et de l’État, 2026.",
+          "sourceIds": [
+            "debout-probite"
+          ]
+        },
+        {
+          "id": "debout-vacances",
+          "theme": "Jeunesse",
+          "title": "Garantir un séjour collectif financé pendant la scolarité",
+          "summary": "Ouvrir à chaque enfant français un premier départ collectif en colonie.",
+          "detail": "Le droit serait automatique, sans démarche familiale ; le même cahier propose la gratuité du BAFA.",
+          "context": "Cahier de campagne 2027 : temps des loisirs, 2026.",
+          "sourceIds": [
+            "debout-loisirs"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "id": "debout-direction",
+          "title": "Debout ! — présentation du mouvement national présidé par François Ruffin",
+          "publisher": "Debout !",
+          "url": "https://debout.fr/",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "debout-campagne",
+          "title": "Nous Président ! — Notre programme",
+          "publisher": "Campagne François Ruffin 2027 / Debout !",
+          "url": "https://nouspresident.fr/notre-programme/",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "debout-essentiels",
+          "title": "Pour un statut des travailleuses et travailleurs essentiels",
+          "publisher": "Campagne François Ruffin 2027 / Debout !",
+          "url": "https://nouspresident.fr/statut-travailleurs-essentiels/",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "debout-probite",
+          "title": "Pour une séparation de l’argent et de l’État",
+          "publisher": "Campagne François Ruffin 2027 / Debout !",
+          "url": "https://nouspresident.fr/separation-argent-etat/",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "debout-loisirs",
+          "title": "Pour renouer avec le temps des loisirs",
+          "publisher": "Campagne François Ruffin 2027 / Debout !",
+          "url": "https://nouspresident.fr/temps-loisirs/",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        }
+      ],
+      "notes": [
+        "Debout ! est distinct de Debout la France et de L’Après.",
+        "Les cahiers et plans d’action constituent un corpus évolutif ; leurs dates exactes de publication ne sont pas affichées sur les pages consultées."
+      ],
+      "unknowns": [
+        "Éventuels accords de rassemblement et validation légale de la candidature non encore acquis."
+      ]
+    },
+    {
+      "id": "apres",
+      "name": "L’Après — Alliance pour la République écologique et sociale",
+      "abbreviation": "L’Après",
+      "description": "Organisation de gauche issue notamment d’anciens membres de LFI, défendant une transformation sociale et écologique et l’unité des gauches.",
+      "officialWebsite": "https://l-apres.fr/",
+      "leadership": [
+        {
+          "name": "Clémentine Autain",
+          "role": "Cofondatrice ; ancienne candidate à la primaire unitaire, retirée en juillet 2026",
+          "sourceIds": [
+            "apres-identite",
+            "apres-retrait"
+          ]
+        },
+        {
+          "name": "Alexis Corbière",
+          "role": "Cofondateur ; ne pas assimiler ce titre à une présidence individuelle",
+          "sourceIds": [
+            "apres-identite"
+          ]
+        },
+        {
+          "name": "Danielle Simonnet",
+          "role": "Cofondatrice et porte-parole mentionnée dans les publications du mouvement",
+          "sourceIds": [
+            "apres-identite",
+            "apres-porteparole"
+          ]
+        },
+        {
+          "name": "Raquel Garrido",
+          "role": "Cofondatrice et porte-parole mentionnée dans les publications du mouvement",
+          "sourceIds": [
+            "apres-identite",
+            "apres-porteparole"
+          ]
+        }
+      ],
+      "election2027": {
+        "status": "withdrawn",
+        "summary": "Clémentine Autain a retiré sa candidature le 11 juillet 2026 ; aucun candidat de remplacement n’est établi dans cette édition du dossier.",
+        "people": [
+          {
+            "name": "Clémentine Autain",
+            "status": "Candidature retirée le 11 juillet 2026",
+            "sourceIds": [
+              "apres-retrait"
+            ]
+          }
+        ],
+        "sourceIds": [
+          "apres-retrait"
+        ]
+      },
+      "proposals": [
+        {
+          "id": "apres-salaire",
+          "theme": "Travail",
+          "title": "Relever le salaire brut à 2 000 € et l’indexer",
+          "summary": "Augmenter le plancher salarial brut et le faire suivre l’inflation.",
+          "detail": "La déclaration du 30 avril revendique ce montant brut et l’ouverture de négociations dans toutes les entreprises.",
+          "context": "Déclaration nationale sur le travail du 30 avril 2026.",
+          "sourceIds": [
+            "apres-travail2026"
+          ]
+        },
+        {
+          "id": "apres-prix",
+          "theme": "Pouvoir d’achat",
+          "title": "Bloquer les prix des biens essentiels",
+          "summary": "Encadrer les prix de l’énergie, du carburant, des loyers et des produits nécessaires.",
+          "detail": "Le blocage est défendu comme réponse de crise dans la déclaration nationale.",
+          "context": "Déclaration nationale sur le travail du 30 avril 2026.",
+          "sourceIds": [
+            "apres-travail2026"
+          ]
+        },
+        {
+          "id": "apres-chsct",
+          "theme": "Travail",
+          "title": "Rétablir les CHSCT et renforcer les droits des salariés",
+          "summary": "Recréer les comités d’hygiène, de sécurité et des conditions de travail.",
+          "detail": "Le texte demande aussi du temps dédié pour débattre collectivement de l’organisation du travail.",
+          "context": "Déclaration nationale sur le travail du 30 avril 2026.",
+          "sourceIds": [
+            "apres-travail2026"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "id": "apres-identite",
+          "title": "Qui sommes-nous ?",
+          "publisher": "L’Après",
+          "url": "https://l-apres.fr/pages/6rju0u8IWfJ0wAyMYDVmoq/qui-sommes-nous",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "apres-porteparole",
+          "title": "Face à l’extrême-centre qui s’entête : unité du NFP",
+          "publisher": "L’Après",
+          "url": "https://lapres.nationbuilder.com/face_l_extr_me_centre_qui_s_ent_te_unit_du_nfp",
+          "publishedAt": "2025-01-16",
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "apres-retrait",
+          "title": "Clémentine Autain renonce à être candidate à la présidentielle et n’exclut pas de soutenir Jean-Luc Mélenchon",
+          "publisher": "RTL / AFP, déclaration sur France 2",
+          "url": "https://www.rtl.fr/actu/politique/il-n-y-aura-pas-de-primaire-clementine-autain-renonce-a-etre-candidate-a-la-presidentielle-et-n-exclut-pas-de-soutenir-jean-luc-melenchon-7900654390",
+          "publishedAt": "2026-07-11",
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "apres-travail2026",
+          "title": "Dans la rue le 1er mai, pour augmenter nos salaires et redonner du sens à notre travail !",
+          "publisher": "L’Après — Hendrik Davi",
+          "url": "https://l-apres.fr/posts/2LA1OdUKtcDYfcmRUwGdkw/dans-la-rue-le-1er-mai-pour-augmenter-nos-salaires-et-redonner-du-sens-a-notre-travail",
+          "publishedAt": "2026-04-30",
+          "checkedAt": "2026-10-20"
+        }
+      ],
+      "notes": [
+        "Les rôles de cofondateurs et porte-parole ne constituent pas une liste exhaustive et vérifiée de l’exécutif actuel.",
+        "Le retrait concerne la personne ; L’Après poursuit une activité politique. Les mesures sont des positions nationales de 2026, pas le programme d’une candidature Autain maintenue."
+      ],
+      "unknowns": [
+        "Composition exhaustive actuelle de la direction collective et choix final de soutien présidentiel non établis dans les sources consultées."
+      ]
+    },
+    {
+      "id": "revolution-permanente",
+      "name": "Révolution permanente",
+      "abbreviation": "RP",
+      "description": "Organisation communiste révolutionnaire défendant le contrôle de l’économie par les travailleurs et une politique internationaliste.",
+      "officialWebsite": "https://www.revolutionpermanente.fr/",
+      "leadership": [
+        {
+          "name": "Anasse Kazib",
+          "role": "Porte-parole et candidat à la présidentielle ; ne pas assimiler ce rôle à une présidence du parti",
+          "sourceIds": [
+            "rp-candidature"
+          ]
+        }
+      ],
+      "election2027": {
+        "status": "declared",
+        "summary": "Anasse Kazib mène une campagne pour 2027 avec Révolution permanente, annoncée en juin puis lancée publiquement en septembre 2026.",
+        "people": [
+          {
+            "name": "Anasse Kazib",
+            "status": "Candidat déclaré",
+            "sourceIds": [
+              "rp-candidature",
+              "rp-lancement"
+            ]
+          }
+        ],
+        "sourceIds": [
+          "rp-candidature",
+          "rp-lancement"
+        ]
+      },
+      "proposals": [
+        {
+          "id": "rp-28h",
+          "theme": "Travail",
+          "title": "Passer à une semaine de 28 heures",
+          "summary": "Répartir le travail sans diminution de salaire.",
+          "detail": "Mesure présentée avec l’interdiction des licenciements dans les premières propositions de campagne.",
+          "context": "Premières mesures de la campagne 2027 publiées en septembre 2026.",
+          "sourceIds": [
+            "rp-premieres-mesures"
+          ]
+        },
+        {
+          "id": "rp-smic",
+          "theme": "Travail",
+          "title": "Porter le SMIC à 2 000 € net",
+          "summary": "Revaloriser les bas revenus et indexer les salaires sur les prix.",
+          "detail": "La page de campagne revendique également une augmentation de 500 € des salaires.",
+          "context": "Premières propositions de campagne 2027, programme complet en préparation.",
+          "sourceIds": [
+            "rp-programme"
+          ]
+        },
+        {
+          "id": "rp-retraites",
+          "theme": "Retraites",
+          "title": "Retraite à 60 ans, ou 55 ans pour les métiers pénibles",
+          "summary": "Supprimer les conditions d’annuités pour ces départs.",
+          "detail": "Ces âges et cette absence de condition d’annuités figurent dans les propositions de campagne.",
+          "context": "Premières propositions de campagne 2027, programme complet en préparation.",
+          "sourceIds": [
+            "rp-programme"
+          ]
+        },
+        {
+          "id": "rp-expropriation",
+          "theme": "Économie",
+          "title": "Exproprier les secteurs stratégiques",
+          "summary": "Placer énergie, transports, banques et santé sous contrôle des travailleurs.",
+          "detail": "L’article de lancement défend une expropriation sans indemnisation ni rachat.",
+          "context": "Premières mesures de la campagne 2027 publiées en septembre 2026.",
+          "sourceIds": [
+            "rp-premieres-mesures"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "id": "rp-candidature",
+          "title": "Notre candidature — une candidature ouvrière à la présidentielle",
+          "publisher": "Campagne Anasse Kazib 2027 / Révolution permanente",
+          "url": "https://anasse2027.fr/pourquoi-nous-soutenir",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "rp-lancement",
+          "title": "Présidentielles : la campagne d’Anasse Kazib est lancée, rejoignez-nous !",
+          "publisher": "Révolution permanente",
+          "url": "https://www.revolutionpermanente.fr/On-peut-arracher-les-500-parrainages-la-campagne-d-Anasse-Kazib-est-lancee-rejoignez-nous",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "rp-premieres-mesures",
+          "title": "28 h, expropriation des secteurs stratégiques : RP présente les premières mesures de sa candidature",
+          "publisher": "Révolution permanente — Daniel Matisa et Gregorio Oneto",
+          "url": "https://www.revolutionpermanente.fr/28h-expropriation-des-secteurs-strategiques-RP-presente-les-premieres-mesures-de-sa-candidature",
+          "publishedAt": "2026-09-16",
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "rp-programme",
+          "title": "Notre programme — Anasse Kazib 2027",
+          "publisher": "Campagne Anasse Kazib 2027 / Révolution permanente",
+          "url": "https://anasse2027.fr/programme",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        }
+      ],
+      "notes": [
+        "La page officielle distingue les premières propositions de 2027 du programme 2022 offert en lecture d’attente ; ne pas attribuer ce dernier à 2027.",
+        "La candidature doit encore franchir le processus légal de validation."
+      ],
+      "unknowns": [
+        "Programme présidentiel 2027 complet annoncé en cours d’élaboration ; validation légale et parrainages non encore acquis."
+      ]
+    }
+  ],
+  "omissions": [
+    {
+      "name": "Génération·s",
+      "reason": "Actualité 2027 évoquée par la presse et textes stratégiques officiels retrouvés, mais direction exhaustive actuelle, position finale et ensemble de mesures récentes insuffisamment recoupés dans ce lot. Ne pas reprendre Benoît Hamon comme dirigeant/candidat actuel par défaut.",
+      "sources": [
+        {
+          "title": "Notre texte d’orientation stratégique — Août 2025",
+          "publisher": "Génération·s",
+          "url": "https://www.generation-s.fr/notre-texte-dorientation-strategique-nov-2022/",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        }
+      ]
+    }
+  ]
+}

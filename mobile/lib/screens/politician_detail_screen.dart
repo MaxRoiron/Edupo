@@ -1,282 +1,218 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../models/political_party.dart';
-import '../theme/app_theme.dart';
+import '../models/political_portraits.dart';
+import '../theme/civic_theme.dart';
+import '../widgets/political_components.dart';
 
+/// Separates organisational office holders from presidential contenders.
+/// No old portrait, constituency or seat is inferred from a party affiliation.
 class PoliticianDetailScreen extends StatelessWidget {
-  final PoliticalParty party;
-
   const PoliticianDetailScreen({super.key, required this.party});
-
+  final PoliticalParty party;
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: party.primaryColor,
-        elevation: 0,
-        title: Text(party.leader, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+  Widget build(BuildContext context) => PoliticalPage(
+    title: 'Les personnes · ${party.abbreviation}',
+    child: ListView(
+      padding: const EdgeInsets.fromLTRB(22, 18, 22, 36),
+      children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          child: PartyMark(party, size: 62),
         ),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [party.primaryColor, party.primaryColor.withValues(alpha: 0.0)],
-                  stops: const [0.0, 1.0],
-                ),
-              ),
-              child: Column(
-                children: [
-                  const SizedBox(height: 20),
-                  Hero(
-                    tag: 'leader_${party.abbreviation}',
-                    child: Container(
-                      width: 200,
-                      height: 200,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.2),
-                            blurRadius: 15,
-                            offset: const Offset(0, 10),
-                          )
-                        ],
-                        image: DecorationImage(
-                          image: AssetImage(party.leaderAsset),
-                          fit: BoxFit.cover,
-                          alignment: Alignment.topCenter,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    party.leader,
-                    style: const TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w900,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: party.primaryColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: party.primaryColor.withValues(alpha: 0.3)),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Image.asset(party.logoAsset, width: 24, height: 24),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Leader - ${party.name}',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: party.primaryColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Carrière',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: AppColors.cardBackground,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.border),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.03),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Text(
-                      party.leaderCareer,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        height: 1.5,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  const Text(
-                    'Informations',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildInfoCard(
-                    icon: Icons.flag_rounded,
-                    title: 'Parti Politique',
-                    value: party.name,
-                    color: party.primaryColor,
-                  ),
-                  const SizedBox(height: 12),
-                  _buildInfoCard(
-                    icon: Icons.account_balance_rounded,
-                    title: 'Idéologie',
-                    value: party.ideology,
-                    color: party.secondaryColor,
-                  ),
-                  const SizedBox(height: 12),
-                  _buildInfoCard(
-                    icon: Icons.explore_rounded,
-                    title: 'Positionnement',
-                    value: party.positioning,
-                    color: AppColors.accentBlue,
-                  ),
-                  if (party.constituency != null) ...[
-                    const SizedBox(height: 12),
-                    _buildInfoCard(
-                      icon: Icons.map_rounded,
-                      title: 'Circonscription',
-                      value: party.constituency!,
-                      color: party.primaryColor,
-                    ),
-                  ],
-                  if (party.seatNumber != null) ...[
-                    const SizedBox(height: 12),
-                    _buildInfoCard(
-                      icon: Icons.event_seat_rounded,
-                      title: 'Siège Hémicycle',
-                      value: party.seatNumber!,
-                      color: party.secondaryColor,
-                    ),
-                  ],
-                  if (party.assemblyLink != null) ...[
-                    const SizedBox(height: 12),
-                    _buildInfoCard(
-                      icon: Icons.link_rounded,
-                      title: 'Fiche Assemblée Nationale',
-                      value: 'Voir sur assemblee-nationale.fr',
-                      color: AppColors.accentBlue,
-                      onTap: () async {
-                        final url = Uri.parse(party.assemblyLink!);
-                        if (await canLaunchUrl(url)) {
-                          await launchUrl(url);
-                        }
-                      },
-                    ),
-                  ],
-                  const SizedBox(height: 32),
-                ],
-              ),
-            ),
-          ],
+        const SizedBox(height: 22),
+        Text('Qui fait quoi ?', style: Civic.heading(34)),
+        const SizedBox(height: 12),
+        Text(
+          party.name,
+          style: const TextStyle(color: Civic.muted, fontSize: 16),
         ),
-      ),
-    );
-  }
+        const SizedBox(height: 26),
+        Text('La direction du parti', style: Civic.heading(23)),
+        const SizedBox(height: 14),
+        if (party.leadership.isEmpty)
+          const PoliticalPanel(
+            child: Text('Direction actuelle non vérifiée dans ce dossier.'),
+          ),
+        for (final person in party.leadership)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 14),
+            child: _person(context, person),
+          ),
+        const SizedBox(height: 18),
+        Text('Pour la présidentielle', style: Civic.heading(23)),
+        const SizedBox(height: 14),
+        PoliticalPanel(
+          blue: true,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                party.election2027.label,
+                style: Civic.heading(20, color: Civic.blue),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                party.election2027.summary,
+                style: const TextStyle(height: 1.6, color: Civic.ink),
+              ),
+              SourcesButton(
+                sources: party.sourcesFor(party.election2027.sourceIds),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
+        for (final person in party.election2027.people)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 14),
+            child: _person(context, person),
+          ),
+        const SizedBox(height: 12),
+        const Text(
+          'Diriger un parti et être candidat sont deux fonctions distinctes. Une candidature annoncée reste soumise aux conditions légales et à la validation du Conseil constitutionnel.',
+          style: TextStyle(color: Civic.muted, height: 1.65),
+        ),
+      ],
+    ),
+  );
 
-  Widget _buildInfoCard({
-    required IconData icon,
-    required String title,
-    required String value,
-    required Color color,
-    VoidCallback? onTap,
-  }) {
-    Widget card = Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.cardBackground,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
+  Widget _person(BuildContext context, PoliticalPerson person) {
+    final portrait = politicalPortraits[person.name];
+    final largeText = MediaQuery.textScalerOf(context).scale(14) > 20;
+    return PoliticalPanel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: color, size: 24),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          if (largeText) ...[
+            _portrait(person, portrait),
+            const SizedBox(height: 12),
+            Text(person.name, style: Civic.heading(22)),
+          ] else
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textMuted,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: onTap != null ? Colors.blue : AppColors.textPrimary,
-                    fontWeight: FontWeight.bold,
-                    decoration: onTap != null ? TextDecoration.underline : null,
-                  ),
-                ),
+                _portrait(person, portrait),
+                const SizedBox(width: 15),
+                Expanded(child: Text(person.name, style: Civic.heading(22))),
               ],
             ),
+          const SizedBox(height: 12),
+          Text(
+            person.role,
+            style: const TextStyle(color: Civic.muted, height: 1.55),
           ),
-          if (onTap != null)
-            const Icon(Icons.open_in_new_rounded, color: Colors.blue, size: 20),
+          const SizedBox(height: 4),
+          Wrap(
+            spacing: 8,
+            runSpacing: 0,
+            children: [
+              SourcesButton(sources: party.sourcesFor(person.sourceIds)),
+              if (portrait != null)
+                TextButton.icon(
+                  onPressed: () => _photoCredit(context, portrait),
+                  icon: const Icon(Icons.image_outlined, size: 18),
+                  label: const Text('Crédit photo'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Civic.blue,
+                    minimumSize: const Size(48, 48),
+                  ),
+                ),
+            ],
+          ),
+          if (portrait == null)
+            const Text(
+              'Portrait indisponible en licence réutilisable.',
+              style: TextStyle(color: Civic.muted, fontSize: 12),
+            ),
         ],
       ),
     );
-
-    if (onTap != null) {
-      return GestureDetector(
-        onTap: onTap,
-        child: card,
-      );
-    }
-    return card;
   }
+
+  Widget _portrait(PoliticalPerson person, PoliticalPortrait? portrait) {
+    final initials = person.name
+        .split(' ')
+        .where((part) => part.isNotEmpty)
+        .take(2)
+        .map((part) => part[0])
+        .join();
+    Widget fallback() => Center(
+      child: Text(initials, style: Civic.heading(24, color: Civic.blue)),
+    );
+    return Semantics(
+      label: portrait == null
+          ? 'Portrait indisponible de ${person.name}'
+          : 'Portrait de ${person.name}',
+      image: portrait != null,
+      child: Container(
+        width: 78,
+        height: 84,
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          color: Civic.pale,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: portrait == null
+            ? fallback()
+            : Image.asset(
+                portrait.asset,
+                key: ValueKey('portrait-image-${person.name}'),
+                fit: BoxFit.cover,
+                cacheWidth: 240,
+                errorBuilder: (context, error, stackTrace) => fallback(),
+              ),
+      ),
+    );
+  }
+
+  void _photoCredit(
+    BuildContext context,
+    PoliticalPortrait portrait,
+  ) => showModalBottomSheet<void>(
+    context: context,
+    useSafeArea: true,
+    showDragHandle: true,
+    backgroundColor: Civic.paper,
+    builder: (context) => Padding(
+      padding: const EdgeInsets.fromLTRB(22, 4, 22, 26),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(child: Text('Crédit photo', style: Civic.heading(24))),
+              IconButton(
+                tooltip: 'Fermer le crédit photo',
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.close_rounded),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text('Auteur : ${portrait.author}'),
+          const SizedBox(height: 7),
+          Text('Licence : ${portrait.license}'),
+          const SizedBox(height: 7),
+          const Text(
+            'Miniature Wikimedia Commons ; affichage recadré dans la fiche.',
+            style: TextStyle(color: Civic.muted, fontSize: 12),
+          ),
+          const SizedBox(height: 12),
+          TextButton.icon(
+            onPressed: () => openPoliticalSource(context, portrait.sourceUrl),
+            icon: const Icon(Icons.open_in_new_rounded, size: 18),
+            label: const Text('Voir la photo et sa source'),
+          ),
+          if (portrait.licenseUrl.isNotEmpty)
+            TextButton.icon(
+              onPressed: () =>
+                  openPoliticalSource(context, portrait.licenseUrl),
+              icon: const Icon(Icons.article_outlined, size: 18),
+              label: const Text('Lire la licence'),
+            ),
+        ],
+      ),
+    ),
+  );
 }

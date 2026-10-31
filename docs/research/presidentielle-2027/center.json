@@ -1,0 +1,741 @@
+{
+  "checkedAt": "2026-10-20",
+  "scope": "Renaissance, Horizons, MoDem et UDI ; sources accessibles au 20 octobre 2026. Les candidatures déclarées restent distinctes des candidatures validées par le Conseil constitutionnel.",
+  "parties": [
+    {
+      "id": "renaissance",
+      "name": "Renaissance",
+      "abbreviation": "RE",
+      "description": "Parti fondé dans la continuité d'En Marche, défendant l'intégration européenne, le travail et une ligne réformatrice.",
+      "officialWebsite": "https://parti-renaissance.fr/",
+      "leadership": [
+        {
+          "name": "Gabriel Attal",
+          "role": "Secrétaire général",
+          "sourceIds": [
+            "re-leadership"
+          ]
+        },
+        {
+          "name": "Emmanuel Macron",
+          "role": "Président d'honneur",
+          "sourceIds": [
+            "re-leadership"
+          ]
+        }
+      ],
+      "election2027": {
+        "status": "declared",
+        "summary": "Gabriel Attal a annoncé sa candidature le 22 mai 2026 à Mur-de-Barrez. Cette déclaration ne vaut pas validation administrative de candidature.",
+        "people": [
+          {
+            "name": "Gabriel Attal",
+            "status": "Candidat déclaré le 22 mai 2026",
+            "sourceIds": [
+              "re-attal-bio",
+              "re-lcp-candidacy"
+            ]
+          }
+        ],
+        "sourceIds": [
+          "re-attal-bio",
+          "re-lcp-candidacy"
+        ]
+      },
+      "proposals": [
+        {
+          "id": "re-ecole",
+          "theme": "Éducation",
+          "title": "Renforcer les acquis avant le collège",
+          "summary": "Rétablir un certificat d'études en CM2 et une année passerelle pour les élèves en difficulté.",
+          "detail": "Le projet inclut le retour des groupes de niveau au collège.",
+          "context": "Propositions de campagne 2027, septembre 2026.",
+          "sourceIds": [
+            "re-franceinfo"
+          ]
+        },
+        {
+          "id": "re-retraites",
+          "theme": "Retraites",
+          "title": "Changer les règles de départ",
+          "summary": "Fonder le départ sur la durée de cotisation et développer la capitalisation.",
+          "detail": "Les règles communes seraient organisées autour de trois régimes : salariés, fonctionnaires et indépendants, sans âge légal de départ.",
+          "context": "Propositions de campagne 2027, septembre et octobre 2026.",
+          "sourceIds": [
+            "re-franceinfo",
+            "re-blois"
+          ]
+        },
+        {
+          "id": "re-reseaux",
+          "theme": "Numérique",
+          "title": "Protéger les moins de 15 ans en ligne",
+          "summary": "Soumettre à référendum l'interdiction des réseaux sociaux avant 15 ans.",
+          "detail": "Il s'agit d'une proposition d'application de l'interdiction, présentée dans la campagne.",
+          "context": "Proposition de campagne 2027, septembre 2026.",
+          "sourceIds": [
+            "re-franceinfo"
+          ]
+        },
+        {
+          "id": "re-salaires",
+          "theme": "Travail",
+          "title": "Réduire l'écart entre salaire brut et net",
+          "summary": "Baisser les cotisations sur le travail grâce à des économies sociales.",
+          "detail": "Les pistes citées concernent l'assurance chômage et les indemnités journalières.",
+          "context": "Proposition de campagne 2027, septembre 2026.",
+          "sourceIds": [
+            "re-franceinfo"
+          ]
+        },
+        {
+          "id": "re-energie",
+          "theme": "Énergie",
+          "title": "Produire davantage d'énergie en France",
+          "summary": "Développer notamment le nucléaire et améliorer l'isolation des logements.",
+          "detail": "Le candidat souhaite aussi accompagner le remplacement des chaudières au gaz par des pompes à chaleur.",
+          "context": "Propositions de campagne 2027, octobre 2026.",
+          "sourceIds": [
+            "re-blois"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "id": "re-leadership",
+          "title": "Qui sommes-nous ? — Bureau exécutif",
+          "publisher": "Renaissance",
+          "url": "https://parti-renaissance.fr/le-parti",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "re-attal-bio",
+          "title": "Gabriel Attal — Qui je suis",
+          "publisher": "Attal Président",
+          "url": "https://attalpresident.fr/gabriel-attal",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "re-lcp-candidacy",
+          "title": "Présidentielle 2027 : Gabriel Attal officialise sa candidature",
+          "publisher": "LCP — Assemblée nationale",
+          "url": "https://lcp.fr/actualites/presidentielle-2027-gabriel-attal-officialise-sa-candidature-436721",
+          "publishedAt": "2026-05-22",
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "re-franceinfo",
+          "title": "Gabriel Attal veut remettre l'exigence au cœur de l'École et transformer le modèle français sur France Info",
+          "publisher": "Attal Président",
+          "url": "https://attalpresident.fr/actualites/gabriel-attal-veut-remettre-l-exigence-au-coeur-de-l-ecole-et-transformer-le-modele-francais-sur-france-info",
+          "publishedAt": "2026-09-09",
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "re-blois",
+          "title": "Gabriel Attal débat avec les Français à Blois et à Bourges",
+          "publisher": "Attal Président",
+          "url": "https://attalpresident.fr/actualites/gabriel-attal-debat-avec-les-francais-a-blois-et-a-bourges",
+          "publishedAt": "2026-10-05",
+          "checkedAt": "2026-10-20"
+        }
+      ],
+      "notes": [
+        "Emmanuel Macron est président d'honneur du parti ; il n'est pas présenté ici comme candidat en 2027.",
+        "Les propositions retenues proviennent du site de campagne actuel, et ne reprennent pas le programme Macron 2022 sous une étiquette 2027."
+      ],
+      "unknowns": [
+        "Les modalités de financement et les textes définitifs de mise en œuvre ne sont pas établis par ces résumés."
+      ],
+      "descriptionSourceIds": [
+        "re-leadership"
+      ]
+    },
+    {
+      "id": "horizons",
+      "name": "Horizons",
+      "abbreviation": "HOR",
+      "description": "Parti fondé par Édouard Philippe, attaché à l'intégration européenne, à la compétitivité économique et au renforcement de l'autorité publique.",
+      "officialWebsite": "https://horizonsleparti.fr/",
+      "leadership": [
+        {
+          "name": "Christophe Béchu",
+          "role": "Secrétaire général ; direction du mouvement depuis le 1er octobre 2026",
+          "sourceIds": [
+            "hor-campaign-committee",
+            "hor-afp-leadership"
+          ]
+        },
+        {
+          "name": "Édouard Philippe",
+          "role": "Fondateur et candidat à la présidentielle ; a quitté la présidence exécutive",
+          "sourceIds": [
+            "hor-campaign-committee"
+          ]
+        }
+      ],
+      "election2027": {
+        "status": "declared",
+        "summary": "Édouard Philippe conduit une campagne pour 2027 et cherche à élargir ses soutiens à droite et au centre. Il a quitté la présidence exécutive d'Horizons au 1er octobre 2026.",
+        "people": [
+          {
+            "name": "Édouard Philippe",
+            "status": "Candidat déclaré ; campagne présidentielle en cours",
+            "sourceIds": [
+              "hor-campaign-committee",
+              "hor-afp-leadership"
+            ]
+          }
+        ],
+        "sourceIds": [
+          "hor-campaign-committee",
+          "hor-afp-leadership"
+        ]
+      },
+      "proposals": [
+        {
+          "id": "hor-retraites",
+          "theme": "Retraites",
+          "title": "Porter progressivement le départ à 65 ans",
+          "summary": "Atteindre 65 ans et 45 années de cotisation en moins de dix ans pour les personnes qui le peuvent.",
+          "detail": "Le projet maintient des départs anticipés pour certaines carrières et situations de santé et prévoit une capitalisation collective.",
+          "context": "Priorités de campagne 2027 ; réforme présentée en septembre 2026.",
+          "sourceIds": [
+            "hor-prosperity",
+            "hor-retirement"
+          ]
+        },
+        {
+          "id": "hor-fiscalite",
+          "theme": "Économie",
+          "title": "Échanger des aides contre des baisses d'impôts",
+          "summary": "Réduire de 50 milliards d'euros les impôts de production et de 50 milliards certaines aides publiques.",
+          "detail": "Ces montants sont les objectifs annoncés par le candidat, sans évaluation indépendante intégrée ici.",
+          "context": "Priorité de campagne 2027, page non datée.",
+          "sourceIds": [
+            "hor-prosperity"
+          ]
+        },
+        {
+          "id": "hor-energie",
+          "theme": "Énergie",
+          "title": "Renforcer le nucléaire et l'électrification",
+          "summary": "Lancer huit EPR supplémentaires aux six déjà prévus, développer les renouvelables et électrifier les usages.",
+          "detail": "Cette orientation s'inscrit dans les priorités de décarbonation et de souveraineté du candidat.",
+          "context": "Priorité de campagne 2027, page non datée.",
+          "sourceIds": [
+            "hor-sovereignty"
+          ]
+        },
+        {
+          "id": "hor-narcotrafic",
+          "theme": "Sécurité",
+          "title": "Créer un état d'urgence contre le narcotrafic",
+          "summary": "Prévoir des pouvoirs exceptionnels limités dans le temps et dans l'espace.",
+          "detail": "Le projet inclut une utilisation ciblée de la reconnaissance faciale et des établissements de réinsertion et de soin pour les mineurs condamnés.",
+          "context": "Priorité de campagne 2027, page non datée.",
+          "sourceIds": [
+            "hor-security"
+          ]
+        },
+        {
+          "id": "hor-enfance",
+          "theme": "Enfance",
+          "title": "Créer une inspection nationale de l'enfance",
+          "summary": "Contrôler les lieux accueillant des mineurs au moins tous les trois ans.",
+          "detail": "L'inspection pourrait fermer des établissements ; le projet prévoit aussi des certificats d'honorabilité dans le périscolaire.",
+          "context": "Priorité de campagne 2027, page non datée.",
+          "sourceIds": [
+            "hor-children"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "id": "hor-campaign-committee",
+          "title": "Le comité de campagne est lancé !",
+          "publisher": "Avec Édouard 2027",
+          "url": "https://www.edouardphilippe.fr/actualites/le-comite-de-campagne-est-lance",
+          "publishedAt": "2026-09-08",
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "hor-afp-leadership",
+          "title": "Présidentielle : Philippe tend la main à la droite et au centre, Retailleau la refuse",
+          "publisher": "AFP, diffusé par Boursorama",
+          "url": "https://www.boursorama.com/actualite-economique/actualites-amp/presidentielle-philippe-tend-la-main-a-la-droite-et-au-centre-retailleau-la-refuse-b6c13d84f1aad7e9f933889e195f4b91",
+          "publishedAt": "2026-09-08",
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "hor-organisation",
+          "title": "Iéna — Organisation du parti",
+          "publisher": "Horizons",
+          "url": "https://horizonsleparti.fr/organisation/",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "hor-manifesto",
+          "title": "Le Manifeste",
+          "publisher": "Horizons",
+          "url": "https://horizonsleparti.fr/le-manifeste/",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "hor-prosperity",
+          "title": "Pour une France plus prospère",
+          "publisher": "Avec Édouard 2027",
+          "url": "https://www.edouardphilippe.fr/priorites/pour-une-france-plus-prospere",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "hor-retirement",
+          "title": "Retraites : la réforme que je propose aux Français",
+          "publisher": "Avec Édouard 2027",
+          "url": "https://www.edouardphilippe.fr/actualites/retraites-la-reforme-que-je-propose-aux-francais",
+          "publishedAt": "2026-09-29",
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "hor-sovereignty",
+          "title": "Pour une France plus conquérante",
+          "publisher": "Avec Édouard 2027",
+          "url": "https://www.edouardphilippe.fr/priorites/pour-une-france-plus-conquerante",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "hor-security",
+          "title": "Pour une France plus sûre",
+          "publisher": "Avec Édouard 2027",
+          "url": "https://www.edouardphilippe.fr/priorites/pour-une-france-plus-sure",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "hor-children",
+          "title": "Pour une France plus attentive à ses enfants",
+          "publisher": "Avec Édouard 2027",
+          "url": "https://www.edouardphilippe.fr/priorites/pour-une-france-plus-attentive-a-ses-enfants",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        }
+      ],
+      "notes": [
+        "L'organigramme non daté d'Horizons affiche encore Édouard Philippe comme président. La communication de campagne datée du 8 septembre 2026, recoupée avec l'AFP, indique le relais pris par Christophe Béchu à compter du 1er octobre. Le titre de président n'est pas inventé pour Béchu : sa fonction vérifiée demeure secrétaire général assurant la direction.",
+        "Les mesures proviennent des pages de campagne 2027 ; le manifeste du parti est un texte d'orientation, pas un programme présidentiel chiffré."
+      ],
+      "unknowns": [
+        "Les pages de priorités ne portent pas de date de publication : leur disponibilité est constatée au 20 octobre 2026.",
+        "Le parti doit actualiser son organigramme ; la dénomination statutaire exacte de la fonction future de Christophe Béchu n'est pas précisée dans l'annonce de campagne."
+      ],
+      "descriptionSourceIds": [
+        "hor-manifesto"
+      ]
+    },
+    {
+      "id": "modem",
+      "name": "Mouvement démocrate",
+      "abbreviation": "MoDem",
+      "description": "Parti centriste fondé en 2007, attaché à la construction européenne, au pluralisme et à la recherche de compromis.",
+      "officialWebsite": "https://www.mouvementdemocrate.fr/",
+      "leadership": [
+        {
+          "name": "François Bayrou",
+          "role": "Président",
+          "sourceIds": [
+            "modem-bayrou"
+          ]
+        }
+      ],
+      "election2027": {
+        "status": "not_verified",
+        "summary": "Aucune candidature présidentielle propre au MoDem n'est confirmée par les sources consultées. François Bayrou appelle à une compétition démocratique pour désigner un candidat commun de l'espace central.",
+        "people": [
+          {
+            "name": "François Bayrou",
+            "status": "Président du parti ; ne pas assimiler cette fonction à une candidature 2027",
+            "sourceIds": [
+              "modem-bayrou",
+              "modem-selection",
+              "modem-rfi"
+            ]
+          }
+        ],
+        "sourceIds": [
+          "modem-selection",
+          "modem-rfi",
+          "modem-selection-news"
+        ]
+      },
+      "proposals": [
+        {
+          "id": "modem-proportionnelle",
+          "theme": "Institutions",
+          "title": "Élire les députés à la proportionnelle",
+          "summary": "Modifier le mode de scrutin pour représenter davantage les sensibilités politiques.",
+          "detail": "Cette priorité du parti est publiée dans sa rubrique Démocratie.",
+          "context": "Projet de parti ; pas un programme présidentiel 2027 finalisé.",
+          "sourceIds": [
+            "modem-democracy"
+          ]
+        },
+        {
+          "id": "modem-financement",
+          "theme": "Institutions",
+          "title": "Créer une Banque de la démocratie",
+          "summary": "Réduire la dépendance des partis aux banques privées pour leur financement.",
+          "detail": "La mesure figure aux côtés de la reconnaissance du vote blanc dans les priorités du MoDem.",
+          "context": "Projet de parti ; page non datée, consultée en octobre 2026.",
+          "sourceIds": [
+            "modem-democracy"
+          ]
+        },
+        {
+          "id": "modem-fiscalite",
+          "theme": "Fiscalité",
+          "title": "Taxer davantage la fortune improductive",
+          "summary": "Remplacer l'IFI par un impôt sur la fortune improductive et limiter certains mécanismes d'optimisation fiscale.",
+          "detail": "Le dossier budgétaire propose notamment de limiter les effets d'aubaine liés au pacte Dutreil.",
+          "context": "Propositions pour le budget 2026 ; ne pas les présenter comme programme 2027 ni comme droit adopté.",
+          "sourceIds": [
+            "modem-budget",
+            "modem-fesneau-tax"
+          ]
+        },
+        {
+          "id": "modem-defense",
+          "theme": "Europe",
+          "title": "Renforcer l'Europe de la défense",
+          "summary": "Développer une défense européenne et l'autonomie industrielle et numérique de l'Union.",
+          "detail": "Ces orientations sont présentées dans les priorités européennes du mouvement.",
+          "context": "Projet de parti ; pas un engagement attribué à un candidat 2027 désigné.",
+          "sourceIds": [
+            "modem-europe"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "id": "modem-about",
+          "title": "Qui sommes-nous ?",
+          "publisher": "Mouvement démocrate",
+          "url": "https://www.mouvementdemocrate.fr/qui-sommes-nous-7915",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "modem-bayrou",
+          "title": "François Bayrou — Président du Mouvement démocrate",
+          "publisher": "Mouvement démocrate",
+          "url": "https://www.mouvementdemocrate.fr/fiche/francois-bayrou-2366",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "modem-selection",
+          "title": "François Bayrou : Il faut une compétition loyale et franche à l'intérieur de ce grand espace",
+          "publisher": "Mouvement démocrate, tribune dans La Tribune Dimanche",
+          "url": "https://www.mouvementdemocrate.fr/actualites/francois-bayrou-il-faut-une-competition-loyale-et-franche-linterieur-de-ce-grand-espace",
+          "publishedAt": "2026-08-30",
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "modem-rfi",
+          "title": "François Bayrou : La voix de la France sera entendue à la mesure du redressement du pays",
+          "publisher": "Mouvement démocrate, transcription d'entretien RFI",
+          "url": "https://www.mouvementdemocrate.fr/actualites/francois-bayrou-la-voix-de-la-france-sera-entendue-la-mesure-du-redressement-du-pays",
+          "publishedAt": "2026-07-16",
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "modem-selection-news",
+          "title": "Présidentielle 2027 : François Bayrou tance les candidats de l'espace central et appelle à nouveau à une primaire",
+          "publisher": "Le Monde",
+          "url": "https://www.lemonde.fr/politique/article/2026/09/10/presidentielle-2027-francois-bayrou-tance-les-candidats-de-l-espace-central-sans-legitimite-et-appelle-a-nouveau-a-une-primaire_6769657_823448.html",
+          "publishedAt": "2026-09-10",
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "modem-democracy",
+          "title": "Rénover notre démocratie",
+          "publisher": "Mouvement démocrate",
+          "url": "https://www.mouvementdemocrate.fr/renover-notre-democratie-7927",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "modem-budget",
+          "title": "Dossier de presse budget 2026",
+          "publisher": "Mouvement démocrate",
+          "url": "https://www.mouvementdemocrate.fr/system/files/documents/Dossier%20de%20presse%20budget%202026%20%283%29.pdf",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "modem-fesneau-tax",
+          "title": "Marc Fesneau : Nous proposons un impôt sur la fortune improductive",
+          "publisher": "Mouvement démocrate, entretien aux Échos",
+          "url": "https://www.mouvementdemocrate.fr/actualites/marc-fesneau-nous-proposons-un-impot-sur-la-fortune-improductive-image-7951-image",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "modem-europe",
+          "title": "Renforcer l'Union européenne",
+          "publisher": "Mouvement démocrate",
+          "url": "https://www.mouvementdemocrate.fr/renforcer-lunion-europeenne-7923",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        }
+      ],
+      "notes": [
+        "Une demande de primaire n'est pas une primaire déjà organisée. Aucun résultat ou date de désignation n'est inventé.",
+        "Les anciennes pages programmatiques 2019, encore accessibles, n'ont pas été recyclées comme programme 2027. Les priorités actuelles et le dossier budgétaire 2026 sont distingués."
+      ],
+      "unknowns": [
+        "Candidat soutenu et procédure définitive de désignation non établis par les sources consultées."
+      ],
+      "descriptionSourceIds": [
+        "modem-about"
+      ]
+    },
+    {
+      "id": "udi",
+      "name": "Union des démocrates et indépendants",
+      "abbreviation": "UDI",
+      "description": "Parti centriste européen, attaché à la décentralisation et au rôle des collectivités locales.",
+      "officialWebsite": "https://www.parti-udi.fr/",
+      "leadership": [
+        {
+          "name": "Hervé Marseille",
+          "role": "Président, réélu en décembre 2025",
+          "sourceIds": [
+            "udi-congress",
+            "udi-leadership"
+          ]
+        }
+      ],
+      "election2027": {
+        "status": "not_verified",
+        "summary": "L'UDI prépare l'échéance de 2027 et souhaite un rassemblement du centre et de la droite. Les sources consultées ne confirment pas de candidature présidentielle propre ni de soutien définitif à un candidat.",
+        "people": [
+          {
+            "name": "Hervé Marseille",
+            "status": "Président du parti ; aucune candidature présidentielle établie dans ce dossier",
+            "sourceIds": [
+              "udi-congress",
+              "udi-newyear"
+            ]
+          }
+        ],
+        "sourceIds": [
+          "udi-congress",
+          "udi-newyear",
+          "udi-afp-coordination"
+        ]
+      },
+      "proposals": [
+        {
+          "id": "udi-territoires",
+          "theme": "Territoires",
+          "title": "Donner des financements stables aux collectivités",
+          "summary": "Permettre aux élus locaux de conduire leurs politiques sur plusieurs années.",
+          "detail": "L'UDI s'oppose à ce que les budgets territoriaux servent systématiquement d'ajustement aux comptes de l'État.",
+          "context": "Position dans le débat budgétaire 2026 ; pas un programme présidentiel finalisé.",
+          "sourceIds": [
+            "udi-budget"
+          ]
+        },
+        {
+          "id": "udi-foncier",
+          "theme": "Fiscalité",
+          "title": "Revoir les valeurs locatives avec les communes",
+          "summary": "Soutenir la suspension de la hausse de taxe foncière et réformer les bases locatives.",
+          "detail": "La position publiée demande une construction de cette réforme avec les collectivités.",
+          "context": "Position dans le débat budgétaire 2026 ; ce résumé ne décrit pas le droit en vigueur.",
+          "sourceIds": [
+            "udi-budget"
+          ]
+        },
+        {
+          "id": "udi-adaptation",
+          "theme": "Climat",
+          "title": "Adapter les logements aux fortes chaleurs",
+          "summary": "Soutenir la rénovation des logements des personnes âgées et l'action des collectivités.",
+          "detail": "Une contribution d'Olivier Richefou, vice-président de l'UDI, demande des moyens durables et davantage de souplesse locale.",
+          "context": "Contribution publiée par le parti en 2026 ; page sans date exacte visible.",
+          "sourceIds": [
+            "udi-climate"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "id": "udi-leadership",
+          "title": "La direction nationale",
+          "publisher": "UDI",
+          "url": "https://www.parti-udi.fr/la-direction-nationale-2025/",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "udi-congress",
+          "title": "Congrès de l'UDI : Hervé Marseille réélu Président",
+          "publisher": "UDI",
+          "url": "https://www.parti-udi.fr/congres-de-ludi-herve-marseille-reelu-president/",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "udi-newyear",
+          "title": "Bonne année 2026",
+          "publisher": "UDI",
+          "url": "https://www.parti-udi.fr/bonne-annee-2026/",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "udi-afp-coordination",
+          "title": "Présidentielle : Philippe tend la main à la droite et au centre, Retailleau la refuse",
+          "publisher": "AFP, diffusé par Boursorama",
+          "url": "https://www.boursorama.com/actualite-economique/actualites-amp/presidentielle-philippe-tend-la-main-a-la-droite-et-au-centre-retailleau-la-refuse-b6c13d84f1aad7e9f933889e195f4b91",
+          "publishedAt": "2026-09-08",
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "udi-budget",
+          "title": "Budget 2026 : un travail de responsabilité, de cohérence et d'équité pour le pays",
+          "publisher": "UDI",
+          "url": "https://www.parti-udi.fr/budget-2026-un-travail-de-responsabilite-de-coherence-et-dequite-pour-le-pays/",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "udi-climate",
+          "title": "Face au dérèglement climatique, faisons confiance aux territoires",
+          "publisher": "UDI — contribution d'Olivier Richefou",
+          "url": "https://www.parti-udi.fr/face-au-dereglement-climatique/",
+          "publishedAt": null,
+          "checkedAt": "2026-10-20"
+        },
+        {
+          "id": "udi-values",
+          "title": "Prologue : nos valeurs",
+          "publisher": "UDI",
+          "url": "https://www.parti-udi.fr/nos-valeurs/",
+          "publishedAt": "2017-04-03",
+          "checkedAt": "2026-10-20"
+        }
+      ],
+      "notes": [
+        "Jean-Louis Borloo est une figure fondatrice ; le président actuel vérifié est Hervé Marseille.",
+        "Le programme commun des européennes 2024 et les anciennes publications 2017/2020 ne sont pas relabellisés programme présidentiel 2027."
+      ],
+      "unknowns": [
+        "Aucun programme présidentiel 2027 finalisé trouvé dans les sources consultées.",
+        "Les contributions de responsables du parti ne valent pas automatiquement engagement d'un futur candidat."
+      ],
+      "descriptionSourceIds": [
+        "udi-values"
+      ]
+    }
+  ],
+  "electionRules": {
+    "checkedAt": "2026-10-20",
+    "summary": "L'élection présidentielle porte sur des personnes. Une annonce politique ou l'investiture d'un parti ne suffit pas à faire figurer quelqu'un sur la liste officielle.",
+    "rules": [
+      {
+        "title": "500 présentations d'élus",
+        "summary": "Au moins 500 élus habilités, issus d'au moins 30 départements ou collectivités, avec au maximum un dixième provenant d'un même département ou collectivité.",
+        "sourceIds": [
+          "rules-interior",
+          "rules-cc-qpc"
+        ]
+      },
+      {
+        "title": "Validation par le Conseil constitutionnel",
+        "summary": "Le Conseil constitutionnel contrôle les conditions de candidature et établit la liste. Les candidatures déclarées doivent être distinguées des candidatures validées.",
+        "sourceIds": [
+          "rules-interior",
+          "rules-cc-list"
+        ]
+      },
+      {
+        "title": "Scrutin à deux tours",
+        "summary": "Un candidat doit dépasser la moitié des suffrages exprimés. À défaut au premier tour, les deux premiers peuvent participer au second tour, deux semaines après.",
+        "sourceIds": [
+          "rules-servicepublic"
+        ]
+      }
+    ],
+    "officialList": {
+      "status": "not_published_in_consulted_sources",
+      "summary": "Aucune liste définitive 2027 arrêtée par le Conseil constitutionnel n'a été trouvée lors de cette vérification. Ne pas présenter le catalogue éditorial de l'application comme la liste officielle exhaustive.",
+      "sourceIds": [
+        "rules-interior",
+        "rules-cc-list",
+        "rules-cnccfp"
+      ]
+    },
+    "calendar": {
+      "firstRound": "2027-04-18",
+      "secondRound": "2027-05-02",
+      "summary": "Dates indiquées par Service Public, fiche vérifiée le 1er juillet 2026. Aucun décret de convocation 2027 n'a été vérifié séparément dans cette recherche ; éviter un décompte irrévocable sans vérification complémentaire.",
+      "sourceIds": [
+        "rules-servicepublic"
+      ]
+    },
+    "sources": [
+      {
+        "id": "rules-interior",
+        "title": "La candidature à l'élection présidentielle",
+        "publisher": "Ministère de l'Intérieur — archive explicative",
+        "url": "https://www.interieur.gouv.fr/archive/la-candidature-a-l-election-presidentielle",
+        "publishedAt": null,
+        "checkedAt": "2026-10-20"
+      },
+      {
+        "id": "rules-cc-qpc",
+        "title": "Commentaire de la décision 2012-233 QPC",
+        "publisher": "Conseil constitutionnel — QPC360",
+        "url": "https://qpc360.conseil-constitutionnel.fr/commentaire-decision-2012-233-qpc",
+        "publishedAt": null,
+        "checkedAt": "2026-10-20"
+      },
+      {
+        "id": "rules-cc-list",
+        "title": "Décision n° 2022-184/188 PDR du 24 mars 2022",
+        "publisher": "Conseil constitutionnel — QPC360",
+        "url": "https://qpc360.conseil-constitutionnel.fr/2022-03-24/decision-2022-184188-pdr-24-mars-2022",
+        "publishedAt": "2022-03-24",
+        "checkedAt": "2026-10-20"
+      },
+      {
+        "id": "rules-servicepublic",
+        "title": "Élection présidentielle",
+        "publisher": "Service Public — DILA / Ministère de l'Intérieur",
+        "url": "https://www.service-public.gouv.fr/particuliers/vosdroits/F1940",
+        "publishedAt": null,
+        "checkedAt": "2026-10-20"
+      },
+      {
+        "id": "rules-cnccfp",
+        "title": "Guide à l'usage des candidats à l'élection du Président de la République — 2027",
+        "publisher": "CNCCFP",
+        "url": "https://cnccfp.fr/wp-content/uploads/2026/04/Guide-a-lusage-des-candidats-a-lelection-du-President-de-la-Republique.pdf",
+        "publishedAt": "2026-03-26",
+        "checkedAt": "2026-10-20"
+      }
+    ],
+    "notes": [
+      "Les documents historiques du Conseil constitutionnel servent à expliquer le mécanisme de contrôle, pas à transposer la liste de 2022 à 2027.",
+      "La recherche ne remplace pas le contrôle du décret de convocation, du droit consolidé et de la future publication de la liste officielle."
+    ]
+  }
+}

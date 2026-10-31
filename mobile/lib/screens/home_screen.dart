@@ -1,27 +1,25 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
+import '../theme/civic_theme.dart';
 import '../services/law_feed_controller.dart';
+import '../widgets/civic_components.dart';
 import '../widgets/law_card.dart';
 import 'law_detail_screen.dart';
-import 'login_screen.dart';
-import 'register_screen.dart';
 import 'profile_screen.dart';
-import '../services/auth_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
-
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
-  final GlobalKey _profileButtonKey = GlobalKey();
-  final ScrollController _scrollController = ScrollController();
+  final _scrollController = ScrollController();
+  final _searchController = TextEditingController();
+  final _introKey = GlobalKey();
   late final LawFeedController _feed;
-  bool _isLoggedIn = false;
   Timer? _searchTimer;
+  bool _lastLoadWasMore = false;
 
   @override
   void initState() {
@@ -29,41 +27,68 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     _feed = LawFeedController(
       canApplyUpdate: () =>
-          !_scrollController.hasClients || _scrollController.offset < 320,
+          !_scrollController.hasClients ||
+          (_scrollController.offset < 120 &&
+              !_scrollController.position.isScrollingNotifier.value),
     )..addListener(_onFeedChanged);
+    _scrollController.addListener(_onScroll);
     unawaited(_feed.refresh(sync: true));
-    _checkLoginStatus();
   }
 
   void _onFeedChanged() {
+    if (_feed.loading || _feed.loadingMore) {
+      _lastLoadWasMore = _feed.loadingMore;
+    }
     if (mounted) setState(() {});
+  }
+
+  Future<void> _selectFeed({String? group, String? query}) {
+    if ((group ?? _feed.group) == _feed.group &&
+        (query ?? _feed.query) == _feed.query) {
+      return Future.value();
+    }
+    if (group != null) FocusScope.of(context).unfocus();
+    final introHeight = _introKey.currentContext?.size?.height;
+    if (_scrollController.hasClients &&
+        introHeight != null &&
+        _scrollController.offset > introHeight) {
+      _scrollController.jumpTo(introHeight);
+    }
+    return _feed.select(group: group, query: query);
+  }
+
+  void _onScroll() {
+    if (_scrollController.hasClients &&
+        _scrollController.position.extentAfter < 450 &&
+        _feed.hasMore &&
+        !_feed.loading &&
+        !_feed.loadingMore &&
+        _feed.error == null) {
+      unawaited(_feed.loadMore());
+    }
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       unawaited(_feed.refresh(sync: true, preservePosition: true));
-      _checkLoginStatus();
     }
   }
 
-  void _selectGroup(bool upcoming) {
-    unawaited(_feed.select(group: upcoming ? 'pending' : 'voted'));
-  }
-
-  void _search(String query) {
+  void _search(String value) {
+    setState(() {}); // Only changes the clear affordance, never sorts the feed.
     _searchTimer?.cancel();
     _searchTimer = Timer(
       const Duration(milliseconds: 350),
-      () => unawaited(_feed.select(query: query)),
+      () => unawaited(_selectFeed(query: value.trim())),
     );
   }
 
-  Future<void> _checkLoginStatus() async {
-    final loggedIn = await AuthService.isLoggedIn();
-    if (mounted && loggedIn != _isLoggedIn) {
-      setState(() => _isLoggedIn = loggedIn);
-    }
+  void _clearSearch() {
+    _searchTimer?.cancel();
+    _searchController.clear();
+    unawaited(_selectFeed(query: ''));
+    setState(() {});
   }
 
   @override
@@ -72,110 +97,150 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     _searchTimer?.cancel();
     _feed.removeListener(_onFeedChanged);
     _feed.dispose();
+    _searchController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFF0F4FF), AppColors.background],
-          ),
-        ),
+  Widget build(BuildContext context) => Theme(
+    data: Civic.theme(context),
+    child: Scaffold(
+      backgroundColor: Civic.paper,
+      body: SafeArea(
+        bottom: false,
         child: Stack(
-          fit: StackFit.expand,
           children: [
             RefreshIndicator(
-              // A refresh reads the database immediately; collection runs beside it.
+              color: Civic.blue,
               onRefresh: () => _feed.refresh(sync: true),
               child: CustomScrollView(
                 key: const PageStorageKey('laws'),
                 controller: _scrollController,
                 physics: const AlwaysScrollableScrollPhysics(),
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
                 slivers: [
-                  SliverToBoxAdapter(
-                    child: RepaintBoundary(child: _buildHeroHeader()),
+                  SliverToBoxAdapter(child: _center(_intro())),
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: _FeedTools(
+                      height: MediaQuery.textScalerOf(context).scale(16) > 23
+                          ? 178
+                          : 148,
+                      child: _center(_tools()),
+                    ),
                   ),
                   SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                      child: TextField(
-                        onChanged: _search,
-                        decoration: const InputDecoration(
-                          labelText: 'Rechercher une loi',
-                          prefixIcon: Icon(Icons.search),
-                          border: OutlineInputBorder(),
-                          filled: true,
+                    child: _center(
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
+                        child: Wrap(
+                          alignment: WrapAlignment.spaceBetween,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 12,
+                          runSpacing: 8,
+                          children: [
+                            Text(
+                              _feed.group == 'pending'
+                                  ? 'Au cœur du débat'
+                                  : 'Les décisions de l’Assemblée',
+                              style: Civic.heading(19),
+                            ),
+                            Text(
+                              '${_feed.laws.length} textes affichés',
+                              style: const TextStyle(
+                                color: Civic.muted,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
                   ),
-                  SliverToBoxAdapter(child: _buildToggleTabs()),
+                  if (_feed.syncWarning != null)
+                    SliverToBoxAdapter(
+                      child: _center(
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+                          child: CivicNotice(message: _feed.syncWarning!),
+                        ),
+                      ),
+                    ),
                   if (_feed.error != null)
                     SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          children: [
-                            Text(_feed.error!),
-                            TextButton(
-                              onPressed: () => _feed.refresh(sync: true),
-                              child: const Text('Réessayer'),
-                            ),
-                          ],
+                      child: _center(
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+                          child: CivicNotice(
+                            message: _feed.error!,
+                            error: true,
+                            action: 'Réessayer',
+                            onAction: () => _lastLoadWasMore
+                                ? _feed.loadMore()
+                                : _feed.refresh(
+                                    sync: true,
+                                    preservePosition: true,
+                                  ),
+                          ),
                         ),
                       ),
                     ),
                   if (_feed.loading && _feed.laws.isEmpty)
                     const SliverFillRemaining(
                       hasScrollBody: false,
-                      child: Center(child: CircularProgressIndicator()),
-                    )
-                  else if (_feed.laws.isEmpty && _feed.error == null)
-                    const SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: Center(child: Text('Aucune loi trouvée.')),
-                    )
-                  else
-                    SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-                      sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            final law = _feed.laws[index];
-                            return LawCard(
+                      child: Center(
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    ),
+                  if (!_feed.loading &&
+                      _feed.laws.isEmpty &&
+                      _feed.error == null)
+                    SliverFillRemaining(hasScrollBody: false, child: _empty()),
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final law = _feed.laws[index];
+                          return _center(
+                            maxWidth: 672,
+                            LawCard(
                               key: ValueKey(law.id),
                               law: law,
+                              featured: index == 0 && _feed.query.isEmpty,
                               onTap: () => Navigator.of(context).push(
                                 MaterialPageRoute(
                                   builder: (_) => LawDetailScreen(law: law),
                                 ),
                               ),
-                            );
-                          },
-                          childCount: _feed.laws.length,
-                          addAutomaticKeepAlives: false,
-                        ),
+                            ),
+                          );
+                        },
+                        childCount: _feed.laws.length,
+                        addAutomaticKeepAlives: false,
                       ),
                     ),
+                  ),
                   if (_feed.hasMore)
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.only(bottom: 32),
                         child: Center(
                           child: _feed.loadingMore
-                              ? const CircularProgressIndicator()
-                              : TextButton(
+                              ? const Padding(
+                                  padding: EdgeInsets.all(12),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : TextButton.icon(
                                   onPressed: _feed.loading
                                       ? null
                                       : _feed.loadMore,
-                                  child: const Text('Charger la suite'),
+                                  icon: const Icon(Icons.add_rounded, size: 18),
+                                  label: const Text('Charger la suite'),
                                 ),
                         ),
                       ),
@@ -183,299 +248,278 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 ],
               ),
             ),
-            if (_feed.updatesAvailable || _feed.syncWarning != null)
+            if (_feed.updatesAvailable)
               Positioned(
                 left: 20,
                 right: 20,
                 bottom: 16,
-                child: Material(
-                  color: Colors.white,
-                  elevation: 2,
-                  borderRadius: BorderRadius.circular(12),
-                  child: _feed.updatesAvailable
-                      ? TextButton(
-                          onPressed: () => _feed.refresh(),
-                          child: const Text(
-                            'De nouvelles informations sont disponibles. Actualiser',
-                          ),
-                        )
-                      : Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Text(
-                            _feed.syncWarning!,
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                        ),
+                child: _center(
+                  CivicNotice(
+                    message: 'De nouvelles informations sont disponibles.',
+                    action: 'Actualiser',
+                    onAction: () => _feed.refresh(),
+                  ),
                 ),
               ),
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
 
-  Widget _buildHeroHeader() {
-    final imageWidth =
-        (MediaQuery.sizeOf(context).width *
-                MediaQuery.devicePixelRatioOf(context))
-            .round()
-            .clamp(1, 1200);
-    return Container(
-      clipBehavior: Clip.antiAlias,
-      decoration: const BoxDecoration(
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
-      ),
-      child: Stack(
+  Widget _center(Widget child, {double maxWidth = 720}) => Center(
+    child: ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: maxWidth),
+      child: SizedBox(width: double.infinity, child: child),
+    ),
+  );
+
+  Widget _intro() => LayoutBuilder(
+    builder: (context, constraints) {
+      final illustrationWidth = (constraints.maxWidth * .76)
+          .clamp(240.0, 320.0)
+          .toDouble();
+      return Stack(
+        clipBehavior: Clip.none,
         children: [
-          Positioned.fill(
-            child: Image.asset(
-              'assets/images/slider/hemicycle.png',
-              fit: BoxFit.cover,
-              cacheWidth: imageWidth,
-            ),
-          ),
-          const Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0x99000000), Color(0xB3002395)],
-                ),
-              ),
-            ),
+          // The decoration paints first, behind every header control and label.
+          Positioned(
+            top: -5,
+            right: -36,
+            width: illustrationWidth,
+            height: 230,
+            child: const IgnorePointer(child: CivicHemicycle(fadeEdges: true)),
           ),
           Padding(
-            padding: EdgeInsets.fromLTRB(
-              24,
-              MediaQuery.paddingOf(context).top + 12,
-              24,
-              24,
-            ),
+            key: _introKey,
+            padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Row(
-                      children: [
-                        Icon(
-                          Icons.account_balance_rounded,
-                          color: Colors.white,
-                          size: 28,
-                        ),
-                        SizedBox(width: 12),
-                        Text(
-                          'Édupo',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 26,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ],
-                    ),
+                    const CivicWordmark(),
+                    const Spacer(),
                     IconButton(
-                      key: _profileButtonKey,
-                      tooltip: 'Mon profil',
-                      onPressed: _handleProfileTap,
+                      tooltip: 'Actualiser les lois',
+                      onPressed: _feed.loading
+                          ? null
+                          : () => _feed.refresh(sync: true),
                       icon: const Icon(
-                        Icons.person_outline_rounded,
-                        color: Colors.white,
+                        Icons.refresh_rounded,
+                        color: Civic.muted,
+                        size: 21,
                       ),
+                    ),
+                    const SizedBox(width: 4),
+                    IconButton.filledTonal(
+                      tooltip: 'Mon compte',
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Civic.blue,
+                        side: const BorderSide(color: Civic.line),
+                      ),
+                      onPressed: () => Navigator.of(context).push(
+                        CivicPageRoute(
+                          context: context,
+                          builder: (_) => const ProfileScreen(),
+                        ),
+                      ),
+                      icon: const Icon(Icons.person_outline_rounded, size: 22),
                     ),
                   ],
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 28),
                 const Text(
-                  'Vous aussi, prenez part à la vie politique !',
+                  'LE DÉBAT VOUS APPARTIENT',
                   style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700,
-                    height: 1.3,
+                    color: Civic.blue,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.7,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 Text(
-                  _feed.syncing
-                      ? 'Recherche de mises à jour…'
-                      : '${_feed.laws.length} textes de loi chargés',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: Colors.white70, fontSize: 13),
+                  'La politique,\nà votre portée.',
+                  style: Civic.heading(34),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Comprendre. Se positionner. Participer.',
+                  style: TextStyle(
+                    color: Civic.muted,
+                    fontSize: 13,
+                    height: 1.5,
+                  ),
                 ),
               ],
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildToggleTabs() => Padding(
-    padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
-    child: Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.frBlue.withValues(alpha: 0.08)),
-      ),
-      child: Row(
-        children: [
-          _buildTabButton(
-            label: 'À venir',
-            icon: Icons.schedule_rounded,
-            isSelected: _feed.group == 'pending',
-            onTap: () => _selectGroup(true),
-          ),
-          _buildTabButton(
-            label: 'Déjà votées',
-            icon: Icons.how_to_vote_rounded,
-            isSelected: _feed.group == 'voted',
-            onTap: () => _selectGroup(false),
-          ),
-        ],
-      ),
-    ),
+      );
+    },
   );
 
-  Widget _buildTabButton({
-    required String label,
-    required IconData icon,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeOutCubic,
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: isSelected ? AppColors.frBlue : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: AppColors.frBlue.withValues(alpha: 0.35),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ]
-                : [],
-          ),
+  Widget _tools() => Padding(
+    padding: const EdgeInsets.fromLTRB(24, 12, 24, 10),
+    child: Column(
+      children: [
+        Expanded(
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                icon,
-                size: 16,
-                color: isSelected
-                    ? Colors.white
-                    : AppColors.frBlue.withValues(alpha: 0.5),
+              Expanded(
+                child: _tab('À venir', 'pending', Icons.schedule_rounded),
               ),
               const SizedBox(width: 6),
-              Text(
-                label,
-                style: TextStyle(
-                  color: isSelected
-                      ? Colors.white
-                      : AppColors.frBlue.withValues(alpha: 0.6),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                ),
+              Expanded(
+                child: _tab('Déjà votées', 'voted', Icons.how_to_vote_outlined),
               ),
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  void _handleProfileTap() async {
-    if (_isLoggedIn) {
-      final result = await Navigator.of(
-        context,
-      ).push(MaterialPageRoute(builder: (_) => const ProfileScreen()));
-      // If user logged out from profile, refresh status
-      if (result == 'logged_out') {
-        _checkLoginStatus();
-      }
-    } else {
-      _showAuthPopup();
-    }
-  }
-
-  void _showAuthPopup() {
-    final RenderBox renderBox =
-        _profileButtonKey.currentContext!.findRenderObject() as RenderBox;
-    final Offset offset = renderBox.localToGlobal(Offset.zero);
-    final Size size = renderBox.size;
-
-    showMenu<String>(
-      context: context,
-      position: RelativeRect.fromLTRB(
-        offset.dx - 120 + size.width,
-        offset.dy + size.height + 8,
-        offset.dx + size.width,
-        0,
-      ),
-      elevation: 8,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      color: AppColors.cardBackground,
-      items: [
-        PopupMenuItem<String>(
-          value: 'login',
-          child: Row(
-            children: [
-              Icon(Icons.login_rounded, color: AppColors.frBlue, size: 20),
-              const SizedBox(width: 12),
-              const Text(
-                'Se connecter',
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 54,
+          child: TextField(
+            controller: _searchController,
+            onChanged: _search,
+            textInputAction: TextInputAction.search,
+            onSubmitted: (value) {
+              _searchTimer?.cancel();
+              unawaited(_selectFeed(query: value.trim()));
+            },
+            style: const TextStyle(fontSize: 14, color: Civic.ink),
+            decoration: InputDecoration(
+              hintText: 'Un sujet, une loi, une question…',
+              labelText: 'Rechercher une loi',
+              floatingLabelBehavior: FloatingLabelBehavior.never,
+              prefixIcon: const Icon(
+                Icons.search_rounded,
+                size: 21,
+                color: Civic.muted,
               ),
-            ],
-          ),
-        ),
-        PopupMenuItem<String>(
-          value: 'register',
-          child: Row(
-            children: [
-              Icon(Icons.person_add_rounded, color: AppColors.frBlue, size: 20),
-              const SizedBox(width: 12),
-              const Text(
-                'Créer un compte',
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
+              suffixIcon: _searchController.text.isNotEmpty
+                  ? IconButton(
+                      tooltip: 'Effacer la recherche',
+                      onPressed: _clearSearch,
+                      icon: const Icon(Icons.close_rounded, size: 19),
+                    )
+                  : null,
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
               ),
-            ],
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: Civic.line),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: Civic.blue, width: 1.5),
+              ),
+            ),
           ),
         ),
       ],
-    ).then((value) async {
-      if (!mounted) return;
-      if (value == 'login') {
-        final result = await Navigator.of(
-          context,
-        ).push(MaterialPageRoute(builder: (_) => const LoginScreen()));
-        if (result == true) _checkLoginStatus();
-      } else if (value == 'register') {
-        final result = await Navigator.of(
-          context,
-        ).push(MaterialPageRoute(builder: (_) => const RegisterScreen()));
-        if (result == true) _checkLoginStatus();
-      }
-    });
+    ),
+  );
+
+  Widget _tab(String label, String group, IconData icon) {
+    final selected = _feed.group == group;
+    return Semantics(
+      selected: selected,
+      child: Material(
+        color: selected ? Civic.blue : Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: selected ? Civic.blue : Civic.line),
+        ),
+        child: CivicPress(
+          onTap: () => unawaited(_selectFeed(group: group)),
+          radius: 16,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 52),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    icon,
+                    size: 18,
+                    color: selected ? Colors.white : Civic.muted,
+                  ),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      label,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: selected ? Colors.white : Civic.muted,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
+
+  Widget _empty() => Padding(
+    padding: const EdgeInsets.all(32),
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Icon(Icons.manage_search_rounded, color: Civic.blue, size: 40),
+        const SizedBox(height: 16),
+        Text(
+          _feed.syncing && _feed.query.isEmpty
+              ? 'Les textes arrivent.'
+              : 'Aucune loi trouvée.',
+          style: Civic.heading(23),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 10),
+        Text(
+          _feed.query.isEmpty
+              ? 'Les textes disponibles apparaîtront ici.'
+              : 'Essayez un autre mot-clé ou revenez à tous les textes.',
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: Civic.muted, height: 1.5),
+        ),
+        if (_feed.query.isNotEmpty)
+          TextButton(
+            onPressed: _clearSearch,
+            child: const Text('Effacer la recherche'),
+          ),
+      ],
+    ),
+  );
+}
+
+class _FeedTools extends SliverPersistentHeaderDelegate {
+  _FeedTools({required this.height, required this.child});
+  final double height;
+  final Widget child;
+  @override
+  double get minExtent => height;
+  @override
+  double get maxExtent => height;
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) => ColoredBox(color: Civic.paper, child: child);
+  @override
+  bool shouldRebuild(covariant _FeedTools oldDelegate) =>
+      oldDelegate.child != child || oldDelegate.height != height;
 }

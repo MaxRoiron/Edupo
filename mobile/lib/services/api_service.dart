@@ -10,8 +10,14 @@ class ApiResponse {
   final bool success;
   final String? message;
   final Map<String, dynamic>? data;
+  final int? statusCode;
 
-  ApiResponse({required this.success, this.message, this.data});
+  ApiResponse({
+    required this.success,
+    this.message,
+    this.data,
+    this.statusCode,
+  });
 }
 
 /// Service pour les appels HTTP au backend FastAPI
@@ -23,254 +29,133 @@ class ApiService {
     _client = client;
   }
 
-  /// POST /register
-  /// Retourne le JWT si succès
+  static Future<ApiResponse> _accountRequest(
+    String method,
+    String path, {
+    Map<String, dynamic>? body,
+    bool public = false,
+  }) async {
+    final token = public ? null : await AuthService.getToken();
+    if (!public && token == null) {
+      return ApiResponse(
+        success: false,
+        statusCode: 401,
+        message: 'Connectez-vous pour continuer.',
+      );
+    }
+    try {
+      final uri = Uri.parse('${ApiConfig.baseUrl}$path');
+      final headers = {
+        'Content-Type': 'application/json',
+        if (token != null) 'Authorization': 'Bearer $token',
+      };
+      final request = switch (method) {
+        'POST' => _client.post(uri, headers: headers, body: jsonEncode(body)),
+        'PATCH' => _client.patch(uri, headers: headers, body: jsonEncode(body)),
+        _ => _client.get(uri, headers: headers),
+      };
+      final response = await request.timeout(const Duration(seconds: 15));
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        final decoded = response.body.isEmpty
+            ? <String, dynamic>{}
+            : jsonDecode(response.body);
+        return ApiResponse(
+          success: true,
+          statusCode: response.statusCode,
+          data: decoded is List
+              ? {'list': decoded}
+              : Map<String, dynamic>.from(decoded),
+        );
+      }
+      if (response.statusCode == 401 && !public) {
+        await AuthService.deleteToken();
+      }
+      final message = switch (response.statusCode) {
+        401 =>
+          public
+              ? 'Adresse e-mail ou mot de passe incorrect.'
+              : 'Votre session a expiré. Reconnectez-vous.',
+        409 =>
+          path == '/register' || path == '/me'
+              ? 'Cette adresse e-mail est déjà utilisée.'
+              : 'Ces informations existent déjà. Actualisez votre profil avant de réessayer.',
+        403 => 'Cette action n’est pas autorisée pour ce compte.',
+        _ => 'Impossible de terminer cette action. Réessayez.',
+      };
+      return ApiResponse(
+        success: false,
+        statusCode: response.statusCode,
+        message: message,
+      );
+    } catch (_) {
+      return ApiResponse(
+        success: false,
+        message: 'Connexion au serveur impossible. Réessayez.',
+      );
+    }
+  }
+
   static Future<ApiResponse> register({
     required String username,
     required String email,
     required String password,
   }) async {
-    try {
-      final url = '${ApiConfig.baseUrl}/register';
-      debugPrint('[DEBUG] POST $url');
-      final response = await _client.post(
-        Uri.parse(url),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'username': username,
-          'email': email,
-          'password': password,
-        }),
-      );
-
-      final body = jsonDecode(response.body) as Map<String, dynamic>;
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final token = body['access_token'] as String;
-        await AuthService.saveToken(token);
-        return ApiResponse(success: true, data: body);
-      } else if (response.statusCode == 409) {
-        return ApiResponse(
-          success: false,
-          message: 'Un compte avec cet e-mail existe déjà.',
-        );
-      } else {
-        return ApiResponse(
-          success: false,
-          message:
-              body['detail']?.toString() ?? 'Erreur lors de l\'inscription.',
-        );
-      }
-    } catch (e, stackTrace) {
-      debugPrint('[DEBUG] Register error: $e');
-      debugPrint('[DEBUG] Stack: $stackTrace');
-      return ApiResponse(success: false, message: 'Erreur: $e');
-    }
+    final response = await _accountRequest(
+      'POST',
+      '/register',
+      public: true,
+      body: {'username': username, 'email': email, 'password': password},
+    );
+    return _saveSession(response);
   }
 
-  /// POST /login — Connexion d'un utilisateur existant
-  /// Retourne le JWT si succès
   static Future<ApiResponse> login({
     required String email,
     required String password,
   }) async {
-    try {
-      final url = '${ApiConfig.baseUrl}/login';
-      debugPrint('[DEBUG] POST $url');
-      final response = await _client.post(
-        Uri.parse(url),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email, 'password': password}),
-      );
-
-      final body = jsonDecode(response.body) as Map<String, dynamic>;
-
-      if (response.statusCode == 200) {
-        final token = body['access_token'] as String;
-        await AuthService.saveToken(token);
-        return ApiResponse(success: true, data: body);
-      } else if (response.statusCode == 401) {
-        return ApiResponse(
-          success: false,
-          message: 'E-mail ou mot de passe incorrect.',
-        );
-      } else {
-        return ApiResponse(
-          success: false,
-          message: body['detail']?.toString() ?? 'Erreur lors de la connexion.',
-        );
-      }
-    } catch (e, stackTrace) {
-      debugPrint('[DEBUG] Login error: $e');
-      debugPrint('[DEBUG] Stack: $stackTrace');
-      return ApiResponse(success: false, message: 'Erreur: $e');
-    }
+    final response = await _accountRequest(
+      'POST',
+      '/login',
+      public: true,
+      body: {'email': email, 'password': password},
+    );
+    return _saveSession(response);
   }
 
-  /// GET /me — Récupère les infos de l'utilisateur connecté
-  static Future<ApiResponse> getMe() async {
-    try {
-      final token = await AuthService.getToken();
-      if (token == null) {
-        return ApiResponse(success: false, message: 'Non connecté.');
-      }
-
-      final response = await _client.get(
-        Uri.parse('${ApiConfig.baseUrl}/me'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-
-      final body = jsonDecode(response.body) as Map<String, dynamic>;
-
-      if (response.statusCode == 200) {
-        return ApiResponse(success: true, data: body);
-      } else if (response.statusCode == 401) {
-        await AuthService.deleteToken();
-        return ApiResponse(success: false, message: 'Session expirée.');
-      } else {
-        return ApiResponse(
-          success: false,
-          message: body['detail']?.toString() ?? 'Erreur.',
-        );
-      }
-    } catch (e) {
+  static Future<ApiResponse> _saveSession(ApiResponse response) async {
+    if (!response.success) return response;
+    final token = response.data?['access_token'];
+    if (token is! String || token.isEmpty) {
       return ApiResponse(
         success: false,
-        message: 'Impossible de se connecter au serveur.',
+        message: 'La connexion n’a pas pu être confirmée. Réessayez.',
       );
     }
-  }
-
-  /// GET /me/data — Récupère les données additionnelles de l'utilisateur
-  static Future<ApiResponse> getUserData() async {
     try {
-      final token = await AuthService.getToken();
-      if (token == null) {
-        return ApiResponse(success: false, message: 'Non connecté.');
-      }
-
-      final response = await _client.get(
-        Uri.parse('${ApiConfig.baseUrl}/me/data'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-
-      final body = jsonDecode(response.body) as Map<String, dynamic>;
-      if (response.statusCode == 200) {
-        return ApiResponse(success: true, data: body);
-      }
+      await AuthService.saveToken(token);
+      return response;
+    } catch (_) {
       return ApiResponse(
         success: false,
-        message: body['detail']?.toString() ?? 'Erreur.',
+        message:
+            'Impossible de conserver votre connexion sur cet appareil. Réessayez.',
       );
-    } catch (e) {
-      return ApiResponse(success: false, message: 'Erreur: $e');
     }
   }
 
-  /// POST /me/data — Crée les données additionnelles
-  static Future<ApiResponse> createUserData(Map<String, dynamic> data) async {
-    try {
-      final token = await AuthService.getToken();
-      if (token == null) {
-        return ApiResponse(success: false, message: 'Non connecté.');
-      }
-
-      final response = await _client.post(
-        Uri.parse('${ApiConfig.baseUrl}/me/data'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode(data),
-      );
-
-      final body = jsonDecode(response.body) as Map<String, dynamic>;
-      if ((response.statusCode == 200 || response.statusCode == 201)) {
-        return ApiResponse(success: true, data: body);
-      }
-      return ApiResponse(
-        success: false,
-        message: body['detail']?.toString() ?? 'Erreur.',
-      );
-    } catch (e) {
-      return ApiResponse(success: false, message: 'Erreur: $e');
-    }
-  }
-
-  /// PATCH /me/data — Met à jour les données additionnelles
-  static Future<ApiResponse> updateUserData(Map<String, dynamic> data) async {
-    try {
-      final token = await AuthService.getToken();
-      if (token == null) {
-        return ApiResponse(success: false, message: 'Non connecté.');
-      }
-
-      final response = await _client.patch(
-        Uri.parse('${ApiConfig.baseUrl}/me/data'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode(data),
-      );
-
-      final body = jsonDecode(response.body) as Map<String, dynamic>;
-      if (response.statusCode == 200) {
-        return ApiResponse(success: true, data: body);
-      }
-      return ApiResponse(
-        success: false,
-        message: body['detail']?.toString() ?? 'Erreur.',
-      );
-    } catch (e) {
-      return ApiResponse(success: false, message: 'Erreur: $e');
-    }
-  }
-
-  /// GET les listes
-  static Future<ApiResponse> getProfessionalStatuses() async {
-    try {
-      final token = await AuthService.getToken();
-      final response = await _client.get(
-        Uri.parse('${ApiConfig.baseUrl}/user_data/professional'),
-        headers: {'Authorization': 'Bearer $token'},
-      );
-      if (response.statusCode == 200) {
-        return ApiResponse(
-          success: true,
-          data: {'list': jsonDecode(response.body)},
-        );
-      }
-      return ApiResponse(success: false);
-    } catch (e) {
-      return ApiResponse(success: false);
-    }
-  }
-
-  static Future<ApiResponse> getGenders() async {
-    try {
-      final token = await AuthService.getToken();
-      final response = await _client.get(
-        Uri.parse('${ApiConfig.baseUrl}/user_data/gender'),
-        headers: {'Authorization': 'Bearer $token'},
-      );
-      if (response.statusCode == 200) {
-        return ApiResponse(
-          success: true,
-          data: {'list': jsonDecode(response.body)},
-        );
-      }
-      return ApiResponse(success: false);
-    } catch (e) {
-      return ApiResponse(success: false);
-    }
-  }
+  static Future<ApiResponse> getMe() => _accountRequest('GET', '/me');
+  static Future<ApiResponse> getUserData() =>
+      _accountRequest('GET', '/me/data');
+  static Future<ApiResponse> createUserData(Map<String, dynamic> data) =>
+      _accountRequest('POST', '/me/data', body: data);
+  static Future<ApiResponse> updateUserData(Map<String, dynamic> data) =>
+      _accountRequest('PATCH', '/me/data', body: data);
+  static Future<ApiResponse> updateAccount(Map<String, dynamic> data) =>
+      _accountRequest('PATCH', '/me', body: data);
+  static Future<ApiResponse> getProfessionalStatuses() =>
+      _accountRequest('GET', '/user_data/professional');
+  static Future<ApiResponse> getGenders() =>
+      _accountRequest('GET', '/user_data/gender');
 
   static Future<ApiResponse> getAllUsers() async {
     try {

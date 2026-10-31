@@ -2,6 +2,7 @@ from app import app
 from app.modules import User, UserData
 
 import os
+
 os.environ["ENV_FILE"] = os.path.join(os.path.dirname(__file__), ".env.test")
 from app.core import get_session, settings, create_access_token, get_password_hash
 
@@ -10,6 +11,11 @@ from sqlmodel import SQLModel, create_engine, Session
 from fastapi.testclient import TestClient
 
 engine = create_engine(url=settings.DATABASE_URL)
+if "test" not in (engine.url.database or "").lower():
+    raise RuntimeError(
+        "Tests interdits sur une base dont le nom ne contient pas 'test'"
+    )
+
 
 @pytest.fixture(name="session")
 def session_fixture():
@@ -17,6 +23,7 @@ def session_fixture():
     with Session(engine) as session:
         yield session
     SQLModel.metadata.drop_all(engine)
+
 
 @pytest.fixture(name="client")
 def client_fixture(session: Session):
@@ -29,18 +36,20 @@ def client_fixture(session: Session):
     yield client
     app.dependency_overrides.clear()
 
+
 @pytest.fixture(name="test_user")
 def test_user_fixture(session: Session):
     user = User(
         username="testUser",
         email="user@test.com",
         hashed_password=get_password_hash("userPassword"),
-        role="user"
+        role="user",
     )
     session.add(user)
     session.commit()
     session.refresh(user)
     return user
+
 
 @pytest.fixture(name="auth_user")
 def auth_user_fixture(client: TestClient, test_user: User):
@@ -48,25 +57,25 @@ def auth_user_fixture(client: TestClient, test_user: User):
     client.headers.update({"Authorization": f"Bearer {token}"})
     return client
 
+
 @pytest.fixture(name="test_user_with_user_data")
 def test_user_with_data_fixture(session: Session):
     user = User(
         username="testUser",
         email="user@test.com",
         hashed_password=get_password_hash("userPassword"),
-        role="user"
+        role="user",
     )
     session.add(user)
     session.commit()
     session.refresh(user)
 
-    user_data = UserData(
-        user_id=user.id
-    )
+    user_data = UserData(user_id=user.id)
     session.add(user_data)
     session.commit()
     session.refresh(user_data)
     return user
+
 
 @pytest.fixture(name="auth_user_with_user_data")
 def auth_user_with_data_fixture(client: TestClient, test_user_with_user_data: User):
@@ -74,18 +83,20 @@ def auth_user_with_data_fixture(client: TestClient, test_user_with_user_data: Us
     client.headers.update({"Authorization": f"Bearer {token}"})
     return client
 
+
 @pytest.fixture(name="test_admin")
 def test_admin_fixture(session: Session):
     admin = User(
         username="testAdmin",
         email="admin@test.com",
         hashed_password=get_password_hash("adminPassword"),
-        role="admin"
+        role="admin",
     )
     session.add(admin)
     session.commit()
     session.refresh(admin)
     return admin
+
 
 @pytest.fixture(name="auth_admin")
 def auth_admin_fixture(client: TestClient, test_admin: User):

@@ -1,423 +1,619 @@
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
 import '../models/political_party.dart';
+import '../repositories/political_repository.dart';
+import '../theme/civic_theme.dart';
+import '../theme/political_identity.dart';
+import '../widgets/civic_components.dart';
+import '../widgets/political_components.dart';
 import 'program_detail_screen.dart';
+import 'text_reader_screen.dart';
 
 class ProgramsScreen extends StatefulWidget {
-  const ProgramsScreen({super.key});
-
+  const ProgramsScreen({super.key, this.repository});
+  final PoliticalRepository? repository;
   @override
   State<ProgramsScreen> createState() => _ProgramsScreenState();
 }
 
-class _ProgramsScreenState extends State<ProgramsScreen>
-    with TickerProviderStateMixin {
-  late AnimationController _fadeController;
-  late Animation<double> _fadeAnimation;
-
+class _ProgramsScreenState extends State<ProgramsScreen> {
+  late Future<PoliticalCatalog> _catalog;
+  final _search = TextEditingController();
+  final _introKey = GlobalKey();
+  final _scroll = ScrollController();
+  bool _measures = false, _declared = false;
   @override
   void initState() {
     super.initState();
-    _fadeController = AnimationController(
-      duration: const Duration(milliseconds: 600),
-      vsync: this,
-    );
-    _fadeAnimation = CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeOut,
-    );
-    _fadeController.forward();
+    _load();
+  }
+
+  void _load() {
+    _catalog = (widget.repository ?? PoliticalRepository.instance).load();
   }
 
   @override
   void dispose() {
-    _fadeController.dispose();
+    _search.dispose();
+    _scroll.dispose();
     super.dispose();
   }
 
+  void _showResults({bool animate = false}) {
+    final intro = _introKey.currentContext?.findRenderObject();
+    if (!_scroll.hasClients || intro is! RenderBox) return;
+    final offset = intro.size.height.clamp(
+      _scroll.position.minScrollExtent,
+      _scroll.position.maxScrollExtent,
+    );
+    if (animate && Civic.duration(context, true) != Duration.zero) {
+      _scroll.animateTo(
+        offset,
+        duration: Civic.duration(context, true),
+        curve: Curves.easeOutCubic,
+      );
+    } else {
+      _scroll.jumpTo(offset);
+    }
+  }
+
+  void _changeFilters(VoidCallback change) {
+    setState(change);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _showResults();
+    });
+  }
+
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            // Header
-            SliverToBoxAdapter(child: _buildHeader()),
-
-            // Intro text
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(20, 24, 20, 8),
-                child: Text(
-                  'Partis politiques',
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-            ),
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(20, 0, 20, 20),
-                child: Text(
-                  'Explorez les programmes des principaux partis français. '
-                  'Pour chaque parti, retrouvez une synthèse des mesures phares '
-                  'et une analyse critique.',
-                  style: TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 14,
-                    height: 1.5,
-                  ),
-                ),
-              ),
-            ),
-
-            // Party cards
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final party = frenchPoliticalParties[index];
-                    return TweenAnimationBuilder<double>(
-                      tween: Tween(begin: 0.0, end: 1.0),
-                      duration: Duration(milliseconds: 400 + index * 100),
-                      curve: Curves.easeOut,
-                      builder: (context, value, child) {
-                        return Opacity(
-                          opacity: value,
-                          child: Transform.translate(
-                            offset: Offset(0, 24 * (1 - value)),
-                            child: child,
+  Widget build(BuildContext context) => Theme(
+    data: Civic.theme(context),
+    child: Scaffold(
+      backgroundColor: Civic.paper,
+      body: SafeArea(
+        bottom: false,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 720),
+            child: FutureBuilder<PoliticalCatalog>(
+              future: _catalog,
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return _state(
+                    'Le dossier n’a pas pu être chargé.',
+                    'Réessayer',
+                    () => setState(_load),
+                    Icons.cloud_off_outlined,
+                  );
+                }
+                if (!snapshot.hasData) {
+                  return Center(
+                    child: Semantics(
+                      liveRegion: true,
+                      child: const Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircularProgressIndicator(
+                            semanticsLabel: 'Chargement du dossier politique',
                           ),
-                        );
-                      },
-                      child: _buildPartyCard(party),
-                    );
-                  },
-                  childCount: frenchPoliticalParties.length,
-                ),
-              ),
+                          SizedBox(height: 18),
+                          Text(
+                            'Chargement du dossier…',
+                            style: TextStyle(color: Civic.muted),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+                return _content(snapshot.requireData);
+              },
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return RepaintBoundary(
-      child: Container(
-        padding: EdgeInsets.fromLTRB(
-          24,
-          MediaQuery.of(context).padding.top + 10,
-          24,
-          20,
-        ),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF0036B3),
-              AppColors.frBlue,
-              AppColors.frBlue,
-              Color(0xFF0036B3),
-            ],
           ),
-          borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.frBlue.withValues(alpha: 0.25),
-              blurRadius: 24,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Title bar
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.description_rounded,
-                    color: Colors.white,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                const Text(
-                  'Programmes',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            Text(
-              'Comprenez les enjeux, formez votre opinion.',
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.8),
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
-                height: 1.4,
-              ),
-            ),
-          ],
         ),
       ),
-    );
-  }
+    ),
+  );
 
-  Widget _buildPartyCard(PoliticalParty party) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: GestureDetector(
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => ProgramDetailScreen(party: party),
-            ),
-          );
-        },
-        child: RepaintBoundary(
-          child: Container(
-            decoration: BoxDecoration(
-              color: AppColors.cardBackground,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: AppColors.border),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
+  Widget _state(
+    String message,
+    String action,
+    VoidCallback onTap,
+    IconData icon,
+  ) => Center(
+    child: Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 42, color: Civic.blue),
+          const SizedBox(height: 18),
+          Text(message, textAlign: TextAlign.center, style: Civic.heading(23)),
+          const SizedBox(height: 20),
+          CivicButton(label: action, onPressed: onTap),
+        ],
+      ),
+    ),
+  );
+
+  Widget _content(PoliticalCatalog catalog) {
+    final query = normalizePoliticalSearch(_search.text.trim());
+    final parties = catalog.parties
+        .where(
+          (p) => (!_declared || p.election2027.isDeclared) && p.matches(query),
+        )
+        .toList();
+    final measures = <({PoliticalParty party, PoliticalProposal proposal})>[
+      for (final party in catalog.parties.where(
+        (p) => !_declared || p.election2027.isDeclared,
+      ))
+        for (final proposal in party.proposals)
+          if (normalizePoliticalSearch(
+            '${party.name} ${party.abbreviation} ${party.leadership.map((p) => p.name).join(' ')} ${party.election2027.people.map((p) => p.name).join(' ')} ${proposal.theme} ${proposal.title} ${proposal.summary}',
+          ).contains(query))
+            (party: party, proposal: proposal),
+    ];
+    final count = _measures ? measures.length : parties.length;
+    return CustomScrollView(
+      key: const PageStorageKey('political-feed'),
+      controller: _scroll,
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      slivers: [
+        SliverToBoxAdapter(
+          child: Padding(
+            key: _introKey,
+            padding: const EdgeInsets.fromLTRB(24, 12, 24, 22),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Top colored bar with party info
-                Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        party.primaryColor,
-                        party.secondaryColor,
-                      ],
+                Row(
+                  children: [
+                    const CivicWordmark(),
+                    const Spacer(),
+                    IconButton(
+                      tooltip: 'Comprendre ce dossier',
+                      onPressed: () => _method(catalog),
+                      icon: const Icon(
+                        Icons.info_outline_rounded,
+                        color: Civic.blue,
+                      ),
                     ),
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(18),
-                      topRight: Radius.circular(18),
-                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                const PoliticalLabel('LE CAP SUR 2027'),
+                const SizedBox(height: 14),
+                Text('La politique,\nen clair.', style: Civic.heading(36)),
+                const SizedBox(height: 14),
+                const Text(
+                  'Les partis, les candidatures et les idées.\nDes repères pour vous faire votre avis.',
+                  style: TextStyle(
+                    color: Civic.muted,
+                    fontSize: 15,
+                    height: 1.55,
                   ),
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      // Leader face — large and slightly transparent with bottom fade
-                      Positioned(
-                        right: 40,
-                        top: -20,
-                        bottom: -20,
-                        child: Opacity(
-                          opacity: 0.85,
-                          child: ShaderMask(
-                            shaderCallback: (bounds) => const LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [Colors.white, Colors.transparent],
-                              stops: [0.75, 1.0],
-                            ).createShader(bounds),
-                            blendMode: BlendMode.dstIn,
-                            child: Image.asset(
-                              party.leaderAsset,
-                              height: 200,
-                              cacheHeight: 600,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(top: 5),
+                      child: Icon(
+                        Icons.verified_outlined,
+                        size: 15,
+                        color: Civic.blue,
+                      ),
+                    ),
+                    const SizedBox(width: 7),
+                    Expanded(
+                      child: Text(
+                        'Dossier vérifié le ${politicalDate(catalog.checkedAt)}',
+                        style: const TextStyle(
+                          color: Civic.blue,
+                          fontSize: 12,
+                          height: 1.6,
                         ),
                       ),
-                      // Foreground: Logo + Name + Arrow
-                      Row(
-                        children: [
-                          // Party logo
-                          Container(
-                            width: 44,
-                            height: 44,
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(12),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        PinnedHeaderSliver(
+          child: ColoredBox(
+            color: Civic.paper,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 6, 20, 8),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: _search,
+                    onTap: () => _showResults(animate: true),
+                    onSubmitted: (_) => FocusScope.of(context).unfocus(),
+                    onChanged: (_) => _changeFilters(() {}),
+                    textInputAction: TextInputAction.search,
+                    decoration: InputDecoration(
+                      hintText: 'Rechercher dans les partis',
+                      labelText: 'Rechercher dans les partis',
+                      floatingLabelBehavior: FloatingLabelBehavior.never,
+                      prefixIcon: const Icon(Icons.search_rounded),
+                      suffixIcon: _search.text.isEmpty
+                          ? null
+                          : IconButton(
+                              tooltip: 'Effacer la recherche',
+                              icon: const Icon(Icons.close_rounded),
+                              onPressed: () => _changeFilters(_search.clear),
                             ),
-                            child: Image.asset(
-                              party.logoAsset,
-                              cacheHeight: 150,
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                        const SizedBox(width: 14),
-                        // Name + abbreviation
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                party.name,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                party.abbreviation,
-                                style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.7),
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        _mode(
+                          'Partis',
+                          !_measures,
+                          () => _changeFilters(() => _measures = false),
                         ),
-                        // Arrow  
-                        Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(8),
+                        const SizedBox(width: 8),
+                        _mode(
+                          'Mesures',
+                          _measures,
+                          () => _changeFilters(() => _measures = true),
+                        ),
+                        const SizedBox(width: 12),
+                        FilterChip(
+                          label: const Text('Candidatures déclarées'),
+                          selected: _declared,
+                          onSelected: (value) =>
+                              _changeFilters(() => _declared = value),
+                          selectedColor: Civic.pale,
+                          labelStyle: const TextStyle(
+                            fontSize: 12,
+                            color: Civic.blue,
                           ),
-                          child: const Icon(
-                            Icons.arrow_forward_rounded,
-                            color: Colors.white,
-                            size: 18,
-                          ),
+                          side: const BorderSide(color: Civic.line),
                         ),
                       ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      '$count ${_measures ? 'mesure${count > 1 ? 's' : ''}' : 'parti${count > 1 ? 's' : ''}'} · ordre alphabétique',
+                      style: const TextStyle(fontSize: 12, color: Civic.muted),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        if (count == 0)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 90),
+              child: PoliticalPanel(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      catalog.parties.isEmpty
+                          ? 'Le dossier est encore vide.'
+                          : 'Aucun résultat pour ces critères.',
+                      style: Civic.heading(22),
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Essayez un autre nom ou un autre thème.',
+                      style: TextStyle(color: Civic.muted),
+                    ),
+                    TextButton(
+                      onPressed: () => _changeFilters(() {
+                        _search.clear();
+                        _declared = false;
+                      }),
+                      child: const Text('Réinitialiser les filtres'),
                     ),
                   ],
                 ),
               ),
+            ),
+          ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+          sliver: SliverList.builder(
+            itemCount: count,
+            itemBuilder: (context, index) => Padding(
+              padding: const EdgeInsets.only(bottom: 14),
+              child: _measures
+                  ? ProposalCard(
+                      proposal: measures[index].proposal,
+                      party: measures[index].party,
+                      onTap: () => Navigator.push(
+                        context,
+                        CivicPageRoute(
+                          context: context,
+                          builder: (_) => TextReaderScreen(
+                            party: measures[index].party,
+                            proposal: measures[index].proposal,
+                          ),
+                        ),
+                      ),
+                    )
+                  : _partyCard(parties[index]),
+            ),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 12, 24, 40),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  catalog.electionNotice,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Civic.muted,
+                    height: 1.6,
+                  ),
+                ),
+                TextButton.icon(
+                  onPressed: () => _method(catalog),
+                  icon: const Icon(Icons.tune_rounded, size: 17),
+                  label: const Text('Périmètre et méthode'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 
-              // Body
-              Padding(
-                padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
+  Widget _mode(String label, bool selected, VoidCallback onTap) =>
+      PoliticalChoiceChip(label: label, selected: selected, onSelected: onTap);
+
+  Widget _partyCard(PoliticalParty party) {
+    final identity = politicalIdentity(party.id);
+    final smallText = MediaQuery.textScalerOf(context).scale(14) <= 20;
+    final featured = party.election2027.people.isNotEmpty
+        ? party.election2027.people.map((person) => person.name).join(' · ')
+        : party.election2027.summary;
+    return Material(
+      key: ValueKey('party-card-${party.id}'),
+      color: identity.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(color: identity.border),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: CivicPress(
+        radius: 20,
+        onTap: () => Navigator.push(
+          context,
+          CivicPageRoute(
+            context: context,
+            builder: (_) => ProgramDetailScreen(party: party),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(height: 4, color: identity.color),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 13, 16, 14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      PartyMark(party, size: 43),
+                      const SizedBox(width: 11),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              party.abbreviation,
+                              style: TextStyle(
+                                color: identity.color,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            if (smallText) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                party.name,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: Civic.heading(17),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.arrow_outward_rounded,
+                        color: identity.color,
+                        size: 19,
+                      ),
+                    ],
+                  ),
+                  if (!smallText) ...[
+                    const SizedBox(height: 8),
+                    Text(party.name, style: Civic.heading(18)),
+                  ],
+                  const SizedBox(height: 11),
+                  Wrap(
+                    spacing: 7,
+                    runSpacing: 7,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      PoliticalPositionFlag(party.id),
+                      Text(
+                        party.election2027.label,
+                        style: const TextStyle(
+                          color: Civic.muted,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 9),
+                  Text(
+                    featured,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Civic.ink,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      height: 1.35,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    '${party.proposals.length} propositions documentées',
+                    style: const TextStyle(color: Civic.muted, fontSize: 11),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _method(PoliticalCatalog catalog) => showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    useSafeArea: true,
+    showDragHandle: true,
+    backgroundColor: Civic.paper,
+    builder: (context) => FractionallySizedBox(
+      heightFactor: .85,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Des repères,\npas des consignes.',
+                    style: Civic.heading(28),
+                  ),
+                ),
+                IconButton(
+                  tooltip: 'Fermer la méthode',
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close_rounded),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Text(
+              catalog.scope,
+              style: const TextStyle(color: Civic.ink, height: 1.7),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              catalog.electionNotice,
+              style: const TextStyle(color: Civic.muted, height: 1.6),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Les synthèses sont éditoriales et sourcées. Elles distinguent la direction du parti, la candidature annoncée et la validation officielle. Les programmes antérieurs à 2027 portent leur contexte. Les propositions ne constituent pas une liste exhaustive ni un classement.',
+              style: TextStyle(color: Civic.muted, height: 1.6),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Les repères gauche, centre et droite sont des indications éditoriales simplifiées. Ils ne résument pas les courants, les alliances ou toutes les positions d’un parti. Les couleurs servent à identifier les fiches, sans ordre de préférence.',
+              style: TextStyle(color: Civic.muted, height: 1.6),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Version documentaire du ${politicalDate(catalog.checkedAt)}. Lecture hors ligne ; les annonces postérieures nécessitent une nouvelle édition du dossier.',
+              style: const TextStyle(color: Civic.muted, height: 1.6),
+            ),
+            for (final candidate in catalog.additionalCandidates) ...[
+              const SizedBox(height: 22),
+              PoliticalPanel(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Leader + positioning row
-                    Row(
-                      children: [
-                        _buildTag(party.positioning, party.primaryColor),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            party.leader,
-                            style: const TextStyle(
-                              color: AppColors.textSecondary,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
+                    const PoliticalLabel('HORS DES FICHES PARTIS'),
                     const SizedBox(height: 12),
-                    // Short description
+                    Text(candidate.name, style: Civic.heading(22)),
+                    const SizedBox(height: 8),
                     Text(
-                      party.shortDescription,
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 13,
-                        height: 1.5,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                      candidate.affiliation,
+                      style: const TextStyle(color: Civic.muted, height: 1.5),
                     ),
                     const SizedBox(height: 12),
-                    // Bottom info
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.checklist_rounded,
-                          size: 16,
-                          color: party.primaryColor.withValues(alpha: 0.7),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          '${party.programPoints.length} mesures',
-                          style: TextStyle(
-                            color: party.primaryColor,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Icon(
-                          Icons.psychology_rounded,
-                          size: 16,
-                          color: AppColors.accentOrange.withValues(alpha: 0.7),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          '${party.criticalQuestions.length} questions critiques',
-                          style: const TextStyle(
-                            color: AppColors.accentOrange,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      candidate.summary,
+                      style: const TextStyle(color: Civic.ink, height: 1.6),
                     ),
+                    for (final proposal in candidate.proposals)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 14),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              proposal.title,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                                color: Civic.ink,
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            Text(
+                              proposal.context,
+                              style: const TextStyle(
+                                color: Civic.muted,
+                                height: 1.6,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    for (final unknown in candidate.unknowns)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 12),
+                        child: Text(
+                          unknown,
+                          style: const TextStyle(
+                            color: Civic.muted,
+                            height: 1.6,
+                          ),
+                        ),
+                      ),
+                    SourcesButton(sources: candidate.sources),
                   ],
                 ),
               ),
             ],
-          ),
-        ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTag(String label, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: color,
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
+            SourcesButton(
+              sources: catalog.sources,
+              label: 'Règles de la présidentielle',
+            ),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
 }
