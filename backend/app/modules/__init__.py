@@ -7,3 +7,4 @@ from .political_party import PoliticalParty, Domain, PoliticalProgram, Political
 from .user_data import UserData, ProfessionalStatus, SocialStatus, GenderIdentities, user_data_router
 from .user_vote import UserVote
 from .users import User, users_router
+from .stats import stats_router
